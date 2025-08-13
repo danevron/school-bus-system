@@ -1,4 +1,4 @@
-# School Bus System API
+# School Bus System
 
 A comprehensive school ride management system that supports four user roles: Admin, Driver, Parent, and Student. The system manages transportation lines, routes, vehicles, and bookings for school transportation with advanced ride scheduling and real-time tracking capabilities.
 
