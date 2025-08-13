@@ -1,0 +1,570 @@
+openapi: 3.0.3
+info:
+  title: School Bus System API
+  version: 1.0.0
+  description: API specification for the School Bus System.
+servers:
+  - url: https://api.schoolbus.com/api
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: Service health status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  timestamp:
+                    type: string
+                  service:
+                    type: string
+  /auth/register:
+    post:
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+                email:
+                  type: string
+      responses:
+        '201':
+          description: User registered
+  /auth/login:
+    post:
+      summary: Authenticate user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Authenticated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+  /auth/profile:
+    get:
+      summary: Get authenticated user's profile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User profile
+  /lines:
+    get:
+      summary: Get all lines
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of lines
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Line'
+    post:
+      summary: Create a new line
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Line'
+      responses:
+        '201':
+          description: Line created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Line'
+  /lines/{id}:
+    get:
+      summary: Get line by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Line details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Line'
+    put:
+      summary: Update a line
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Line'
+      responses:
+        '200':
+          description: Line updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Line'
+    delete:
+      summary: Delete a line
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Line deleted
+  /lines/{id}/assign-students:
+    post:
+      summary: Assign students to a line
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                studentIds:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Students assigned
+  /lines/{id}/students:
+    post:
+      summary: Add a student to a line
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                studentId:
+                  type: string
+      responses:
+        '200':
+          description: Student added
+  /lines/{id}/students/{studentId}:
+    delete:
+      summary: Remove a student from a line
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: studentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Student removed
+  /lines/driver/my-lines:
+    get:
+      summary: Get lines assigned to the authenticated driver
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of lines for driver
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Line'
+  /bookings:
+    get:
+      summary: Get all bookings (admin only)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of bookings
+    post:
+      summary: Create a booking (parent only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Booking'
+      responses:
+        '201':
+          description: Booking created
+  /bookings/{id}:
+    get:
+      summary: Get booking by ID (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Booking details
+    put:
+      summary: Update booking (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Booking'
+      responses:
+        '200':
+          description: Booking updated
+  /bookings/parent/my-bookings:
+    get:
+      summary: Get bookings for authenticated parent
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of bookings for parent
+  /bookings/line/{lineId}:
+    get:
+      summary: Get bookings for a specific line
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: lineId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of bookings for line
+  /routes:
+    get:
+      summary: Get all routes
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of routes
+    post:
+      summary: Create a new route (admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Route'
+      responses:
+        '201':
+          description: Route created
+  /routes/{id}:
+    get:
+      summary: Get route by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Route details
+    put:
+      summary: Update route (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Route'
+      responses:
+        '200':
+          description: Route updated
+    delete:
+      summary: Delete route (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Route deleted
+  /vehicles:
+    get:
+      summary: Get all vehicles
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of vehicles
+    post:
+      summary: Create a new vehicle (admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Vehicle'
+      responses:
+        '201':
+          description: Vehicle created
+  /vehicles/{id}:
+    get:
+      summary: Get vehicle by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Vehicle details
+    put:
+      summary: Update vehicle (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Vehicle'
+      responses:
+        '200':
+          description: Vehicle updated
+    delete:
+      summary: Delete vehicle (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Vehicle deleted
+  /rides:
+    post:
+      summary: Generate rides (admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Rides generated
+    get:
+      summary: Get all rides (admin only)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of rides
+  /rides/{id}:
+    get:
+      summary: Get ride by ID (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Ride details
+    put:
+      summary: Update ride status (admin or driver)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+      responses:
+        '200':
+          description: Ride status updated
+  /rides/{rideId}/guests:
+    post:
+      summary: Add guest student to ride (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: rideId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                studentId:
+                  type: string
+      responses:
+        '200':
+          description: Guest student added
+  /rides/driver/my-rides:
+    get:
+      summary: Get rides for authenticated driver
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of rides for driver
+  /rides/student/my-rides:
+    get:
+      summary: Get rides for authenticated student
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of rides for student
+  /rides/{rideId}/students/{studentId}:
+    delete:
+      summary: Remove student from ride (parent only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: rideId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: studentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Student removed from ride
+components:
+  schemas:
+    # Define your schemas here (e.g., User, Line, Booking, Vehicle, Ride)
