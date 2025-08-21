@@ -11,6 +11,14 @@ export interface JWTPayload {
 }
 
 export const generateToken = (user: IUser): string => {
+  if (user.role === UserRole.STUDENT) {
+    throw new Error('Students cannot generate authentication tokens');
+  }
+
+  if (!user.email) {
+    throw new Error('Email is required for token generation');
+  }
+
   const payload: JWTPayload = {
     userId: (user._id as any).toString(),
     email: user.email,

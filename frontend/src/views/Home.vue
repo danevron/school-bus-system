@@ -24,6 +24,11 @@
             <h3>Admin Dashboard</h3>
             <div class="dashboard-cards">
               <div class="dashboard-card">
+                <h4>Route Management</h4>
+                <p>Create and manage bus routes with stops</p>
+                <button class="action-button" @click="goToRouteManagement">Manage Routes</button>
+              </div>
+              <div class="dashboard-card">
                 <h4>Lines Management</h4>
                 <p>Create and manage transportation lines</p>
                 <button class="action-button" disabled>Manage Lines</button>
@@ -37,11 +42,6 @@
                 <h4>Users Management</h4>
                 <p>Manage drivers, parents, and students</p>
                 <button class="action-button" @click="goToUserManagement">Manage Users</button>
-              </div>
-              <div class="dashboard-card">
-                <h4>Reports</h4>
-                <p>View system reports and analytics</p>
-                <button class="action-button" disabled>View Reports</button>
               </div>
             </div>
           </div>
@@ -163,12 +163,17 @@ export default {
       router.push('/user-management')
     }
     
+    const goToRouteManagement = () => {
+      router.push('/routes')
+    }
+    
     return {
       authStore,
       userRole,
       roleClass,
       handleLogout,
-      goToUserManagement
+      goToUserManagement,
+      goToRouteManagement
     }
   }
 }

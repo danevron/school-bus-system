@@ -11,6 +11,137 @@
 
     <main class="main-content">
       <div class="content-wrapper">
+        <!-- Create Student Section -->
+        <div class="student-section">
+          <h2>Create Student</h2>
+          <form @submit.prevent="handleCreateStudent" class="student-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="studentFirstName">First Name:</label>
+                <input 
+                  id="studentFirstName"
+                  type="text" 
+                  v-model="studentForm.firstName" 
+                  required 
+                  :disabled="loading"
+                />
+              </div>
+              
+              <div class="form-group">
+                <label for="studentLastName">Last Name:</label>
+                <input 
+                  id="studentLastName"
+                  type="text" 
+                  v-model="studentForm.lastName" 
+                  required 
+                  :disabled="loading"
+                />
+              </div>
+              
+              <div class="form-group">
+                <label for="studentPhone">Phone:</label>
+                <input 
+                  id="studentPhone"
+                  type="tel" 
+                  v-model="studentForm.phone" 
+                  required 
+                  :disabled="loading"
+                />
+              </div>
+            </div>
+            
+            <button 
+              type="submit" 
+              class="create-student-button"
+              :disabled="loading"
+            >
+              {{ loading ? 'Creating...' : 'Create Student' }}
+            </button>
+          </form>
+          
+          <div v-if="studentMessage" class="message" :class="studentMessageType">
+            {{ studentMessage }}
+          </div>
+        </div>
+
+        <!-- Connect Student to Parents Section -->
+        <div class="parent-student-section">
+          <h2>Connect Student to Parents</h2>
+          <form @submit.prevent="handleConnectStudentToParents" class="parent-student-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="studentSelect">Student:</label>
+                <select 
+                  id="studentSelect"
+                  v-model="parentStudentForm.studentId" 
+                  required 
+                  :disabled="loading || loadingStudents"
+                >
+                  <option value="">Select student...</option>
+                  <option 
+                    v-for="student in availableStudents" 
+                    :key="student._id" 
+                    :value="student._id"
+                  >
+                    {{ student.firstName }} {{ student.lastName }} 
+                    ({{ student.parents?.length || 0 }}/2 parents)
+                  </option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label for="parentSelect1">Parent 1:</label>
+                <select 
+                  id="parentSelect1"
+                  v-model="parentStudentForm.parentId1" 
+                  required 
+                  :disabled="loading || loadingParents"
+                >
+                  <option value="">Select parent...</option>
+                  <option 
+                    v-for="parent in availableParents" 
+                    :key="parent._id" 
+                    :value="parent._id"
+                  >
+                    {{ parent.firstName }} {{ parent.lastName }} ({{ parent.email }})
+                  </option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label for="parentSelect2">Parent 2 (Optional):</label>
+                <select 
+                  id="parentSelect2"
+                  v-model="parentStudentForm.parentId2" 
+                  :disabled="loading || loadingParents"
+                >
+                  <option value="">Select parent...</option>
+                  <option 
+                    v-for="parent in availableParents" 
+                    :key="parent._id" 
+                    :value="parent._id"
+                    :disabled="parent._id === parentStudentForm.parentId1"
+                  >
+                    {{ parent.firstName }} {{ parent.lastName }} ({{ parent.email }})
+                  </option>
+                </select>
+              </div>
+            </div>
+            
+            <button 
+              type="submit" 
+              class="connect-button"
+              :disabled="loading || !parentStudentForm.studentId || !parentStudentForm.parentId1"
+            >
+              {{ loading ? 'Connecting...' : 'Connect Student to Parents' }}
+            </button>
+          </form>
+          
+          <div v-if="parentStudentMessage" class="message" :class="parentStudentMessageType">
+            {{ parentStudentMessage }}
+          </div>
+        </div>
+
         <!-- Invite User Section -->
         <div class="invite-section">
           <h2>Invite New User</h2>
@@ -47,10 +178,8 @@
                   :disabled="loading"
                 >
                   <option value="">Select role...</option>
-                  <option value="admin">Admin</option>
                   <option value="driver">Driver</option>
                   <option value="parent">Parent</option>
-                  <option value="student">Student</option>
                 </select>
               </div>
             </div>
@@ -113,6 +242,18 @@
                   <span class="status-badge" :class="user.isActive ? 'active' : 'inactive'">
                     {{ user.isActive ? 'Active' : 'Inactive' }}
                   </span>
+                </div>
+                <div v-if="user.role === 'student' && user.parents && user.parents.length > 0" class="user-relationships">
+                  <strong>Parents:</strong>
+                  <div v-for="parent in user.parents" :key="parent._id" class="relationship-item">
+                    {{ parent.firstName }} {{ parent.lastName }}
+                  </div>
+                </div>
+                <div v-if="user.role === 'parent' && user.children && user.children.length > 0" class="user-relationships">
+                  <strong>Children:</strong>
+                  <div v-for="child in user.children" :key="child._id" class="relationship-item">
+                    {{ child.firstName }} {{ child.lastName }}
+                  </div>
                 </div>
                 <div class="user-dates">
                   Created: {{ formatDate(user.createdAt) }}
@@ -181,8 +322,14 @@ export default {
     const loading = ref(false)
     const loadingUsers = ref(false)
     const loadingInvitations = ref(false)
+    const loadingStudents = ref(false)
+    const loadingParents = ref(false)
     const message = ref('')
     const messageType = ref('success')
+    const studentMessage = ref('')
+    const studentMessageType = ref('success')
+    const parentStudentMessage = ref('')
+    const parentStudentMessageType = ref('success')
     
     const inviteForm = ref({
       email: '',
@@ -190,13 +337,91 @@ export default {
       role: ''
     })
     
+    const studentForm = ref({
+      firstName: '',
+      lastName: '',
+      phone: ''
+    })
+    
+    const parentStudentForm = ref({
+      studentId: '',
+      parentId1: '',
+      parentId2: ''
+    })
+    
     const users = ref([])
     const invitations = ref([])
+    const availableStudents = ref([])
+    const availableParents = ref([])
     
     const userFilter = ref({
       role: '',
       isActive: ''
     })
+    
+    const handleCreateStudent = async () => {
+      try {
+        loading.value = true
+        studentMessage.value = ''
+        
+        await apiService.post('/auth/students', studentForm.value)
+        
+        studentMessage.value = 'Student created successfully!'
+        studentMessageType.value = 'success'
+        
+        // Reset form
+        studentForm.value = {
+          firstName: '',
+          lastName: '',
+          phone: ''
+        }
+        
+        // Refresh lists
+        await Promise.all([fetchUsers(), fetchAvailableStudents()])
+        
+      } catch (error) {
+        studentMessage.value = error.response?.data?.message || 'Failed to create student'
+        studentMessageType.value = 'error'
+      } finally {
+        loading.value = false
+      }
+    }
+    
+    const handleConnectStudentToParents = async () => {
+      try {
+        loading.value = true
+        parentStudentMessage.value = ''
+        
+        const parentIds = [parentStudentForm.value.parentId1]
+        if (parentStudentForm.value.parentId2) {
+          parentIds.push(parentStudentForm.value.parentId2)
+        }
+        
+        await apiService.post('/auth/students/connect-parents', {
+          studentId: parentStudentForm.value.studentId,
+          parentIds
+        })
+        
+        parentStudentMessage.value = 'Student connected to parents successfully!'
+        parentStudentMessageType.value = 'success'
+        
+        // Reset form
+        parentStudentForm.value = {
+          studentId: '',
+          parentId1: '',
+          parentId2: ''
+        }
+        
+        // Refresh lists
+        await Promise.all([fetchUsers(), fetchAvailableStudents()])
+        
+      } catch (error) {
+        parentStudentMessage.value = error.response?.data?.message || 'Failed to connect student to parents'
+        parentStudentMessageType.value = 'error'
+      } finally {
+        loading.value = false
+      }
+    }
     
     const handleInvite = async () => {
       try {
@@ -232,6 +457,7 @@ export default {
         const params = new URLSearchParams()
         if (userFilter.value.role) params.append('role', userFilter.value.role)
         if (userFilter.value.isActive) params.append('isActive', userFilter.value.isActive)
+        params.append('populate', 'true') // Request populated relationships
         
         const response = await apiService.get(`/auth/users?${params.toString()}`)
         users.value = response.users
@@ -239,6 +465,30 @@ export default {
         console.error('Failed to fetch users:', error)
       } finally {
         loadingUsers.value = false
+      }
+    }
+    
+    const fetchAvailableStudents = async () => {
+      try {
+        loadingStudents.value = true
+        const response = await apiService.get('/auth/students/with-parents?maxParents=1')
+        availableStudents.value = response.students
+      } catch (error) {
+        console.error('Failed to fetch available students:', error)
+      } finally {
+        loadingStudents.value = false
+      }
+    }
+    
+    const fetchAvailableParents = async () => {
+      try {
+        loadingParents.value = true
+        const response = await apiService.get('/auth/users?role=parent&isActive=true')
+        availableParents.value = response.users
+      } catch (error) {
+        console.error('Failed to fetch available parents:', error)
+      } finally {
+        loadingParents.value = false
       }
     }
     
@@ -280,7 +530,9 @@ export default {
     onMounted(async () => {
       await Promise.all([
         fetchUsers(),
-        fetchInvitations()
+        fetchInvitations(),
+        fetchAvailableStudents(),
+        fetchAvailableParents()
       ])
     })
     
@@ -288,12 +540,24 @@ export default {
       loading,
       loadingUsers,
       loadingInvitations,
+      loadingStudents,
+      loadingParents,
       message,
       messageType,
+      studentMessage,
+      studentMessageType,
+      parentStudentMessage,
+      parentStudentMessageType,
       inviteForm,
+      studentForm,
+      parentStudentForm,
       users,
       invitations,
+      availableStudents,
+      availableParents,
       userFilter,
+      handleCreateStudent,
+      handleConnectStudentToParents,
       handleInvite,
       fetchUsers,
       deleteInvitation,
@@ -358,6 +622,8 @@ export default {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
+.student-section h2,
+.parent-student-section h2,
 .invite-section h2,
 .users-section h2,
 .invitations-section h2 {
@@ -365,6 +631,8 @@ export default {
   margin-bottom: 20px;
 }
 
+.student-form,
+.parent-student-form,
 .invite-form {
   margin-bottom: 20px;
 }
@@ -398,6 +666,8 @@ export default {
   border-color: #007bff;
 }
 
+.create-student-button,
+.connect-button,
 .invite-button {
   background-color: #28a745;
   color: white;
@@ -409,10 +679,28 @@ export default {
   transition: background-color 0.2s;
 }
 
+.create-student-button {
+  background-color: #17a2b8;
+}
+
+.connect-button {
+  background-color: #fd7e14;
+}
+
+.create-student-button:hover:not(:disabled) {
+  background-color: #138496;
+}
+
+.connect-button:hover:not(:disabled) {
+  background-color: #e8640a;
+}
+
 .invite-button:hover:not(:disabled) {
   background-color: #218838;
 }
 
+.create-student-button:disabled,
+.connect-button:disabled,
 .invite-button:disabled {
   background-color: #ccc;
   cursor: not-allowed;
@@ -550,6 +838,21 @@ export default {
 .status-badge.pending {
   background-color: #ffc107;
   color: #000;
+}
+
+.user-relationships {
+  font-size: 0.85rem;
+  color: #444;
+  margin: 8px 0;
+  padding: 8px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+}
+
+.relationship-item {
+  margin-left: 10px;
+  color: #666;
+  font-size: 0.8rem;
 }
 
 .user-dates,

@@ -3,6 +3,9 @@ import Login from './views/Login.vue'
 import Home from './views/Home.vue'
 import UserManagement from './views/UserManagement.vue'
 import AcceptInvitation from './views/AcceptInvitation.vue'
+import RouteList from './views/RouteList.vue'
+import RouteDetail from './views/RouteDetail.vue'
+import RouteCreate from './views/RouteCreate.vue'
 import authStore from './stores/auth'
 
 const routes = [
@@ -33,6 +36,24 @@ const routes = [
     name: 'AcceptInvitation',
     component: AcceptInvitation,
     meta: { requiresGuest: true }
+  },
+  {
+    path: '/routes',
+    name: 'RouteList',
+    component: RouteList,
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/routes/create',
+    name: 'RouteCreate',
+    component: RouteCreate,
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/routes/:id',
+    name: 'RouteDetail',
+    component: RouteDetail,
+    meta: { requiresAuth: true, requiresAdmin: true }
   }
 ]
 

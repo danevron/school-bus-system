@@ -12,6 +12,12 @@ export const userValidation = {
     role: Joi.string().valid(...Object.values(UserRole)).required()
   }),
 
+  createStudent: Joi.object({
+    firstName: Joi.string().min(2).max(50).required(),
+    lastName: Joi.string().min(2).max(50).required(),
+    phone: Joi.string().pattern(/^\+?[\d\s\-\(\)]+$/).required()
+  }),
+
   login: Joi.object({
     email: Joi.string().email().required(),
     password: Joi.string().required()
@@ -59,7 +65,7 @@ export const routeValidation = {
         estimatedTime: Joi.number().min(0).required(),
         type: Joi.string().valid('pickup', 'dropoff').required()
       })
-    ).min(2).required(),
+    ).min(0).required(),
     totalDistance: Joi.number().min(0).required(),
     estimatedDuration: Joi.number().min(0).required()
   })
@@ -140,7 +146,7 @@ export const invitationValidation = {
   invite: Joi.object({
     email: Joi.string().email().required(),
     phone: Joi.string().pattern(/^\+?[\d\s\-\(\)]+$/).required(),
-    role: Joi.string().valid(...Object.values(UserRole)).required()
+    role: Joi.string().valid(UserRole.PARENT, UserRole.DRIVER).required()
   }),
 
   accept: Joi.object({
@@ -150,6 +156,14 @@ export const invitationValidation = {
   })
 };
 
+export const parentStudentValidation = {
+  connectStudentToParents: Joi.object({
+    studentId: Joi.string().hex().length(24).required(),
+    parentIds: Joi.array().items(Joi.string().hex().length(24)).min(1).max(2).required()
+  })
+};
+
 // Export individual validation functions for convenience
 export const validateInviteUser = (data: any) => invitationValidation.invite.validate(data);
-export const validateAcceptInvitation = (data: any) => invitationValidation.accept.validate(data); 
+export const validateAcceptInvitation = (data: any) => invitationValidation.accept.validate(data);
+export const validateConnectStudentToParents = (data: any) => parentStudentValidation.connectStudentToParents.validate(data); 

@@ -10,6 +10,7 @@
 
 # Ignore build directories
 /dist
+/frontend/dist
 /build 
 
 # Ignore environment files

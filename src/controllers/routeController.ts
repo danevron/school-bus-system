@@ -98,4 +98,82 @@ export const deleteRoute = async (req: Request, res: Response): Promise<void> =>
     const errMsg = error instanceof Error ? error.message : String(error);
     res.status(500).json({ message: 'Server error', error: errMsg });
   }
+};
+
+// Stop Management Functions
+export const addStopToRoute = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { stop } = req.body;
+
+    const route = await Route.findById(id);
+    if (!route) {
+      res.status(404).json({ message: 'Route not found' });
+      return;
+    }
+
+    route.stops.push(stop);
+    await route.save();
+
+    res.status(201).json({
+      message: 'Stop added successfully',
+      route
+    });
+  } catch (error) {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    res.status(500).json({ message: 'Server error', error: errMsg });
+  }
+};
+
+export const updateRouteStops = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { stops } = req.body;
+
+    const route = await Route.findById(id);
+    if (!route) {
+      res.status(404).json({ message: 'Route not found' });
+      return;
+    }
+
+    route.stops = stops;
+    await route.save();
+
+    res.json({
+      message: 'Route stops updated successfully',
+      route
+    });
+  } catch (error) {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    res.status(500).json({ message: 'Server error', error: errMsg });
+  }
+};
+
+export const deleteStopFromRoute = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id, stopIndex } = req.params;
+
+    const route = await Route.findById(id);
+    if (!route) {
+      res.status(404).json({ message: 'Route not found' });
+      return;
+    }
+
+    const index = parseInt(stopIndex);
+    if (index < 0 || index >= route.stops.length) {
+      res.status(400).json({ message: 'Invalid stop index' });
+      return;
+    }
+
+    route.stops.splice(index, 1);
+    await route.save();
+
+    res.json({
+      message: 'Stop deleted successfully',
+      route
+    });
+  } catch (error) {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    res.status(500).json({ message: 'Server error', error: errMsg });
+  }
 }; 
