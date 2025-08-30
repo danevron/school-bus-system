@@ -84,7 +84,7 @@ const lineSchema = new Schema<ILine>({
   },
   isActive: {
     type: Boolean,
-    default: true
+    default: false
   },
   maxCapacity: {
     type: Number,
