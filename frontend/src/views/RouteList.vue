@@ -12,20 +12,6 @@
 
     <main class="main-content">
       <div class="content-wrapper">
-        <!-- Filters Section -->
-        <div class="filters-section">
-          <div class="filters">
-            <select v-model="routeFilter.isActive" @change="fetchRoutes">
-              <option value="">All Routes</option>
-              <option value="true">Active Routes</option>
-              <option value="false">Inactive Routes</option>
-            </select>
-          </div>
-          <div class="route-count">
-            {{ routes.length }} route{{ routes.length !== 1 ? 's' : '' }} found
-          </div>
-        </div>
-
         <!-- Routes List Section -->
         <div class="routes-section">
           <div v-if="loading" class="loading">Loading routes...</div>
@@ -45,16 +31,10 @@
               v-for="route in routes" 
               :key="route._id" 
               class="route-card"
-              :class="{ inactive: !route.isActive }"
               @click="viewRoute(route._id)"
             >
               <div class="route-header">
                 <h3 class="route-name">{{ route.name }}</h3>
-                <div class="route-status">
-                  <span class="status-badge" :class="route.isActive ? 'active' : 'inactive'">
-                    {{ route.isActive ? 'Active' : 'Inactive' }}
-                  </span>
-                </div>
               </div>
 
               <div class="route-info">
@@ -119,17 +99,10 @@ export default {
     const loading = ref(false)
     const routes = ref([])
     
-    const routeFilter = ref({
-      isActive: ''
-    })
-    
     const fetchRoutes = async () => {
       try {
         loading.value = true
-        const params = new URLSearchParams()
-        if (routeFilter.value.isActive) params.append('isActive', routeFilter.value.isActive)
-        
-        const response = await apiService.get(`/routes?${params.toString()}`)
+        const response = await apiService.get('/routes')
         routes.value = response.routes
       } catch (error) {
         console.error('Failed to fetch routes:', error)
@@ -186,7 +159,6 @@ export default {
     return {
       loading,
       routes,
-      routeFilter,
       fetchRoutes,
       viewRoute,
       handleAddRoute,
@@ -273,23 +245,6 @@ export default {
   gap: 20px;
 }
 
-.filters-section {
-  background: white;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.filters select {
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  background: white;
-}
-
 .route-count {
   color: #666;
   font-size: 0.9rem;
@@ -360,11 +315,6 @@ export default {
   transform: translateY(-2px);
 }
 
-.route-card.inactive {
-  opacity: 0.7;
-  background-color: #f8f9fa;
-}
-
 .route-header {
   display: flex;
   justify-content: space-between;
@@ -389,11 +339,6 @@ export default {
 
 .status-badge.active {
   background-color: #28a745;
-  color: white;
-}
-
-.status-badge.inactive {
-  background-color: #6c757d;
   color: white;
 }
 
@@ -483,12 +428,6 @@ export default {
   
   .header-actions {
     justify-content: center;
-  }
-  
-  .filters-section {
-    flex-direction: column;
-    gap: 15px;
-    align-items: stretch;
   }
   
   .routes-grid {

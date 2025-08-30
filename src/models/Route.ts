@@ -16,7 +16,6 @@ export interface IRoute extends Document {
   stops: IStop[];
   totalDistance: number; // in kilometers
   estimatedDuration: number; // in minutes
-  isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -74,10 +73,6 @@ const routeSchema = new Schema<IRoute>({
     type: Number,
     required: true,
     min: 0
-  },
-  isActive: {
-    type: Boolean,
-    default: true
   }
 }, {
   timestamps: true

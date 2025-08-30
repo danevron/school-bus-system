@@ -5,11 +5,6 @@
         <div class="header-info">
           <h1 v-if="route">{{ route.name }}</h1>
           <h1 v-else>Route Details</h1>
-          <div v-if="route" class="route-status">
-            <span class="status-badge" :class="route.isActive ? 'active' : 'inactive'">
-              {{ route.isActive ? 'Active' : 'Inactive' }}
-            </span>
-          </div>
         </div>
         <div class="header-actions">
           <button @click="goBack" class="back-button">← Back to Routes</button>
@@ -224,11 +219,6 @@
               <div class="metadata-info">
                 <div><strong>Created:</strong> {{ formatDate(route.createdAt) }}</div>
                 <div><strong>Last Updated:</strong> {{ formatDate(route.updatedAt) }}</div>
-                <div><strong>Status:</strong> 
-                  <span :class="route.isActive ? 'text-success' : 'text-warning'">
-                    {{ route.isActive ? 'Active' : 'Inactive' }}
-                  </span>
-                </div>
               </div>
             </div>
           </div>
@@ -699,24 +689,6 @@ export default {
 
 .header h1 {
   margin: 0;
-}
-
-.status-badge {
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 0.8rem;
-  font-weight: bold;
-  text-transform: uppercase;
-}
-
-.status-badge.active {
-  background-color: #28a745;
-  color: white;
-}
-
-.status-badge.inactive {
-  background-color: #6c757d;
-  color: white;
 }
 
 .back-button {

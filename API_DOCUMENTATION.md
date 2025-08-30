@@ -435,7 +435,7 @@ PUT /bookings/:id
 
 #### Get All Routes
 ```http
-GET /routes?isActive=true
+GET /routes
 ```
 
 **Response:**
@@ -469,8 +469,7 @@ GET /routes?isActive=true
         }
       ],
       "totalDistance": 5.2,
-      "estimatedDuration": 20,
-      "isActive": true
+      "estimatedDuration": 20
     }
   ]
 }

@@ -25,14 +25,7 @@ export const createRoute = async (req: Request, res: Response): Promise<void> =>
 
 export const getAllRoutes = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { isActive } = req.query;
-    const filter: any = {};
-
-    if (isActive !== undefined) {
-      filter.isActive = isActive === 'true';
-    }
-
-    const routes = await Route.find(filter);
+    const routes = await Route.find();
     res.json({ routes });
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : String(error);

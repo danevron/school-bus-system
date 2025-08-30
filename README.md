@@ -180,7 +180,6 @@ npm start
 - `name`,
 - `stops` (array of stops with coordinates)
 - `totalDistance`, `estimatedDuration`
-- `isActive`
 
 ### Line
 - `name`, `description`
