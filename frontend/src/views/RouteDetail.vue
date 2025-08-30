@@ -37,12 +37,6 @@
         <!-- Route Overview -->
         <div class="route-overview">
           <div class="overview-grid">
-            <div class="overview-item">
-              <h3>Description</h3>
-              <p v-if="route.description">{{ route.description }}</p>
-              <p v-else class="no-description">No description provided</p>
-            </div>
-            
             <div class="overview-stats">
               <div class="stat-card">
                 <div class="stat-value">{{ route.stops.length }}</div>
@@ -869,11 +863,6 @@ export default {
 .overview-item p {
   color: #666;
   line-height: 1.5;
-}
-
-.no-description {
-  font-style: italic;
-  color: #999;
 }
 
 .overview-stats {

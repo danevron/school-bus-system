@@ -84,7 +84,6 @@ const sampleData = {
   routes: [
     {
       name: 'Downtown Route',
-      description: 'Route covering downtown area',
       stops: [
         {
           name: 'Central Station',
@@ -106,7 +105,6 @@ const sampleData = {
     },
     {
       name: 'Suburban Route',
-      description: 'Route covering suburban neighborhoods',
       stops: [
         {
           name: 'Suburban Park',

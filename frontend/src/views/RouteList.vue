@@ -58,10 +58,6 @@
               </div>
 
               <div class="route-info">
-                <div v-if="route.description" class="route-description">
-                  {{ route.description }}
-                </div>
-
                 <div class="route-stats">
                   <div class="stat-item">
                     <span class="stat-label">Stops:</span>
@@ -399,13 +395,6 @@ export default {
 .status-badge.inactive {
   background-color: #6c757d;
   color: white;
-}
-
-.route-description {
-  color: #666;
-  margin-bottom: 15px;
-  font-size: 0.95rem;
-  line-height: 1.4;
 }
 
 .route-stats {

@@ -53,7 +53,6 @@ export const vehicleValidation = {
 export const routeValidation = {
   create: Joi.object({
     name: Joi.string().required(),
-    description: Joi.string(),
     stops: Joi.array().items(
       Joi.object({
         name: Joi.string().required(),

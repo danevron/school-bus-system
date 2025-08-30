@@ -13,7 +13,6 @@ export interface IStop {
 
 export interface IRoute extends Document {
   name: string;
-  description: string;
   stops: IStop[];
   totalDistance: number; // in kilometers
   estimatedDuration: number; // in minutes
@@ -63,10 +62,6 @@ const routeSchema = new Schema<IRoute>({
   name: {
     type: String,
     required: true,
-    trim: true
-  },
-  description: {
-    type: String,
     trim: true
   },
   stops: [stopSchema],

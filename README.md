@@ -177,7 +177,7 @@ npm start
 - `lastMaintenance`
 
 ### Route
-- `name`, `description`
+- `name`,
 - `stops` (array of stops with coordinates)
 - `totalDistance`, `estimatedDuration`
 - `isActive`

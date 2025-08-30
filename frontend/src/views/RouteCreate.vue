@@ -28,18 +28,6 @@
                 />
               </div>
 
-              <div class="form-group">
-                <label for="routeDescription">Description</label>
-                <textarea 
-                  id="routeDescription"
-                  v-model="routeForm.description" 
-                  :disabled="loading"
-                  placeholder="Optional description of the route"
-                  rows="3"
-                  maxlength="500"
-                ></textarea>
-              </div>
-
               <div class="form-actions">
                 <button 
                   type="button"
@@ -67,7 +55,7 @@
           <div class="info-panel">
             <h3>📍 About Route Creation</h3>
             <div class="info-content">
-              <p><strong>Step 1:</strong> Create your route with a name and optional description.</p>
+              <p><strong>Step 1:</strong> Create your route with a name</p>
               <p><strong>Step 2:</strong> After creation, you'll be taken to the route details page where you can:</p>
               <ul>
                 <li>Add pickup and dropoff stops</li>
@@ -101,7 +89,6 @@ export default {
     
     const routeForm = ref({
       name: '',
-      description: '',
       stops: [],
       totalDistance: 0,
       estimatedDuration: 0
@@ -114,7 +101,6 @@ export default {
         
         const routeData = {
           name: routeForm.value.name.trim(),
-          description: routeForm.value.description.trim(),
           stops: [], // Empty stops array - stops will be added later
           totalDistance: 0, // Will be calculated when stops are added
           estimatedDuration: 0 // Will be calculated when stops are added
