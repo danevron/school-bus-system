@@ -137,8 +137,6 @@ GET /lines?isActive=true&driver=507f1f77bcf86cd799439011
         "startDate": "2024-01-01T00:00:00.000Z",
         "endDate": "2024-12-31T00:00:00.000Z"
       },
-      "startTime": "07:30",
-      "endTime": "08:00",
       "isActive": true,
       "maxCapacity": 15,
       "currentCapacity": 5,
@@ -174,9 +172,7 @@ POST /lines
     "daysOfWeek": [1, 2, 3, 4, 5],
     "startDate": "2024-01-01T00:00:00.000Z",
     "endDate": "2024-12-31T00:00:00.000Z"
-  },
-  "startTime": "07:30",
-  "endTime": "08:00"
+  }
 }
 ```
 
@@ -400,9 +396,7 @@ POST /bookings
     },
     "line": {
       "id": "507f1f77bcf86cd799439011",
-      "name": "Morning Downtown Line",
-      "startTime": "07:30",
-      "endTime": "08:00"
+      "name": "Morning Downtown Line"
     },
     "date": "2024-01-15T00:00:00.000Z",
     "pickupStop": "507f1f77bcf86cd799439016",

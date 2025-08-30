@@ -188,7 +188,6 @@ npm start
 - `driver` (reference to User)
 - `vehicle` (reference to Vehicle)
 - `schedule` (type, days, dates)
-- `startTime`, `endTime`
 - `maxCapacity`, `currentCapacity`
 - **`students` (array of assigned students)**
 - `isActive`

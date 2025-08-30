@@ -22,8 +22,6 @@ export interface ILine extends Document {
   driver: Types.ObjectId;
   vehicle: Types.ObjectId;
   schedule: ISchedule;
-  startTime: string; // HH:MM format
-  endTime: string; // HH:MM format
   isActive: boolean;
   maxCapacity: number;
   currentCapacity: number;
@@ -83,16 +81,6 @@ const lineSchema = new Schema<ILine>({
   schedule: {
     type: scheduleSchema,
     required: true
-  },
-  startTime: {
-    type: String,
-    required: true,
-    match: /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/
-  },
-  endTime: {
-    type: String,
-    required: true,
-    match: /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/
   },
   isActive: {
     type: Boolean,

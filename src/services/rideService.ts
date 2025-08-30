@@ -131,7 +131,7 @@ export class RideService {
       .populate('route', 'name stops')
       .populate('vehicle', 'licensePlate make vehicleModel capacity')
       .populate('students.student', 'firstName lastName')
-      .sort({ date: 1, 'line.startTime': 1 });
+      .sort({ date: 1 });
   }
 
   /**

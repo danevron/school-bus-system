@@ -183,8 +183,6 @@ export const seedDatabase = async () => {
           startDate: new Date('2024-01-01'),
           endDate: new Date('2024-12-31')
         },
-        startTime: '07:30',
-        endTime: '08:00',
         maxCapacity: createdVehicles[0].capacity,
         currentCapacity: 0,
         students: [student1?._id, student2?._id] // Assign students to this line
@@ -201,8 +199,6 @@ export const seedDatabase = async () => {
           startDate: new Date('2024-01-01'),
           endDate: new Date('2024-12-31')
         },
-        startTime: '07:00',
-        endTime: '07:45',
         maxCapacity: createdVehicles[1].capacity,
         currentCapacity: 0,
         students: [student3?._id] // Assign student to this line

@@ -84,8 +84,6 @@ export const lineValidation = {
       startDate: Joi.date().required(),
       endDate: Joi.date()
     }).required(),
-    startTime: Joi.string().pattern(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/).required(),
-    endTime: Joi.string().pattern(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/).required(),
     maxCapacity: Joi.number().integer().min(1).required()
   }),
 

@@ -67,7 +67,7 @@ export const createBooking = async (req: Request, res: Response): Promise<void> 
 
     const populatedBooking = await booking.populate([
       { path: 'student', select: 'firstName lastName' },
-      { path: 'line', select: 'name startTime endTime' }
+      { path: 'line', select: 'name' }
     ]);
 
     res.status(201).json({
@@ -104,7 +104,7 @@ export const getAllBookings = async (req: Request, res: Response): Promise<void>
     const bookings = await Booking.find(filter).populate([
       { path: 'student', select: 'firstName lastName email' },
       { path: 'parent', select: 'firstName lastName email' },
-      { path: 'line', select: 'name startTime endTime' }
+      { path: 'line', select: 'name' }
     ]);
 
     res.json({ bookings });
@@ -121,7 +121,7 @@ export const getBookingById = async (req: Request, res: Response): Promise<void>
     const booking = await Booking.findById(id).populate([
       { path: 'student', select: 'firstName lastName email phone' },
       { path: 'parent', select: 'firstName lastName email phone' },
-      { path: 'line', select: 'name startTime endTime route driver vehicle' }
+      { path: 'line', select: 'name route driver vehicle' }
     ]);
 
     if (!booking) {
@@ -164,7 +164,7 @@ export const updateBooking = async (req: Request, res: Response): Promise<void> 
     ).populate([
       { path: 'student', select: 'firstName lastName email' },
       { path: 'parent', select: 'firstName lastName email' },
-      { path: 'line', select: 'name startTime endTime' }
+      { path: 'line', select: 'name' }
     ]);
 
     if (!booking) {
@@ -195,7 +195,7 @@ export const getBookingsByParent = async (req: Request, res: Response): Promise<
 
     const bookings = await Booking.find({ parent: parentId }).populate([
       { path: 'student', select: 'firstName lastName' },
-      { path: 'line', select: 'name startTime endTime route' }
+      { path: 'line', select: 'name route' }
     ]);
 
     res.json({ bookings });
