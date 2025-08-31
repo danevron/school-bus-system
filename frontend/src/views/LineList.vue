@@ -106,7 +106,12 @@ export default {
       try {
         loading.value = true
         const response = await apiService.get('/lines')
-        lines.value = response.lines || response.data || []
+        const fetchedLines = response.lines || response.data || []
+        
+        // Sort lines by creation date (newest first)
+        lines.value = fetchedLines.sort((a, b) => {
+          return new Date(b.createdAt) - new Date(a.createdAt)
+        })
       } catch (error) {
         console.error('Failed to fetch lines:', error)
       } finally {
