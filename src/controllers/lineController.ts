@@ -16,11 +16,13 @@ export const createLine = async (req: Request, res: Response): Promise<void> => 
 
     const { route, driver, vehicle, ...lineData } = req.body;
 
-    // Verify route exists
-    const routeExists = await Route.findById(route);
-    if (!routeExists) {
-      res.status(404).json({ message: 'Route not found' });
-      return;
+    // Verify route exists (if provided)
+    if (route) {
+      const routeExists = await Route.findById(route);
+      if (!routeExists) {
+        res.status(404).json({ message: 'Route not found' });
+        return;
+      }
     }
 
     // Verify driver exists and is a driver

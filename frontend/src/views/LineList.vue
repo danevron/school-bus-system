@@ -58,8 +58,12 @@
 
                 <div class="line-details">
                   <div class="detail-item">
-                    <strong>Schedule:</strong>
-                    <span class="schedule-type">{{ formatScheduleType(line.scheduleType) }}</span>
+                    <strong>Duration:</strong>
+                    <span class="schedule-duration">{{ formatScheduleDuration(line.schedule) }}</span>
+                  </div>
+                  <div class="detail-item">
+                    <strong>Operating Days:</strong>
+                    <span class="schedule-days">{{ formatScheduleDays(line.schedule) }}</span>
                   </div>
                   <div class="detail-item">
                     <strong>Students:</strong>
@@ -115,8 +119,7 @@ export default {
     }
     
     const handleAddLine = () => {
-      // Placeholder for now - will implement create line functionality later
-      console.log('Add line clicked - functionality to be implemented')
+      router.push('/lines/create')
     }
     
     const formatDate = (dateString) => {
@@ -139,6 +142,66 @@ export default {
       return `${driver.firstName || ''} ${driver.lastName || ''}`.trim() || 'Driver Assigned'
     }
     
+    const formatScheduleDuration = (schedule) => {
+      if (!schedule || !schedule.startDate) {
+        return 'No schedule set'
+      }
+      
+      const start = new Date(schedule.startDate)
+      const end = schedule.endDate ? new Date(schedule.endDate) : null
+      
+      if (!end) {
+        return `From ${start.toLocaleDateString()}`
+      }
+      
+      const diffTime = Math.abs(end - start)
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1
+      
+      const startStr = start.toLocaleDateString()
+      const endStr = end.toLocaleDateString()
+      
+      if (diffDays === 1) {
+        return `${startStr} (1 day)`
+      } else if (diffDays < 30) {
+        return `${startStr} - ${endStr} (${diffDays} days)`
+      } else if (diffDays < 365) {
+        const weeks = Math.floor(diffDays / 7)
+        return `${startStr} - ${endStr} (${weeks} week${weeks > 1 ? 's' : ''})`
+      } else {
+        const years = Math.floor(diffDays / 365)
+        return `${startStr} - ${endStr} (${years} year${years > 1 ? 's' : ''})`
+      }
+    }
+    
+    const formatScheduleDays = (schedule) => {
+      if (!schedule || !schedule.daysOfWeek || schedule.daysOfWeek.length === 0) {
+        return 'No days selected'
+      }
+      
+      const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+      const selectedDays = schedule.daysOfWeek
+        .sort((a, b) => a - b) // Sort to ensure correct order
+        .map(dayNum => dayNames[dayNum])
+      
+      // Check for common patterns
+      if (selectedDays.length === 7) {
+        return 'Every day'
+      } else if (selectedDays.length === 5 && 
+                 schedule.daysOfWeek.includes(0) && 
+                 schedule.daysOfWeek.includes(1) && 
+                 schedule.daysOfWeek.includes(2) && 
+                 schedule.daysOfWeek.includes(3) && 
+                 schedule.daysOfWeek.includes(4)) {
+        return 'Sun-Thu (Weekdays)'
+      } else if (selectedDays.length === 2 && 
+                 schedule.daysOfWeek.includes(0) && 
+                 schedule.daysOfWeek.includes(6)) {
+        return 'Sat-Sun (Weekends)'
+      } else {
+        return selectedDays.join(', ')
+      }
+    }
+    
     const goBack = () => {
       router.push('/home')
     }
@@ -155,6 +218,8 @@ export default {
       handleAddLine,
       formatDate,
       formatScheduleType,
+      formatScheduleDuration,
+      formatScheduleDays,
       getDriverName,
       goBack
     }
@@ -370,6 +435,18 @@ export default {
 
 .schedule-type {
   color: #007bff;
+  font-weight: 500;
+  margin-left: 8px;
+}
+
+.schedule-duration {
+  color: #007bff;
+  font-weight: 500;
+  margin-left: 8px;
+}
+
+.schedule-days {
+  color: #28a745;
   font-weight: 500;
   margin-left: 8px;
 }

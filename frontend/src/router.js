@@ -7,6 +7,7 @@ import RouteList from './views/RouteList.vue'
 import RouteDetail from './views/RouteDetail.vue'
 import RouteCreate from './views/RouteCreate.vue'
 import LineList from './views/LineList.vue'
+import LineCreate from './views/LineCreate.vue'
 import authStore from './stores/auth'
 
 const routes = [
@@ -60,6 +61,12 @@ const routes = [
     path: '/lines',
     name: 'LineList',
     component: LineList,
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/lines/create',
+    name: 'LineCreate',
+    component: LineCreate,
     meta: { requiresAuth: true, requiresAdmin: true }
   }
 ]

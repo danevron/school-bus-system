@@ -74,7 +74,7 @@ export const lineValidation = {
   create: Joi.object({
     name: Joi.string().required(),
     description: Joi.string(),
-    route: Joi.string().hex().length(24).required(),
+    route: Joi.string().hex().length(24),
     driver: Joi.string().hex().length(24).required(),
     vehicle: Joi.string().hex().length(24).required(),
     schedule: Joi.object({
@@ -83,8 +83,7 @@ export const lineValidation = {
       customDates: Joi.array().items(Joi.date()),
       startDate: Joi.date().required(),
       endDate: Joi.date()
-    }).required(),
-    maxCapacity: Joi.number().integer().min(1).required()
+    }).required()
   }),
 
   assignStudents: Joi.object({

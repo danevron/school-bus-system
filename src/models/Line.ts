@@ -66,7 +66,7 @@ const lineSchema = new Schema<ILine>({
   route: {
     type: Schema.Types.ObjectId,
     ref: 'Route',
-    required: true
+    required: false
   },
   driver: {
     type: Schema.Types.ObjectId,
