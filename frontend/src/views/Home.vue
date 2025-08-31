@@ -31,7 +31,7 @@
               <div class="dashboard-card">
                 <h4>Lines Management</h4>
                 <p>Create and manage transportation lines</p>
-                <button class="action-button" disabled>Manage Lines</button>
+                <button class="action-button" @click="goToLineManagement">Manage Lines</button>
               </div>
               <div class="dashboard-card">
                 <h4>Rides Management</h4>
@@ -167,13 +167,18 @@ export default {
       router.push('/routes')
     }
     
+    const goToLineManagement = () => {
+      router.push('/lines')
+    }
+    
     return {
       authStore,
       userRole,
       roleClass,
       handleLogout,
       goToUserManagement,
-      goToRouteManagement
+      goToRouteManagement,
+      goToLineManagement
     }
   }
 }

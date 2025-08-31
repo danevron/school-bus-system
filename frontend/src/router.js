@@ -6,6 +6,7 @@ import AcceptInvitation from './views/AcceptInvitation.vue'
 import RouteList from './views/RouteList.vue'
 import RouteDetail from './views/RouteDetail.vue'
 import RouteCreate from './views/RouteCreate.vue'
+import LineList from './views/LineList.vue'
 import authStore from './stores/auth'
 
 const routes = [
@@ -53,6 +54,12 @@ const routes = [
     path: '/routes/:id',
     name: 'RouteDetail',
     component: RouteDetail,
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/lines',
+    name: 'LineList',
+    component: LineList,
     meta: { requiresAuth: true, requiresAdmin: true }
   }
 ]
