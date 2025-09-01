@@ -1,5 +1,6 @@
 import app from './app';
 import { connectDB } from './config/database';
+import { log } from './utils/logger';
 
 const PORT = process.env.PORT || 3000;
 
@@ -9,12 +10,16 @@ const startServer = async () => {
     await connectDB();
     
     app.listen(PORT, () => {
-      console.log(`🚌 School Bus System API is running on port ${PORT}`);
-      console.log(`📊 Health check: http://localhost:${PORT}/health`);
-      console.log(`📚 API Documentation: http://localhost:${PORT}/`);
+      log.info('School Bus System API started successfully', { 
+        port: PORT,
+        endpoints: {
+          health: `http://localhost:${PORT}/health`,
+          docs: `http://localhost:${PORT}/`
+        }
+      });
     });
   } catch (error) {
-    console.error('Failed to start server:', error);
+    log.error('Failed to start server', { error: error instanceof Error ? error.message : error });
     process.exit(1);
   }
 };
@@ -23,11 +28,11 @@ startServer();
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
-  console.log('SIGTERM received, shutting down gracefully');
+  log.info('SIGTERM received, shutting down gracefully');
   process.exit(0);
 });
 
 process.on('SIGINT', () => {
-  console.log('SIGINT received, shutting down gracefully');
+  log.info('SIGINT received, shutting down gracefully');
   process.exit(0);
 });

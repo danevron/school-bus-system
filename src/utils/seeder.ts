@@ -4,6 +4,7 @@ import Vehicle from '../models/Vehicle';
 import Line, { ScheduleType } from '../models/Line';
 import { RideService } from '../services/rideService';
 import { connectDB } from '../config/database';
+import { log } from './logger';
 
 const sampleData = {
   users: [
@@ -137,7 +138,7 @@ export const seedDatabase = async () => {
   try {
     await connectDB();
     
-    console.log('🌱 Starting database seeding...');
+    log.info('Starting database seeding');
 
     // Clear existing data
     await User.deleteMany({});
@@ -145,18 +146,18 @@ export const seedDatabase = async () => {
     await Line.deleteMany({});
     await mongoose.model('Ride').deleteMany({});
 
-    console.log('🗑️  Cleared existing data');
+    log.info('Cleared existing data');
 
     // Create users
     const createdUsers = await User.insertMany(sampleData.users);
-    console.log(`👥 Created ${createdUsers.length} users`);
+    log.info('Created users', { count: createdUsers.length });
 
     // Create vehicles
     const createdVehicles = await Vehicle.insertMany(sampleData.vehicles);
-    console.log(`🚗 Created ${createdVehicles.length} vehicles`);
+    log.info('Created vehicles', { count: createdVehicles.length });
 
     // Routes are now embedded in lines, so we don't create them separately
-    console.log('🛣️  Routes will be embedded in lines');
+    log.info('Routes will be embedded in lines');
 
     // Get references to users
     const admin = createdUsers.find(u => u.role === UserRole.ADMIN);
@@ -213,38 +214,42 @@ export const seedDatabase = async () => {
     ];
 
     const createdLines = await Line.insertMany(lines);
-    console.log(`🚌 Created ${createdLines.length} lines with student assignments`);
+    log.info('Created lines with student assignments', { count: createdLines.length });
 
     // Generate rides for the next 30 days
     const startDate = new Date();
     const endDate = new Date();
     endDate.setDate(endDate.getDate() + 30);
 
-    console.log('🚀 Generating rides...');
+    log.info('Generating rides');
     const generatedRides = await RideService.generateRidesForAllLines(startDate, endDate);
-    console.log(`📅 Generated ${generatedRides.length} rides`);
+    log.info('Generated rides', { count: generatedRides.length });
 
-    console.log('✅ Database seeding completed successfully!');
-    console.log('\n📋 Sample Data Summary:');
-    console.log(`- Users: ${createdUsers.length}`);
-    console.log(`- Vehicles: ${createdVehicles.length}`);
-    console.log(`- Lines: ${createdLines.length} (with embedded routes)`);
-    console.log(`- Rides: ${generatedRides.length}`);
-    console.log('\n🔑 Sample Login Credentials:');
-    console.log('Admin: admin@schoolbus.com / admin123');
-    console.log('Driver: driver1@schoolbus.com / driver123');
-    console.log('Parent: parent1@schoolbus.com / parent123');
-    console.log('Student: student1@schoolbus.com / student123');
-    console.log('\n📝 New Features Demo:');
-    console.log('- Lines now have assigned students');
-    console.log('- Rides are automatically generated based on line schedules');
-    console.log('- Drivers can manage ride status and student pickup/dropoff');
-    console.log('- Parents can remove students from future rides');
-    console.log('- Admins can add guest students to rides');
+    log.info('Database seeding completed successfully', {
+      summary: {
+        users: createdUsers.length,
+        vehicles: createdVehicles.length,
+        lines: createdLines.length,
+        rides: generatedRides.length
+      },
+      credentials: {
+        admin: 'admin@schoolbus.com / admin123',
+        driver: 'driver1@schoolbus.com / driver123',
+        parent: 'parent1@schoolbus.com / parent123',
+        student: 'student1@schoolbus.com / student123'
+      },
+      features: [
+        'Lines now have assigned students',
+        'Rides are automatically generated based on line schedules',
+        'Drivers can manage ride status and student pickup/dropoff',
+        'Parents can remove students from future rides',
+        'Admins can add guest students to rides'
+      ]
+    });
 
     await mongoose.disconnect();
   } catch (error) {
-    console.error('❌ Error seeding database:', error);
+    log.error('Error seeding database', { error: error instanceof Error ? error.message : error });
     process.exit(1);
   }
 };

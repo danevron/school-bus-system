@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import { log } from '../utils/logger';
 
 dotenv.config();
 
@@ -8,9 +9,12 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/school
 export const connectDB = async (): Promise<void> => {
   try {
     await mongoose.connect(MONGODB_URI);
-    console.log('MongoDB connected successfully');
+    log.info('MongoDB connected successfully', { uri: MONGODB_URI });
   } catch (error) {
-    console.error('MongoDB connection error:', error);
+    log.error('MongoDB connection error', { 
+      uri: MONGODB_URI, 
+      error: error instanceof Error ? error.message : error 
+    });
     process.exit(1);
   }
 };
@@ -18,8 +22,10 @@ export const connectDB = async (): Promise<void> => {
 export const disconnectDB = async (): Promise<void> => {
   try {
     await mongoose.disconnect();
-    console.log('MongoDB disconnected successfully');
+    log.info('MongoDB disconnected successfully');
   } catch (error) {
-    console.error('MongoDB disconnection error:', error);
+    log.error('MongoDB disconnection error', { 
+      error: error instanceof Error ? error.message : error 
+    });
   }
 }; 

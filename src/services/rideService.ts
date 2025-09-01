@@ -1,6 +1,7 @@
 import Line from '../models/Line';
 import Ride, { RideStatus, StudentRideStatus } from '../models/Ride';
 import { ScheduleType } from '../models/Line';
+import { log } from '../utils/logger';
 
 export class RideService {
   /**
@@ -71,7 +72,10 @@ export class RideService {
         const rides = await this.generateRidesForLine(String(line._id), startDate, endDate);
         allRides.push(...rides);
       } catch (error) {
-        console.error(`Error generating rides for line ${line._id}:`, error);
+        log.error('Error generating rides for line', {
+          lineId: line._id,
+          error: error instanceof Error ? error.message : error
+        });
       }
     }
 

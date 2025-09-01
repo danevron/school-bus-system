@@ -1,6 +1,8 @@
 // Simple email service - in production, you would integrate with services like:
 // SendGrid, AWS SES, Nodemailer with SMTP, etc.
 
+import { log } from '../utils/logger';
+
 export interface EmailOptions {
   to: string;
   subject: string;
@@ -81,18 +83,25 @@ School Bus System Team
 
     try {
       // In development/demo mode, just log the email
-      console.log('\n=== EMAIL INVITATION ===');
-      console.log(`To: ${emailContent.to}`);
-      console.log(`Subject: ${emailContent.subject}`);
-      console.log(`\n${emailContent.text}\n`);
-      console.log('========================\n');
+      log.info('Sending invitation email', {
+        to: emailContent.to,
+        subject: emailContent.subject,
+        role,
+        inviterName,
+        invitationUrl
+      });
       
       // TODO: In production, replace this with actual email sending:
       // await this.sendEmail(emailContent);
       
       return true;
     } catch (error) {
-      console.error('Failed to send invitation email:', error);
+      log.error('Failed to send invitation email', {
+        to: email,
+        role,
+        inviterName,
+        error: error instanceof Error ? error.message : error
+      });
       return false;
     }
   }

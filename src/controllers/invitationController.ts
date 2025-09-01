@@ -4,6 +4,7 @@ import Invitation, { InvitationStatus } from '../models/Invitation';
 import User, { UserRole } from '../models/User';
 import { EmailService } from '../services/emailService';
 import { validateInviteUser, validateAcceptInvitation } from '../utils/validation';
+import { log } from '../utils/logger';
 
 export const inviteUser = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -15,8 +16,7 @@ export const inviteUser = async (req: Request, res: Response): Promise<void> => 
 
     const { email, phone, role } = req.body;
     const inviterId = req.user!.userId;
-    console.log('Full req.user object:', req.user);
-    console.log('Inviter userId:', inviterId);
+    log.debug('Processing user invitation', { email, role, inviterId });
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });
@@ -52,8 +52,8 @@ export const inviteUser = async (req: Request, res: Response): Promise<void> => 
 
     // Get inviter info for email
     const inviter = await User.findById(inviterId);
-    console.log('Inviter user:', inviter);
     const inviterName = `${inviter?.firstName} ${inviter?.lastName}`;
+    log.debug('Sending invitation email', { email, inviterName, role });
 
     // Send invitation email
     const emailSent = await EmailService.sendInvitation(
@@ -64,7 +64,7 @@ export const inviteUser = async (req: Request, res: Response): Promise<void> => 
     );
 
     if (!emailSent) {
-      console.warn('Failed to send invitation email, but invitation was created');
+      log.warn('Failed to send invitation email, but invitation was created', { email, role });
     }
 
     res.status(201).json({
@@ -82,7 +82,11 @@ export const inviteUser = async (req: Request, res: Response): Promise<void> => 
     });
 
   } catch (error) {
-    console.error('Error inviting user:', error);
+    log.error('Error inviting user', { 
+      email: req.body.email, 
+      role: req.body.role, 
+      error: error instanceof Error ? error.message : error 
+    });
     res.status(500).json({ 
       message: 'Failed to send invitation',
       error: process.env.NODE_ENV === 'development' ? (error as Error).message : 'Internal server error'
@@ -105,7 +109,9 @@ export const getInvitations = async (req: Request, res: Response): Promise<void>
     res.json({ invitations });
 
   } catch (error) {
-    console.error('Error fetching invitations:', error);
+    log.error('Error fetching invitations', { 
+      error: error instanceof Error ? error.message : error 
+    });
     res.status(500).json({ 
       message: 'Failed to fetch invitations',
       error: process.env.NODE_ENV === 'development' ? (error as Error).message : 'Internal server error'
@@ -148,7 +154,10 @@ export const getInvitationByToken = async (req: Request, res: Response): Promise
     });
 
   } catch (error) {
-    console.error('Error fetching invitation:', error);
+    log.error('Error fetching invitation by token', { 
+      token: req.params.token,
+      error: error instanceof Error ? error.message : error 
+    });
     res.status(500).json({ 
       message: 'Failed to fetch invitation',
       error: process.env.NODE_ENV === 'development' ? (error as Error).message : 'Internal server error'
@@ -224,7 +233,10 @@ export const acceptInvitation = async (req: Request, res: Response): Promise<voi
     });
 
   } catch (error) {
-    console.error('Error accepting invitation:', error);
+    log.error('Error accepting invitation', { 
+      token: req.params.token,
+      error: error instanceof Error ? error.message : error 
+    });
     res.status(500).json({ 
       message: 'Failed to accept invitation',
       error: process.env.NODE_ENV === 'development' ? (error as Error).message : 'Internal server error'
@@ -246,7 +258,10 @@ export const deleteInvitation = async (req: Request, res: Response): Promise<voi
     res.json({ message: 'Invitation deleted successfully' });
 
   } catch (error) {
-    console.error('Error deleting invitation:', error);
+    log.error('Error deleting invitation', { 
+      invitationId: req.params.id,
+      error: error instanceof Error ? error.message : error 
+    });
     res.status(500).json({ 
       message: 'Failed to delete invitation',
       error: process.env.NODE_ENV === 'development' ? (error as Error).message : 'Internal server error'

@@ -3,6 +3,9 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
+import { RequestLogger } from './middlewares/requestLogger';
+import requestLoggerConfig, { isRequestLoggingEnabled } from './config/requestLogger';
+import { log } from './utils/logger';
 
 // Import routes
 import authRoutes from './routes/auth';
@@ -35,6 +38,12 @@ app.use('/api/', limiter);
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Request logging middleware (after body parsing to capture request body)
+if (isRequestLoggingEnabled) {
+  const requestLogger = new RequestLogger(log, requestLoggerConfig);
+  app.use(requestLogger.middleware());
+}
 
 // Health check endpoint
 app.get('/health', (req, res) => {

@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import User, { UserRole } from '../models/User';
 import { generateToken } from '../utils/jwt';
 import { userValidation, validateConnectStudentToParents } from '../utils/validation';
+import { log } from '../utils/logger';
 import mongoose from 'mongoose';
 
 export const register = async (req: Request, res: Response): Promise<void> => {
@@ -228,7 +229,11 @@ export const connectStudentToParents = async (req: Request, res: Response): Prom
 
     // Update student's parents
     student.parents = [...existingParents, ...parentIds];
-    console.log('Connecting student to  parents:', student.parents);
+    log.info('Connecting student to parents', { 
+      studentId, 
+      parentIds, 
+      totalParents: student.parents.length 
+    });
     await student.save();
 
     // Update each parent's children
