@@ -8,7 +8,7 @@ export class RideService {
     * Generate rides for a specific line based on its schedule
     */
    static async generateRidesForLine(lineId: string, startDate: Date, endDate: Date): Promise<InstanceType<typeof Ride>[]> {
-     const line = await Line.findById(lineId).populate('route');
+     const line = await Line.findById(lineId);
      if (!line) {
        throw new Error('Line not found');
      }
@@ -33,8 +33,8 @@ export class RideService {
           const studentRides = line.students.map(studentId => ({
             student: studentId,
             status: StudentRideStatus.PENDING,
-            pickupStop: (line.route as any)?.stops?.find((stop: any) => stop.type === 'pickup')?._id,
-            dropoffStop: (line.route as any)?.stops?.find((stop: any) => stop.type === 'dropoff')?._id
+            pickupStop: line.route?.stops?.find((stop: any) => stop.type === 'pickup')?.stopId || '',
+            dropoffStop: line.route?.stops?.find((stop: any) => stop.type === 'dropoff')?.stopId || ''
           }));
 
           const ride = new Ride({
@@ -44,8 +44,7 @@ export class RideService {
             students: studentRides,
             guests: [],
             driver: line.driver,
-            vehicle: line.vehicle,
-            route: line.route._id
+            vehicle: line.vehicle
           });
 
           await ride.save();
@@ -127,8 +126,7 @@ export class RideService {
     }
 
     return await Ride.find(filter)
-      .populate('line', 'name description')
-      .populate('route', 'name stops')
+      .populate('line', 'name description route')
       .populate('vehicle', 'licensePlate make vehicleModel capacity')
       .populate('students.student', 'firstName lastName')
       .sort({ date: 1 });
@@ -150,8 +148,7 @@ export class RideService {
     }
 
     return await Ride.find(filter)
-      .populate('line', 'name description')
-      .populate('route', 'name stops')
+      .populate('line', 'name description route')
       .populate('driver', 'firstName lastName')
       .sort({ date: 1 });
   }

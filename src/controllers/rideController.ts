@@ -59,8 +59,7 @@ export const getAllRides = async (req: Request, res: Response): Promise<void> =>
     }
 
     const rides = await Ride.find(filter)
-      .populate('line', 'name description')
-      .populate('route', 'name stops')
+      .populate('line', 'name description route')
       .populate('driver', 'firstName lastName')
       .populate('vehicle', 'licensePlate make vehicleModel capacity')
       .populate('students.student', 'firstName lastName')
@@ -78,8 +77,7 @@ export const getRideById = async (req: Request, res: Response): Promise<void> =>
     const { id } = req.params;
 
     const ride = await Ride.findById(id)
-      .populate('line', 'name description')
-      .populate('route', 'name stops')
+      .populate('line', 'name description route')
       .populate('driver', 'firstName lastName phone')
       .populate('vehicle', 'licensePlate make vehicleModel capacity')
       .populate('students.student', 'firstName lastName phone');

@@ -1,7 +1,6 @@
 import mongoose from 'mongoose';
 import User, { UserRole } from '../models/User';
 import Vehicle from '../models/Vehicle';
-import Route from '../models/Route';
 import Line, { ScheduleType } from '../models/Line';
 import { RideService } from '../services/rideService';
 import { connectDB } from '../config/database';
@@ -143,7 +142,6 @@ export const seedDatabase = async () => {
     // Clear existing data
     await User.deleteMany({});
     await Vehicle.deleteMany({});
-    await Route.deleteMany({});
     await Line.deleteMany({});
     await mongoose.model('Ride').deleteMany({});
 
@@ -157,9 +155,8 @@ export const seedDatabase = async () => {
     const createdVehicles = await Vehicle.insertMany(sampleData.vehicles);
     console.log(`🚗 Created ${createdVehicles.length} vehicles`);
 
-    // Create routes
-    const createdRoutes = await Route.insertMany(sampleData.routes);
-    console.log(`🛣️  Created ${createdRoutes.length} routes`);
+    // Routes are now embedded in lines, so we don't create them separately
+    console.log('🛣️  Routes will be embedded in lines');
 
     // Get references to users
     const admin = createdUsers.find(u => u.role === UserRole.ADMIN);
@@ -169,12 +166,17 @@ export const seedDatabase = async () => {
     const student2 = createdUsers.find(u => u.email === 'student2@schoolbus.com');
     const student3 = createdUsers.find(u => u.email === 'student3@schoolbus.com');
 
-    // Create sample lines with student assignments
+    // Create sample lines with embedded route data and student assignments
     const lines = [
       {
         name: 'Morning Downtown Line',
         description: 'Daily morning pickup from downtown',
-        route: createdRoutes[0]._id,
+        route: {
+          name: sampleData.routes[0].name,
+          stops: sampleData.routes[0].stops,
+          totalDistance: sampleData.routes[0].totalDistance,
+          estimatedDuration: sampleData.routes[0].estimatedDuration
+        },
         driver: driver1?._id,
         vehicle: createdVehicles[0]._id,
         schedule: {
@@ -190,7 +192,12 @@ export const seedDatabase = async () => {
       {
         name: 'Morning Suburban Line',
         description: 'Daily morning pickup from suburbs',
-        route: createdRoutes[1]._id,
+        route: {
+          name: sampleData.routes[1].name,
+          stops: sampleData.routes[1].stops,
+          totalDistance: sampleData.routes[1].totalDistance,
+          estimatedDuration: sampleData.routes[1].estimatedDuration
+        },
         driver: driver2?._id,
         vehicle: createdVehicles[1]._id,
         schedule: {
@@ -221,8 +228,7 @@ export const seedDatabase = async () => {
     console.log('\n📋 Sample Data Summary:');
     console.log(`- Users: ${createdUsers.length}`);
     console.log(`- Vehicles: ${createdVehicles.length}`);
-    console.log(`- Routes: ${createdRoutes.length}`);
-    console.log(`- Lines: ${createdLines.length}`);
+    console.log(`- Lines: ${createdLines.length} (with embedded routes)`);
     console.log(`- Rides: ${generatedRides.length}`);
     console.log('\n🔑 Sample Login Credentials:');
     console.log('Admin: admin@schoolbus.com / admin123');

@@ -15,6 +15,15 @@ router.post('/:id/assign-students', requireAdmin, lineController.assignStudentsT
 router.post('/:id/students', requireAdmin, lineController.addStudentToLine);
 router.delete('/:id/students/:studentId', requireAdmin, lineController.removeStudentFromLine);
 
+// Route management endpoints (formerly standalone routes)
+router.put('/:id/route', requireAdmin, lineController.updateLineRoute);
+router.delete('/:id/route', requireAdmin, lineController.removeLineRoute);
+
+// Stop management endpoints (formerly in route controller)
+router.post('/:id/route/stops', requireAdmin, lineController.addStopToLineRoute);
+router.put('/:id/route/stops', requireAdmin, lineController.updateLineRouteStops);
+router.delete('/:id/route/stops/:stopIndex', requireAdmin, lineController.deleteStopFromLineRoute);
+
 // Public routes (for authenticated users)
 router.get('/', lineController.getAllLines);
 router.get('/:id', lineController.getLineById);

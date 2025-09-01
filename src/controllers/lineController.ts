@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import Line from '../models/Line';
-import Route from '../models/Route';
 import User from '../models/User';
 import Vehicle from '../models/Vehicle';
 import { lineValidation } from '../utils/validation';
@@ -14,16 +13,7 @@ export const createLine = async (req: Request, res: Response): Promise<void> => 
       return;
     }
 
-    const { route, driver, vehicle, ...lineData } = req.body;
-
-    // Verify route exists (if provided)
-    if (route) {
-      const routeExists = await Route.findById(route);
-      if (!routeExists) {
-        res.status(404).json({ message: 'Route not found' });
-        return;
-      }
-    }
+    const { driver, vehicle, ...lineData } = req.body;
 
     // Verify driver exists and is a driver
     const driverUser = await User.findById(driver);
@@ -44,16 +34,20 @@ export const createLine = async (req: Request, res: Response): Promise<void> => 
 
     const line = new Line({
       ...lineData,
-      route,
       driver,
       vehicle,
-      students: [] // Initialize with empty students array
+      students: [], // Initialize with empty students array
+      route: {
+        name: `${lineData.name} Route`,
+        stops: [],
+        totalDistance: 0,
+        estimatedDuration: 0
+      }
     });
 
     await line.save();
 
     const populatedLine = await line.populate([
-      { path: 'route', select: 'name description' },
       { path: 'driver', select: 'firstName lastName email' },
       { path: 'vehicle', select: 'licensePlate make vehicleModel capacity' },
       { path: 'students', select: 'firstName lastName email' }
@@ -82,7 +76,6 @@ export const getAllLines = async (req: Request, res: Response): Promise<void> =>
     }
 
     const lines = await Line.find(filter).populate([
-      { path: 'route', select: 'name description' },
       { path: 'driver', select: 'firstName lastName email' },
       { path: 'vehicle', select: 'licensePlate make vehicleModel capacity' },
       { path: 'students', select: 'firstName lastName email' }
@@ -99,7 +92,6 @@ export const getLineById = async (req: Request, res: Response): Promise<void> =>
     const { id } = req.params;
 
     const line = await Line.findById(id).populate([
-      { path: 'route', select: 'name description stops' },
       { path: 'driver', select: 'firstName lastName email phone' },
       { path: 'vehicle', select: 'licensePlate make vehicleModel capacity' },
       { path: 'students', select: 'firstName lastName email phone' }
@@ -327,7 +319,6 @@ export const removeStudentFromLine = async (req: Request, res: Response): Promis
       { $pull: { students: studentId } },
       { new: true, runValidators: true }
     ).populate([
-      { path: 'route', select: 'name description' },
       { path: 'driver', select: 'firstName lastName email' },
       { path: 'vehicle', select: 'licensePlate make vehicleModel capacity' },
       { path: 'students', select: 'firstName lastName email' }
@@ -336,6 +327,216 @@ export const removeStudentFromLine = async (req: Request, res: Response): Promis
     res.json({
       message: 'Student removed from line successfully',
       line: updatedLine
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// Route Management Endpoints (formerly in routeController)
+export const updateLineRoute = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    
+    // Validate route data
+    const { error } = lineValidation.updateRoute.validate(req.body);
+    if (error) {
+      res.status(400).json({ message: error.details[0].message });
+      return;
+    }
+
+    const { name, stops, totalDistance, estimatedDuration } = req.body;
+
+    const line = await Line.findById(id);
+    if (!line) {
+      res.status(404).json({ message: 'Line not found' });
+      return;
+    }
+
+    // Update or create route data
+    line.route = {
+      name,
+      stops,
+      totalDistance,
+      estimatedDuration
+    };
+
+    await line.save();
+
+    const populatedLine = await line.populate([
+      { path: 'driver', select: 'firstName lastName email phone' },
+      { path: 'vehicle', select: 'licensePlate make vehicleModel capacity' },
+      { path: 'students', select: 'firstName lastName email phone' }
+    ]);
+
+    res.json({
+      message: 'Line route updated successfully',
+      line: populatedLine
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+export const removeLineRoute = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    const line = await Line.findById(id);
+    if (!line) {
+      res.status(404).json({ message: 'Line not found' });
+      return;
+    }
+
+    // Remove route data
+    line.route = undefined;
+    await line.save();
+
+    const populatedLine = await line.populate([
+      { path: 'driver', select: 'firstName lastName email phone' },
+      { path: 'vehicle', select: 'licensePlate make vehicleModel capacity' },
+      { path: 'students', select: 'firstName lastName email phone' }
+    ]);
+
+    res.json({
+      message: 'Line route removed successfully',
+      line: populatedLine
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// Stop Management Functions (formerly in routeController)
+export const addStopToLineRoute = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    // Validate stop data
+    const { error } = lineValidation.addStop.validate(req.body);
+    if (error) {
+      res.status(400).json({ message: error.details[0].message });
+      return;
+    }
+
+    const { stop } = req.body;
+
+    const line = await Line.findById(id);
+    if (!line) {
+      res.status(404).json({ message: 'Line not found' });
+      return;
+    }
+
+    if (!line.route) {
+      res.status(400).json({ message: 'Line has no route. Please create a route first.' });
+      return;
+    }
+
+    // Generate unique stopId for the new stop
+    const stopWithId = {
+      ...stop,
+      stopId: `stop_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    };
+
+    line.route.stops.push(stopWithId);
+    await line.save();
+
+    const populatedLine = await line.populate([
+      { path: 'driver', select: 'firstName lastName email phone' },
+      { path: 'vehicle', select: 'licensePlate make vehicleModel capacity' },
+      { path: 'students', select: 'firstName lastName email phone' }
+    ]);
+
+    res.status(201).json({
+      message: 'Stop added successfully',
+      line: populatedLine
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+export const updateLineRouteStops = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    // Validate stops data
+    const { error } = lineValidation.updateStops.validate(req.body);
+    if (error) {
+      res.status(400).json({ message: error.details[0].message });
+      return;
+    }
+
+    const { stops } = req.body;
+
+    const line = await Line.findById(id);
+    if (!line) {
+      res.status(404).json({ message: 'Line not found' });
+      return;
+    }
+
+    if (!line.route) {
+      res.status(400).json({ message: 'Line has no route. Please create a route first.' });
+      return;
+    }
+
+    // Ensure all stops have stopId (for backward compatibility)
+    const stopsWithIds = stops.map((stop: any) => ({
+      ...stop,
+      stopId: stop.stopId || `stop_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    }));
+
+    line.route.stops = stopsWithIds;
+    await line.save();
+
+    const populatedLine = await line.populate([
+      { path: 'driver', select: 'firstName lastName email phone' },
+      { path: 'vehicle', select: 'licensePlate make vehicleModel capacity' },
+      { path: 'students', select: 'firstName lastName email phone' }
+    ]);
+
+    res.json({
+      message: 'Line route stops updated successfully',
+      line: populatedLine
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+export const deleteStopFromLineRoute = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id, stopIndex } = req.params;
+
+    const line = await Line.findById(id);
+    if (!line) {
+      res.status(404).json({ message: 'Line not found' });
+      return;
+    }
+
+    if (!line.route) {
+      res.status(400).json({ message: 'Line has no route. Please create a route first.' });
+      return;
+    }
+
+    const index = parseInt(stopIndex);
+    if (index < 0 || index >= line.route.stops.length) {
+      res.status(400).json({ message: 'Invalid stop index' });
+      return;
+    }
+
+    line.route.stops.splice(index, 1);
+    await line.save();
+
+    const populatedLine = await line.populate([
+      { path: 'driver', select: 'firstName lastName email phone' },
+      { path: 'vehicle', select: 'licensePlate make vehicleModel capacity' },
+      { path: 'students', select: 'firstName lastName email phone' }
+    ]);
+
+    res.json({
+      message: 'Stop deleted successfully',
+      line: populatedLine
     });
   } catch (error: any) {
     res.status(500).json({ message: 'Server error', error: error.message });

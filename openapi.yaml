@@ -316,43 +316,76 @@ paths:
       responses:
         '200':
           description: List of bookings for line
-  /routes:
-    get:
-      summary: Get all routes
+  /lines/{id}/route:
+    put:
+      summary: Update line route (admin only)
       security:
         - bearerAuth: []
-      responses:
-        '200':
-          description: List of routes
-    post:
-      summary: Create a new route (admin only)
-      security:
-        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Route'
+              $ref: '#/components/schemas/RouteData'
+      responses:
+        '200':
+          description: Line route updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Line'
+    delete:
+      summary: Remove line route (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Line route removed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Line'
+  /lines/{id}/route/stops:
+    post:
+      summary: Add stop to line route (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                stop:
+                  $ref: '#/components/schemas/Stop'
       responses:
         '201':
-          description: Route created
-  /routes/{id}:
-    get:
-      summary: Get route by ID
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Route details
+          description: Stop added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Line'
     put:
-      summary: Update route (admin only)
+      summary: Update line route stops (admin only)
       security:
         - bearerAuth: []
       parameters:
@@ -366,12 +399,22 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Route'
+              type: object
+              properties:
+                stops:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Stop'
       responses:
         '200':
-          description: Route updated
+          description: Line route stops updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Line'
+  /lines/{id}/route/stops/{stopIndex}:
     delete:
-      summary: Delete route (admin only)
+      summary: Delete stop from line route (admin only)
       security:
         - bearerAuth: []
       parameters:
@@ -380,9 +423,18 @@ paths:
           required: true
           schema:
             type: string
+        - name: stopIndex
+          in: path
+          required: true
+          schema:
+            type: integer
       responses:
-        '204':
-          description: Route deleted
+        '200':
+          description: Stop deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Line'
   /vehicles:
     get:
       summary: Get all vehicles
@@ -566,5 +618,211 @@ paths:
         '200':
           description: Student removed from ride
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
-    # Define your schemas here (e.g., User, Line, Booking, Vehicle, Ride)
+    Stop:
+      type: object
+      required:
+        - name
+        - address
+        - coordinates
+        - estimatedTime
+        - type
+      properties:
+        name:
+          type: string
+          description: Name of the stop
+        address:
+          type: string
+          description: Full address of the stop
+        coordinates:
+          type: object
+          required:
+            - latitude
+            - longitude
+          properties:
+            latitude:
+              type: number
+              minimum: -90
+              maximum: 90
+            longitude:
+              type: number
+              minimum: -180
+              maximum: 180
+        estimatedTime:
+          type: number
+          minimum: 0
+          description: Estimated time to reach this stop (in minutes)
+        type:
+          type: string
+          enum: [pickup, dropoff]
+          description: Type of stop
+    RouteData:
+      type: object
+      required:
+        - name
+        - stops
+        - totalDistance
+        - estimatedDuration
+      properties:
+        name:
+          type: string
+          description: Name of the route
+        stops:
+          type: array
+          items:
+            $ref: '#/components/schemas/Stop'
+          description: List of stops on the route
+        totalDistance:
+          type: number
+          minimum: 0
+          description: Total distance of the route (in km)
+        estimatedDuration:
+          type: number
+          minimum: 0
+          description: Estimated duration of the route (in minutes)
+    Schedule:
+      type: object
+      required:
+        - type
+        - startDate
+      properties:
+        type:
+          type: string
+          enum: [daily, weekdays, weekends, custom]
+          description: Type of schedule
+        daysOfWeek:
+          type: array
+          items:
+            type: integer
+            minimum: 0
+            maximum: 6
+          description: Days of the week (0=Sunday, 6=Saturday)
+        customDates:
+          type: array
+          items:
+            type: string
+            format: date
+          description: Custom dates for custom schedule type
+        startDate:
+          type: string
+          format: date
+          description: Start date of the schedule
+        endDate:
+          type: string
+          format: date
+          description: End date of the schedule
+    Line:
+      type: object
+      required:
+        - name
+        - driver
+        - vehicle
+        - schedule
+      properties:
+        _id:
+          type: string
+          description: Unique identifier for the line
+        name:
+          type: string
+          description: Name of the line
+        description:
+          type: string
+          description: Description of the line
+        route:
+          $ref: '#/components/schemas/RouteData'
+          description: Embedded route data for the line
+        driver:
+          type: string
+          description: ID of the assigned driver
+        vehicle:
+          type: string
+          description: ID of the assigned vehicle
+        schedule:
+          $ref: '#/components/schemas/Schedule'
+          description: Schedule for the line
+        maxCapacity:
+          type: integer
+          minimum: 1
+          description: Maximum capacity of the line
+        currentCapacity:
+          type: integer
+          minimum: 0
+          description: Current number of assigned students
+        students:
+          type: array
+          items:
+            type: string
+          description: List of assigned student IDs
+        isActive:
+          type: boolean
+          default: true
+          description: Whether the line is active
+        createdAt:
+          type: string
+          format: date-time
+          description: Creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+    Vehicle:
+      type: object
+      required:
+        - licensePlate
+        - make
+        - vehicleModel
+        - year
+        - capacity
+      properties:
+        _id:
+          type: string
+        licensePlate:
+          type: string
+        make:
+          type: string
+        vehicleModel:
+          type: string
+        year:
+          type: integer
+        capacity:
+          type: integer
+          minimum: 1
+        isActive:
+          type: boolean
+          default: true
+        lastMaintenance:
+          type: string
+          format: date-time
+    Booking:
+      type: object
+      required:
+        - student
+        - line
+        - date
+        - pickupStop
+        - dropoffStop
+      properties:
+        _id:
+          type: string
+        student:
+          type: string
+        line:
+          type: string
+        date:
+          type: string
+          format: date
+        pickupStop:
+          type: string
+        dropoffStop:
+          type: string
+        status:
+          type: string
+          enum: [pending, confirmed, cancelled, completed]
+          default: pending
+        notes:
+          type: string

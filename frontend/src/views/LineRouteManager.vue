@@ -1,13 +1,13 @@
 <template>
-  <div class="route-detail-container">
+  <div class="route-manager-container">
     <header class="header">
       <div class="header-content">
         <div class="header-info">
-          <h1 v-if="route">{{ route.name }}</h1>
-          <h1 v-else>Route Details</h1>
+          <h1 v-if="line">Route Manager - {{ line.name }}</h1>
+          <h1 v-else>Route Manager</h1>
         </div>
         <div class="header-actions">
-          <button @click="goBack" class="back-button">← Back to Routes</button>
+          <button @click="goBack" class="back-button">← Back to Line</button>
         </div>
       </div>
     </header>
@@ -15,35 +15,41 @@
     <main class="main-content">
       <div v-if="loading" class="loading">
         <div class="loading-spinner"></div>
-        Loading route details...
+        Loading route data...
       </div>
 
       <div v-else-if="error" class="error-state">
         <div class="error-message">
-          <h3>Route Not Found</h3>
+          <h3>Error Loading Route</h3>
           <p>{{ error }}</p>
-          <button @click="goBack" class="back-button-large">
-            ← Return to Routes
-          </button>
+          <button @click="fetchLine" class="retry-button">Try Again</button>
         </div>
       </div>
 
-      <div v-else-if="route" class="content-wrapper">
+      <div v-else-if="line" class="content-wrapper">
         <!-- Route Overview -->
         <div class="route-overview">
           <div class="overview-grid">
             <div class="overview-stats">
               <div class="stat-card">
-                <div class="stat-value">{{ route.stops.length }}</div>
+                <div class="stat-value">{{ routeData.stops.length }}</div>
                 <div class="stat-label">Total Stops</div>
               </div>
               <div class="stat-card">
-                <div class="stat-value">{{ route.totalDistance }} km</div>
+                <div class="stat-value">{{ routeData.totalDistance }} km</div>
                 <div class="stat-label">Total Distance</div>
               </div>
               <div class="stat-card">
-                <div class="stat-value">{{ formatDuration(route.estimatedDuration) }}</div>
+                <div class="stat-value">{{ formatDuration(routeData.estimatedDuration) }}</div>
                 <div class="stat-label">Est. Duration</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value">{{ getDriverName(line.driver) }}</div>
+                <div class="stat-label">Line Driver</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value">{{ getVehicleName(line.vehicle) }}</div>
+                <div class="stat-label">Vehicle</div>
               </div>
             </div>
           </div>
@@ -58,13 +64,13 @@
             </button>
           </div>
           
-          <div v-if="route.stops.length === 0" class="no-stops">
+          <div v-if="routeData.stops.length === 0" class="no-stops">
             <p>No stops have been defined for this route.</p>
           </div>
 
           <div v-else class="stops-timeline">
             <div 
-              v-for="(stop, index) in route.stops" 
+              v-for="(stop, index) in routeData.stops" 
               :key="index"
               class="stop-item"
               :class="{ 
@@ -76,7 +82,7 @@
                 <div class="stop-number">{{ index + 1 }}</div>
                 <div class="stop-type-icon">
                   <span v-if="stop.type === 'pickup'">📍</span>
-                  <span v-else">🏁</span>
+                  <span v-else>🏁</span>
                 </div>
               </div>
 
@@ -103,7 +109,7 @@
                         ↑
                       </button>
                       <button 
-                        v-if="index < route.stops.length - 1"
+                        v-if="index < routeData.stops.length - 1"
                         @click="moveStopDown(index)"
                         class="move-button"
                         :disabled="loading"
@@ -127,24 +133,19 @@
                   <div class="stop-address">
                     <strong>Address:</strong> {{ stop.address }}
                   </div>
-                  <div class="stop-coordinates">
-                    <strong>Coordinates:</strong> 
-                    {{ stop.coordinates.latitude.toFixed(6) }}, 
-                    {{ stop.coordinates.longitude.toFixed(6) }}
-                  </div>
                   <div class="stop-time">
                     <strong>Estimated Time:</strong> {{ stop.estimatedTime }} minutes from start
                   </div>
                 </div>
               </div>
 
-              <div v-if="index < route.stops.length - 1" class="route-connector"></div>
+              <div v-if="index < routeData.stops.length - 1" class="route-connector"></div>
             </div>
           </div>
         </div>
 
         <!-- Route Map -->
-        <div class="route-map" v-if="route.stops.length > 0">
+        <div class="route-map" v-if="routeData.stops.length > 0">
           <h2>Route Map</h2>
           <div class="map-container">
             <div id="route-map" class="map"></div>
@@ -182,46 +183,13 @@
           </div>
         </div>
 
-        <!-- Route Summary -->
-        <div class="route-summary">
-          <h2>Route Summary</h2>
-          <div class="summary-grid">
-            <div class="summary-item">
-              <h4>Stop Types</h4>
-              <div class="type-breakdown">
-                <div class="type-count">
-                  <span class="type-badge pickup">pickup</span>
-                  <span class="count">{{ getStopsByType('pickup').length }}</span>
-                </div>
-                <div class="type-count">
-                  <span class="type-badge dropoff">dropoff</span>
-                  <span class="count">{{ getStopsByType('dropoff').length }}</span>
-                </div>
-              </div>
-            </div>
+      </div>
 
-            <div class="summary-item">
-              <h4>Route Timeline</h4>
-              <div class="timeline-info">
-                <div v-if="route.stops.length > 0">
-                  <div><strong>Start:</strong> {{ route.stops[0].name }}</div>
-                  <div><strong>End:</strong> {{ route.stops[route.stops.length - 1].name }}</div>
-                  <div><strong>Total Duration:</strong> {{ formatDuration(route.estimatedDuration) }}</div>
-                </div>
-                <div v-else class="no-timeline">
-                  No stops defined
-                </div>
-              </div>
-            </div>
-
-            <div class="summary-item">
-              <h4>Route Metadata</h4>
-              <div class="metadata-info">
-                <div><strong>Created:</strong> {{ formatDate(route.createdAt) }}</div>
-                <div><strong>Last Updated:</strong> {{ formatDate(route.updatedAt) }}</div>
-              </div>
-            </div>
-          </div>
+      <div v-else class="not-found-container">
+        <div class="not-found">
+          <h3>Line Not Found</h3>
+          <p>The requested line could not be found.</p>
+          <button @click="goBack" class="back-button">Back to Lines</button>
         </div>
       </div>
     </main>
@@ -236,7 +204,7 @@
 </template>
 
 <script>
-import { ref, inject, onMounted, onUnmounted, nextTick, watch, computed } from 'vue'
+import { ref, reactive, inject, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import apiService from '../services/api'
 import L from 'leaflet'
@@ -245,7 +213,7 @@ import 'leaflet/dist/leaflet.css'
 import StopCreationDialog from '../components/StopCreationDialog.vue'
 
 export default {
-  name: 'RouteDetail',
+  name: 'LineRouteManager',
   components: {
     StopCreationDialog
   },
@@ -256,7 +224,7 @@ export default {
     
     const loading = ref(false)
     const error = ref('')
-    const routeData = ref(null)
+    const line = ref(null)
     const map = ref(null)
     const mapMarkers = ref([])
     const routeLine = ref(null)
@@ -264,42 +232,59 @@ export default {
     const showStopDialog = ref(false)
     const drivingInstructions = ref([])
     
-    const fetchRoute = async () => {
+    // Route data - using reactive for embedded route
+    const routeData = reactive({
+      name: '',
+      stops: [],
+      totalDistance: 0,
+      estimatedDuration: 0
+    })
+    
+    const fetchLine = async () => {
+      const lineId = route.params.id
+      if (!lineId) {
+        error.value = 'No line ID provided'
+        return
+      }
+      
       try {
         loading.value = true
         error.value = ''
         
-        const routeId = route.params.id
-        const response = await apiService.get(`/routes/${routeId}`)
-        routeData.value = response.route
-      } catch (err) {
-        console.error('Failed to fetch route:', err)
-        if (err.response?.status === 404) {
-          error.value = 'Route not found. It may have been deleted or the ID is invalid.'
+        const response = await apiService.get(`/lines/${lineId}`)
+        line.value = response.line || response.data
+        
+        // Initialize route data from line's embedded route
+        if (line.value.route) {
+          routeData.name = line.value.route.name || `${line.value.name} Route`
+          routeData.stops = [...(line.value.route.stops || [])]
+          routeData.totalDistance = line.value.route.totalDistance || 0
+          routeData.estimatedDuration = line.value.route.estimatedDuration || 0
         } else {
-          error.value = 'Failed to load route details. Please try again.'
+          // Initialize empty route
+          routeData.name = `${line.value.name} Route`
+          routeData.stops = []
+          routeData.totalDistance = 0
+          routeData.estimatedDuration = 0
+        }
+      } catch (err) {
+        console.error('Failed to fetch line:', err)
+        if (err.response?.status === 404) {
+          error.value = 'Line not found. It may have been deleted or the ID is invalid.'
+        } else {
+          error.value = 'Failed to load line details. Please try again.'
         }
       } finally {
         loading.value = false
       }
       
       // Initialize map after loading is complete and DOM is updated
-      if (routeData.value && routeData.value.stops.length > 0) {
+      if (routeData.stops.length > 0) {
         await nextTick()
         setTimeout(() => {
           initializeMap()
-        }, 100) // Small delay to ensure DOM is fully rendered
+        }, 100)
       }
-    }
-    
-    const formatDate = (dateString) => {
-      return new Date(dateString).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      })
     }
     
     const formatDuration = (minutes) => {
@@ -318,7 +303,19 @@ export default {
     }
     
     const getStopsByType = (type) => {
-      return routeData.value?.stops.filter(stop => stop.type === type) || []
+      return routeData.stops.filter(stop => stop.type === type) || []
+    }
+    
+    const getDriverName = (driver) => {
+      if (!driver) return 'No driver assigned'
+      if (typeof driver === 'string') return 'Driver assigned'
+      return `${driver.firstName || ''} ${driver.lastName || ''}`.trim() || 'Driver assigned'
+    }
+    
+    const getVehicleName = (vehicle) => {
+      if (!vehicle) return 'No vehicle assigned'
+      if (typeof vehicle === 'string') return 'Vehicle assigned'
+      return vehicle.licensePlate || 'Vehicle assigned'
     }
     
     const initializeMap = () => {
@@ -330,16 +327,16 @@ export default {
         return
       }
       
-      if (!routeData.value || routeData.value.stops.length === 0) {
+      if (!routeData.stops || routeData.stops.length === 0) {
         console.error('No route data or stops available')
         return
       }
       
-      console.log('Map container found, initializing map with', routeData.value.stops.length, 'stops')
+      console.log('Map container found, initializing map with', routeData.stops.length, 'stops')
 
       // Calculate center point from all stops
-      const lats = routeData.value.stops.map(stop => stop.coordinates.latitude)
-      const lngs = routeData.value.stops.map(stop => stop.coordinates.longitude)
+      const lats = routeData.stops.map(stop => stop.coordinates.latitude)
+      const lngs = routeData.stops.map(stop => stop.coordinates.longitude)
       const centerLat = (Math.min(...lats) + Math.max(...lats)) / 2
       const centerLng = (Math.min(...lngs) + Math.max(...lngs)) / 2
 
@@ -372,11 +369,11 @@ export default {
     }
 
     const addStopMarkers = () => {
-      if (!map.value || !routeData.value) return
+      if (!map.value || !routeData.stops) return
 
       mapMarkers.value = []
       
-      routeData.value.stops.forEach((stop, index) => {
+      routeData.stops.forEach((stop, index) => {
         const isPickup = stop.type === 'pickup'
         
         // Create custom icon based on stop type
@@ -422,7 +419,7 @@ export default {
     }
 
     const drawRouteLine = (updateServerWithTimeAndDistance = false) => {
-      if (!map.value || !routeData.value || routeData.value.stops.length < 2) return
+      if (!map.value || !routeData.stops || routeData.stops.length < 2) return
 
       // Remove previous route if exists
       if (routingControl.value) {
@@ -430,7 +427,7 @@ export default {
         routingControl.value = null
       }
 
-      const waypoints = routeData.value.stops.map(stop =>
+      const waypoints = routeData.stops.map(stop =>
         L.latLng(stop.coordinates.latitude, stop.coordinates.longitude)
       )
 
@@ -482,12 +479,12 @@ export default {
       try {
         loading.value = true
         
-        await apiService.post(`/routes/${route.params.id}/stops`, { stop: newStop })
+        await apiService.post(`/lines/${route.params.id}/route/stops`, { stop: newStop })
         
-        // Refresh route data
-        await fetchRoute()
+        // Refresh line data
+        await fetchLine()
         
-        // In order to update the server with the total distance and estimated duration
+        // Update server with total distance and estimated duration
         nextTick(() => {
           drawRouteLine(true)
         })
@@ -506,7 +503,7 @@ export default {
     const moveStopUp = async (index) => {
       if (index <= 0) return
       
-      const stops = [...routeData.value.stops]
+      const stops = [...routeData.stops]
       const temp = stops[index]
       stops[index] = stops[index - 1]
       stops[index - 1] = temp
@@ -515,9 +512,9 @@ export default {
     }
     
     const moveStopDown = async (index) => {
-      if (index >= routeData.value.stops.length - 1) return
+      if (index >= routeData.stops.length - 1) return
       
-      const stops = [...routeData.value.stops]
+      const stops = [...routeData.stops]
       const temp = stops[index]
       stops[index] = stops[index + 1]
       stops[index + 1] = temp
@@ -530,10 +527,10 @@ export default {
       
       try {
         loading.value = true
-        await apiService.delete(`/routes/${route.params.id}/stops/${index}`)
-        await fetchRoute()
+        await apiService.delete(`/lines/${route.params.id}/route/stops/${index}`)
+        await fetchLine()
 
-        // In order to update the server with the total distance and estimated duration
+        // Update server with total distance and estimated duration
         nextTick(() => {
           drawRouteLine(true)
         })
@@ -548,10 +545,10 @@ export default {
     const updateRouteStops = async (stops) => {
       try {
         loading.value = true
-        await apiService.put(`/routes/${route.params.id}/stops`, { stops })
-        await fetchRoute()
+        await apiService.put(`/lines/${route.params.id}/route/stops`, { stops })
+        await fetchLine()
 
-        // In order to update the server with the total distance and estimated duration
+        // Update server with total distance and estimated duration
         nextTick(() => {
           drawRouteLine(true)
         })
@@ -564,7 +561,11 @@ export default {
     }
     
     const goBack = () => {
-      router.push('/routes')
+      if (line.value) {
+        router.push(`/lines/${line.value._id}`)
+      } else {
+        router.push('/lines')
+      }
     }
     
     const formatDistance = (distanceInMeters) => {
@@ -593,19 +594,22 @@ export default {
     }
     
     const updateRouteWithDrivingData = (drivingRoute) => {
-      if (!routeData.value || !drivingRoute) return
+      if (!line.value || !drivingRoute) return
       
       // Update total distance (convert meters to kilometers)
       const totalDistanceKm = (drivingRoute.summary.totalDistance / 1000).toFixed(1)
-      routeData.value.totalDistance = parseFloat(totalDistanceKm)
+      routeData.totalDistance = parseFloat(totalDistanceKm)
       
       // Update estimated duration (convert seconds to minutes)
       const totalDurationMinutes = Math.round(drivingRoute.summary.totalTime / 60)
-      routeData.value.estimatedDuration = totalDurationMinutes
+      routeData.estimatedDuration = totalDurationMinutes
       
-      apiService.put(`/routes/${routeData.value._id}`, {
-        totalDistance: routeData.value.totalDistance,
-        estimatedDuration: routeData.value.estimatedDuration
+      // Update the line route with driving data
+      apiService.put(`/lines/${line.value._id}/route`, {
+        name: routeData.name,
+        stops: routeData.stops,
+        totalDistance: routeData.totalDistance,
+        estimatedDuration: routeData.estimatedDuration
       }).catch(err => {
         console.error('Failed to update route with driving data:', err)
       })
@@ -623,7 +627,7 @@ export default {
     })
     
     onMounted(async () => {
-      await fetchRoute()
+      await fetchLine()
     })
     
     onUnmounted(() => {
@@ -639,20 +643,23 @@ export default {
     return {
       loading,
       error,
-      route: routeData,
+      line,
+      routeData,
       showStopDialog,
       drivingInstructions,
+      fetchLine,
       handleAddStopFromDialog,
       moveStopUp,
       moveStopDown,
       deleteStop,
       formatDuration,
       formatTime,
-      formatDate,
       formatDistance,
       formatTotalDistance,
       formatTotalTime,
       getStopsByType,
+      getDriverName,
+      getVehicleName,
       goBack
     }
   }
@@ -660,7 +667,7 @@ export default {
 </script>
 
 <style scoped>
-.route-detail-container {
+.route-manager-container {
   min-height: 100vh;
   background-color: #f8f9fa;
 }
@@ -738,6 +745,13 @@ export default {
   padding: 60px 20px;
 }
 
+.error-message {
+  background: white;
+  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
 .error-message h3 {
   color: #dc3545;
   margin-bottom: 10px;
@@ -748,7 +762,7 @@ export default {
   margin-bottom: 30px;
 }
 
-.back-button-large {
+.retry-button {
   background-color: #007bff;
   color: white;
   border: none;
@@ -759,7 +773,7 @@ export default {
   transition: background-color 0.2s;
 }
 
-.back-button-large:hover {
+.retry-button:hover {
   background-color: #0056b3;
 }
 
@@ -808,7 +822,6 @@ export default {
 .add-stop-button:hover {
   background-color: #218838;
 }
-
 
 .route-overview h2,
 .route-stops h2,
@@ -1082,16 +1095,6 @@ export default {
   font-style: italic;
 }
 
-.text-success {
-  color: #28a745;
-  font-weight: bold;
-}
-
-.text-warning {
-  color: #ffc107;
-  font-weight: bold;
-}
-
 /* Map Styles */
 .map-container {
   margin-bottom: 20px;
@@ -1302,6 +1305,26 @@ export default {
   border-left: 4px solid #007bff;
   font-size: 1rem;
   color: #333;
+}
+
+.not-found-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.not-found {
+  text-align: center;
+  background: white;
+  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.not-found h3 {
+  color: #dc3545;
+  margin-bottom: 15px;
 }
 
 @media (max-width: 768px) {

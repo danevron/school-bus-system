@@ -3,12 +3,10 @@ import Login from './views/Login.vue'
 import Home from './views/Home.vue'
 import UserManagement from './views/UserManagement.vue'
 import AcceptInvitation from './views/AcceptInvitation.vue'
-import RouteList from './views/RouteList.vue'
-import RouteDetail from './views/RouteDetail.vue'
-import RouteCreate from './views/RouteCreate.vue'
 import LineList from './views/LineList.vue'
 import LineCreate from './views/LineCreate.vue'
 import LineView from './views/LineView.vue'
+import LineRouteManager from './views/LineRouteManager.vue'
 import authStore from './stores/auth'
 
 const routes = [
@@ -41,24 +39,6 @@ const routes = [
     meta: { requiresGuest: true }
   },
   {
-    path: '/routes',
-    name: 'RouteList',
-    component: RouteList,
-    meta: { requiresAuth: true, requiresAdmin: true }
-  },
-  {
-    path: '/routes/create',
-    name: 'RouteCreate',
-    component: RouteCreate,
-    meta: { requiresAuth: true, requiresAdmin: true }
-  },
-  {
-    path: '/routes/:id',
-    name: 'RouteDetail',
-    component: RouteDetail,
-    meta: { requiresAuth: true, requiresAdmin: true }
-  },
-  {
     path: '/lines',
     name: 'LineList',
     component: LineList,
@@ -74,6 +54,12 @@ const routes = [
     path: '/lines/:id',
     name: 'LineView',
     component: LineView,
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/lines/:id/route',
+    name: 'LineRouteManager',
+    component: LineRouteManager,
     meta: { requiresAuth: true, requiresAdmin: true }
   }
 ]

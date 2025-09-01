@@ -130,26 +130,61 @@
           </div>
         </div>
 
-        <!-- Route Management Section - Placeholder -->
-        <div class="route-section placeholder-section">
+        <!-- Route Management Section -->
+        <div class="route-section">
           <div class="section-header">
             <h2>Route Management</h2>
-            <button class="section-action-btn" disabled>
-              {{ line.route ? 'Edit Route' : 'Assign Route' }}
+            <button class="section-action-btn" @click="manageRoute">
+              Manage Route
             </button>
           </div>
-          <div class="placeholder-content">
-            <div class="placeholder-icon">🗺️</div>
-            <div class="placeholder-text">
-              <h3>{{ line.route ? 'Route Configuration' : 'No Route Assigned' }}</h3>
-              <p v-if="line.route">
-                Route management features will be available here. You'll be able to view stops, 
-                modify the route, and manage pickup/dropoff locations.
-              </p>
-              <p v-else>
-                This line doesn't have a route assigned yet. Route assignment and management 
-                features will be available here.
-              </p>
+          <div class="route-content">
+            <div v-if="line.route && line.route.stops && line.route.stops.length > 0" class="route-summary">
+              <div class="route-stats">
+                <div class="stat">
+                  <span class="stat-icon">📍</span>
+                  <div class="stat-info">
+                    <span class="stat-value">{{ line.route.stops.length }}</span>
+                    <span class="stat-label">Stops</span>
+                  </div>
+                </div>
+                <div class="stat">
+                  <span class="stat-icon">📏</span>
+                  <div class="stat-info">
+                    <span class="stat-value">{{ line.route.totalDistance || 0 }}km</span>
+                    <span class="stat-label">Distance</span>
+                  </div>
+                </div>
+                <div class="stat">
+                  <span class="stat-icon">⏱️</span>
+                  <div class="stat-info">
+                    <span class="stat-value">{{ line.route.estimatedDuration || 0 }}min</span>
+                    <span class="stat-label">Duration</span>
+                  </div>
+                </div>
+              </div>
+              <div class="route-stops">
+                <h4>Route Stops</h4>
+                <div class="stops-list">
+                  <div v-for="(stop, index) in line.route.stops" :key="index" class="stop-item">
+                    <span class="stop-number">{{ index + 1 }}</span>
+                    <div class="stop-info">
+                      <span class="stop-name">{{ stop.name }}</span>
+                      <span class="stop-type" :class="stop.type">{{ stop.type }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div v-else class="empty-route">
+              <div class="empty-icon">🗺️</div>
+              <div class="empty-text">
+                <h3>No Route Configured</h3>
+                <p>
+                  This line doesn't have any stops configured yet. Click "Manage Route" 
+                  to add stops and configure the pickup and dropoff locations.
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -306,6 +341,12 @@ export default {
       router.push('/lines')
     }
     
+    const manageRoute = () => {
+      if (line.value) {
+        router.push(`/lines/${line.value._id}/route`)
+      }
+    }
+    
     onMounted(async () => {
       await fetchLine()
     })
@@ -322,7 +363,8 @@ export default {
       getDriverName,
       getVehicleName,
       handleEdit,
-      goBack
+      goBack,
+      manageRoute
     }
   }
 }
@@ -641,6 +683,144 @@ export default {
 .schedule-type {
   color: #007bff;
   font-weight: 500;
+}
+
+/* Route Management Section */
+.route-content {
+  margin-top: 20px;
+}
+
+.route-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.route-stats {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  min-width: 140px;
+}
+
+.stat-icon {
+  font-size: 1.5rem;
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-value {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.route-stops h4 {
+  margin: 0 0 15px 0;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.stops-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stop-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 12px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  border-left: 3px solid #007bff;
+}
+
+.stop-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background-color: #007bff;
+  color: white;
+  border-radius: 50%;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.stop-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.stop-name {
+  font-weight: 500;
+  color: #333;
+}
+
+.stop-type {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  width: fit-content;
+}
+
+.stop-type.pickup {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.stop-type.dropoff {
+  background-color: #d1ecf1;
+  color: #0c5460;
+}
+
+.empty-route {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 40px 20px;
+  text-align: left;
+  color: #666;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  opacity: 0.5;
+}
+
+.empty-text h3 {
+  margin: 0 0 10px 0;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.empty-text p {
+  margin: 0;
+  line-height: 1.5;
 }
 
 /* Placeholder Sections */

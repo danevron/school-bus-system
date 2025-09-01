@@ -8,7 +8,6 @@ import dotenv from 'dotenv';
 import authRoutes from './routes/auth';
 import lineRoutes from './routes/lines';
 import bookingRoutes from './routes/bookings';
-import routeRoutes from './routes/routes';
 import vehicleRoutes from './routes/vehicles';
 import rideRoutes from './routes/rides';
 import invitationRoutes from './routes/invitations';
@@ -50,7 +49,6 @@ app.get('/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/lines', lineRoutes);
 app.use('/api/bookings', bookingRoutes);
-app.use('/api/routes', routeRoutes);
 app.use('/api/vehicles', vehicleRoutes);
 app.use('/api/rides', rideRoutes);
 app.use('/api/invitations', invitationRoutes);
@@ -64,7 +62,6 @@ app.get('/', (req, res) => {
       auth: '/api/auth',
       lines: '/api/lines',
       bookings: '/api/bookings',
-      routes: '/api/routes',
       vehicles: '/api/vehicles',
       rides: '/api/rides',
       invitations: '/api/invitations'

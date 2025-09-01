@@ -1,5 +1,25 @@
 import mongoose, { Document, Schema, Types } from 'mongoose';
 
+// Route-related interfaces (moved from Route.ts)
+export interface IStop {
+  stopId: string; // Unique identifier for the stop
+  name: string;
+  address: string;
+  coordinates: {
+    latitude: number;
+    longitude: number;
+  };
+  estimatedTime: number; // minutes from start
+  type: 'pickup' | 'dropoff';
+}
+
+export interface IRouteData {
+  name: string;
+  stops: IStop[];
+  totalDistance: number; // in kilometers
+  estimatedDuration: number; // in minutes
+}
+
 export enum ScheduleType {
   DAILY = 'daily',
   WEEKDAYS = 'weekdays',
@@ -18,7 +38,7 @@ export interface ISchedule {
 export interface ILine extends Document {
   name: string;
   description: string;
-  route: Types.ObjectId;
+  route?: IRouteData; // Embedded route data (optional)
   driver: Types.ObjectId;
   vehicle: Types.ObjectId;
   schedule: ISchedule;
@@ -53,6 +73,69 @@ const scheduleSchema = new Schema<ISchedule>({
   }
 });
 
+// Stop schema (moved from Route.ts)
+const stopSchema = new Schema<IStop>({
+  stopId: {
+    type: String,
+    required: true,
+    unique: false // Not globally unique, just within the route
+  },
+  name: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  address: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  coordinates: {
+    latitude: {
+      type: Number,
+      required: true,
+      min: -90,
+      max: 90
+    },
+    longitude: {
+      type: Number,
+      required: true,
+      min: -180,
+      max: 180
+    }
+  },
+  estimatedTime: {
+    type: Number,
+    required: true,
+    min: 0
+  },
+  type: {
+    type: String,
+    enum: ['pickup', 'dropoff'],
+    required: true
+  }
+}, { _id: false }); // Disable automatic _id generation
+
+// Route data schema (embedded in Line)
+const routeDataSchema = new Schema<IRouteData>({
+  name: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  stops: [stopSchema],
+  totalDistance: {
+    type: Number,
+    required: true,
+    min: 0
+  },
+  estimatedDuration: {
+    type: Number,
+    required: true,
+    min: 0
+  }
+});
+
 const lineSchema = new Schema<ILine>({
   name: {
     type: String,
@@ -64,8 +147,7 @@ const lineSchema = new Schema<ILine>({
     trim: true
   },
   route: {
-    type: Schema.Types.ObjectId,
-    ref: 'Route',
+    type: routeDataSchema,
     required: false
   },
   driver: {

@@ -19,8 +19,8 @@ export interface IStudentRide {
   status: StudentRideStatus;
   pickupTime?: Date;
   dropoffTime?: Date;
-  pickupStop: Types.ObjectId;
-  dropoffStop: Types.ObjectId;
+  pickupStop: string; // Now references stopId instead of ObjectId
+  dropoffStop: string; // Now references stopId instead of ObjectId
   notes?: string;
 }
 
@@ -28,8 +28,8 @@ export interface IGuestStudent {
   firstName: string;
   lastName: string;
   phone: string;
-  pickupStop: Types.ObjectId;
-  dropoffStop: Types.ObjectId;
+  pickupStop: string; // Now references stopId instead of ObjectId
+  dropoffStop: string; // Now references stopId instead of ObjectId
   status: StudentRideStatus;
   pickupTime?: Date;
   dropoffTime?: Date;
@@ -46,7 +46,6 @@ export interface IRide extends Document {
   guests: IGuestStudent[];
   driver: Types.ObjectId;
   vehicle: Types.ObjectId;
-  route: Types.ObjectId;
   notes?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -70,11 +69,11 @@ const studentRideSchema = new Schema<IStudentRide>({
     type: Date
   },
   pickupStop: {
-    type: Schema.Types.ObjectId,
+    type: String,
     required: true
   },
   dropoffStop: {
-    type: Schema.Types.ObjectId,
+    type: String,
     required: true
   },
   notes: {
@@ -100,11 +99,11 @@ const guestStudentSchema = new Schema<IGuestStudent>({
     trim: true
   },
   pickupStop: {
-    type: Schema.Types.ObjectId,
+    type: String,
     required: true
   },
   dropoffStop: {
-    type: Schema.Types.ObjectId,
+    type: String,
     required: true
   },
   status: {
@@ -155,11 +154,6 @@ const rideSchema = new Schema<IRide>({
   vehicle: {
     type: Schema.Types.ObjectId,
     ref: 'Vehicle',
-    required: true
-  },
-  route: {
-    type: Schema.Types.ObjectId,
-    ref: 'Route',
     required: true
   },
   notes: {

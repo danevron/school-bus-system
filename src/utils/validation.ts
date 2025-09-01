@@ -50,11 +50,44 @@ export const vehicleValidation = {
   })
 };
 
-export const routeValidation = {
+
+export const lineValidation = {
   create: Joi.object({
+    name: Joi.string().required(),
+    description: Joi.string(),
+    route: Joi.object({
+      name: Joi.string().required(),
+      stops: Joi.array().items(
+        Joi.object({
+          name: Joi.string().required(),
+          address: Joi.string().required(),
+          coordinates: Joi.object({
+            latitude: Joi.number().min(-90).max(90).required(),
+            longitude: Joi.number().min(-180).max(180).required()
+          }).required(),
+          estimatedTime: Joi.number().min(0).required(),
+          type: Joi.string().valid('pickup', 'dropoff').required()
+        })
+      ).min(0).required(),
+      totalDistance: Joi.number().min(0).required(),
+      estimatedDuration: Joi.number().min(0).required()
+    }),
+    driver: Joi.string().hex().length(24).required(),
+    vehicle: Joi.string().hex().length(24).required(),
+    schedule: Joi.object({
+      type: Joi.string().valid('daily', 'weekdays', 'weekends', 'custom').required(),
+      daysOfWeek: Joi.array().items(Joi.number().min(0).max(6)),
+      customDates: Joi.array().items(Joi.date()),
+      startDate: Joi.date().required(),
+      endDate: Joi.date()
+    }).required()
+  }),
+
+  updateRoute: Joi.object({
     name: Joi.string().required(),
     stops: Joi.array().items(
       Joi.object({
+        stopId: Joi.string().optional(), // Optional for backwards compatibility
         name: Joi.string().required(),
         address: Joi.string().required(),
         coordinates: Joi.object({
@@ -67,27 +100,40 @@ export const routeValidation = {
     ).min(0).required(),
     totalDistance: Joi.number().min(0).required(),
     estimatedDuration: Joi.number().min(0).required()
-  })
-};
-
-export const lineValidation = {
-  create: Joi.object({
-    name: Joi.string().required(),
-    description: Joi.string(),
-    route: Joi.string().hex().length(24),
-    driver: Joi.string().hex().length(24).required(),
-    vehicle: Joi.string().hex().length(24).required(),
-    schedule: Joi.object({
-      type: Joi.string().valid('daily', 'weekdays', 'weekends', 'custom').required(),
-      daysOfWeek: Joi.array().items(Joi.number().min(0).max(6)),
-      customDates: Joi.array().items(Joi.date()),
-      startDate: Joi.date().required(),
-      endDate: Joi.date()
-    }).required()
   }),
 
   assignStudents: Joi.object({
     students: Joi.array().items(Joi.string().hex().length(24)).required()
+  }),
+
+  // Stop management validations
+  addStop: Joi.object({
+    stop: Joi.object({
+      name: Joi.string().required(),
+      address: Joi.string().required(),
+      coordinates: Joi.object({
+        latitude: Joi.number().min(-90).max(90).required(),
+        longitude: Joi.number().min(-180).max(180).required()
+      }).required(),
+      estimatedTime: Joi.number().min(0).required(),
+      type: Joi.string().valid('pickup', 'dropoff').required()
+    }).required()
+  }),
+
+  updateStops: Joi.object({
+    stops: Joi.array().items(
+      Joi.object({
+        stopId: Joi.string().optional(), // Optional for backwards compatibility
+        name: Joi.string().required(),
+        address: Joi.string().required(),
+        coordinates: Joi.object({
+          latitude: Joi.number().min(-90).max(90).required(),
+          longitude: Joi.number().min(-180).max(180).required()
+        }).required(),
+        estimatedTime: Joi.number().min(0).required(),
+        type: Joi.string().valid('pickup', 'dropoff').required()
+      })
+    ).required()
   })
 };
 
@@ -96,8 +142,8 @@ export const bookingValidation = {
     student: Joi.string().hex().length(24).required(),
     line: Joi.string().hex().length(24).required(),
     date: Joi.date().min('now').required(),
-    pickupStop: Joi.string().hex().length(24).required(),
-    dropoffStop: Joi.string().hex().length(24).required(),
+    pickupStop: Joi.string().required(),
+    dropoffStop: Joi.string().required(),
     notes: Joi.string()
   }),
 
@@ -127,8 +173,8 @@ export const rideValidation = {
     firstName: Joi.string().min(2).max(50).required(),
     lastName: Joi.string().min(2).max(50).required(),
     phone: Joi.string().pattern(/^\+?[\d\s\-\(\)]+$/).required(),
-    pickupStop: Joi.string().hex().length(24).required(),
-    dropoffStop: Joi.string().hex().length(24).required(),
+    pickupStop: Joi.string().required(),
+    dropoffStop: Joi.string().required(),
     notes: Joi.string()
   }),
 

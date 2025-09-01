@@ -24,13 +24,8 @@
             <h3>Admin Dashboard</h3>
             <div class="dashboard-cards">
               <div class="dashboard-card">
-                <h4>Route Management</h4>
-                <p>Create and manage bus routes with stops</p>
-                <button class="action-button" @click="goToRouteManagement">Manage Routes</button>
-              </div>
-              <div class="dashboard-card">
                 <h4>Lines Management</h4>
-                <p>Create and manage transportation lines</p>
+                <p>Create and manage transportation lines with routes</p>
                 <button class="action-button" @click="goToLineManagement">Manage Lines</button>
               </div>
               <div class="dashboard-card">
@@ -163,10 +158,6 @@ export default {
       router.push('/user-management')
     }
     
-    const goToRouteManagement = () => {
-      router.push('/routes')
-    }
-    
     const goToLineManagement = () => {
       router.push('/lines')
     }
@@ -177,7 +168,6 @@ export default {
       roleClass,
       handleLogout,
       goToUserManagement,
-      goToRouteManagement,
       goToLineManagement
     }
   }
