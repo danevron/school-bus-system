@@ -12,10 +12,10 @@ A comprehensive school ride management system that supports four user roles: Adm
 - Capacity management and tracking
 
 ### 🛣️ Routes & Stops
-- Define routes with multiple pickup and dropoff stops
-- Geographic coordinates for each stop
-- Estimated travel times between stops
-- Route optimization and management
+- Routes are embedded within transportation lines
+- Define stops with pickup and dropoff locations
+- Geographic coordinates and timing for each stop
+- Student assignment tracking per stop
 
 ### 🚗 Vehicle Management
 - Fleet management with vehicle details
@@ -83,9 +83,15 @@ A comprehensive school ride management system that supports four user roles: Adm
 - `PUT /api/lines/:id` - Update line (Admin only)
 - `DELETE /api/lines/:id` - Delete line (Admin only)
 - `GET /api/lines/driver/my-lines` - Get driver's assigned lines
-- **`POST /api/lines/:id/assign-students` - Assign students to line (Admin only)**
-- **`POST /api/lines/:id/students` - Add student to line (Admin only)**
-- **`DELETE /api/lines/:id/students/:studentId` - Remove student from line (Admin only)**
+- **`GET /api/lines/:id/student-assignments` - Get student assignments for line**
+- **`POST /api/lines/:id/student-assignments` - Add student assignment to line (Admin only)**
+- **`PUT /api/lines/:id/student-assignments/:assignmentId` - Update student assignment (Admin only)**
+- **`DELETE /api/lines/:id/student-assignments/:assignmentId` - Remove student assignment (Admin only)**
+- **`GET /api/lines/:id/stop-usage` - Get stop usage information**
+- **`POST /api/lines/:id/route/stops` - Add stop to line route (Admin only)**
+- **`PUT /api/lines/:id/route/stops` - Reorder route stops (Admin only)**
+- **`DELETE /api/lines/:id/route/stops/:index` - Delete route stop (Admin only)**
+- **`PUT /api/lines/:id/route` - Update route information (Admin only)**
 
 ### **NEW: Rides**
 - **`POST /api/rides/generate` - Generate rides for lines (Admin only)**
@@ -106,12 +112,6 @@ A comprehensive school ride management system that supports four user roles: Adm
 - `GET /api/bookings/parent/my-bookings` - Get parent's bookings
 - `GET /api/bookings/line/:lineId` - Get bookings for specific line
 
-### Routes
-- `GET /api/routes` - Get all routes
-- `POST /api/routes` - Create new route (Admin only)
-- `GET /api/routes/:id` - Get route by ID
-- `PUT /api/routes/:id` - Update route (Admin only)
-- `DELETE /api/routes/:id` - Delete route (Admin only)
 
 ### Vehicles
 - `GET /api/vehicles` - Get all vehicles
@@ -159,6 +159,30 @@ npm run dev
 npm start
 ```
 
+## Frontend Architecture
+
+The system includes a Vue.js frontend located in the `frontend/` directory:
+
+### Key Components
+- **LineView** - Display line details with embedded route information
+- **LineRouteManager** - Comprehensive line management (stops + students)
+- **RouteMap** - Reusable map component with Leaflet.js integration
+- **StudentSelectionDialog** - Student assignment interface
+- **StopCreationDialog** - Stop creation and editing
+
+### Frontend Features
+- **Integrated Route Management** - Routes are managed directly within lines
+- **Interactive Maps** - Leaflet-based maps with driving directions
+- **Student Assignment** - Visual interface for assigning students to stops
+- **Real-time Updates** - Live capacity and usage tracking
+
+### Development Commands
+```bash
+cd frontend
+npm install
+npm run dev  # Start development server on port 5173
+```
+
 ## Database Schema
 
 ### User
@@ -176,19 +200,22 @@ npm start
 - `isActive`
 - `lastMaintenance`
 
-### Route
-- `name`,
-- `stops` (array of stops with coordinates)
-- `totalDistance`, `estimatedDuration`
-
 ### Line
 - `name`, `description`
-- `route` (reference to Route)
+- **`route` (embedded route object with stops)**
+  - `name`
+  - `stops` (array of stops with coordinates, types, timing)
+  - `totalDistance`, `estimatedDuration`
 - `driver` (reference to User)
 - `vehicle` (reference to Vehicle)
 - `schedule` (type, days, dates)
 - `maxCapacity`, `currentCapacity`
-- **`students` (array of assigned students)**
+- `isActive`
+
+### **NEW: StudentAssignment**
+- `student` (reference to User)
+- `line` (reference to Line)
+- `pickupStop`, `dropoffStop` (stop IDs)
 - `isActive`
 
 ### **NEW: Ride**
@@ -215,11 +242,11 @@ npm start
 ## **NEW: Workflow**
 
 ### 1. Line Setup (Admin)
-1. Create routes with stops
-2. Create vehicles
-3. Create lines with schedules
-4. Assign students to lines
-5. Generate rides automatically
+1. Create vehicles and assign drivers
+2. Create lines with embedded route and stops
+3. Configure schedules for lines
+4. Assign students to lines with pickup/dropoff stops
+5. Generate rides automatically based on line schedules
 
 ### 2. Daily Operations (Driver)
 1. View assigned rides for the day
