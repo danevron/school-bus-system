@@ -24,6 +24,15 @@ router.post('/:id/route/stops', requireAdmin, lineController.addStopToLineRoute)
 router.put('/:id/route/stops', requireAdmin, lineController.updateLineRouteStops);
 router.delete('/:id/route/stops/:stopIndex', requireAdmin, lineController.deleteStopFromLineRoute);
 
+// Student assignment management endpoints
+router.post('/:id/student-assignments', requireAdmin, lineController.assignStudentToLineWithStops);
+router.get('/:id/student-assignments', lineController.getLineStudentAssignments);
+router.put('/:id/student-assignments/:assignmentId', requireAdmin, lineController.updateStudentAssignment);
+router.delete('/:id/student-assignments/:assignmentId', requireAdmin, lineController.removeStudentAssignment);
+
+// Stop usage information endpoint
+router.get('/:id/stop-usage', lineController.getStopUsageInfo);
+
 // Public routes (for authenticated users)
 router.get('/', lineController.getAllLines);
 router.get('/:id', lineController.getLineById);

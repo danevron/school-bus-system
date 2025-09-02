@@ -11,8 +11,8 @@
         </div>
         <div class="header-actions">
           <button @click="goBack" class="back-button">← Back to Lines</button>
-          <button @click="handleEdit" class="edit-button" :disabled="!line">
-            Edit Line
+          <button @click="manageRoute" class="edit-button" :disabled="!line">
+            Manage Stops and Students
           </button>
         </div>
       </div>
@@ -134,9 +134,6 @@
         <div class="route-section">
           <div class="section-header">
             <h2>Route Management</h2>
-            <button class="section-action-btn" @click="manageRoute">
-              Manage Route
-            </button>
           </div>
           <div class="route-content">
             <div v-if="line.route && line.route.stops && line.route.stops.length > 0" class="route-summary">
@@ -169,8 +166,31 @@
                   <div v-for="(stop, index) in line.route.stops" :key="index" class="stop-item">
                     <span class="stop-number">{{ index + 1 }}</span>
                     <div class="stop-info">
-                      <span class="stop-name">{{ stop.name }}</span>
-                      <span class="stop-type" :class="stop.type">{{ stop.type }}</span>
+                      <div class="stop-main">
+                        <span class="stop-name">{{ stop.name }}</span>
+                        <span class="stop-type" :class="stop.type">{{ stop.type }}</span>
+                      </div>
+                      <div class="stop-students">
+                        <div v-if="getStopStudents(stop).pickup.length > 0" class="student-group pickup">
+                          <div class="student-group-header">🚏 Pickup ({{ getStopStudents(stop).pickup.length }}):</div>
+                          <div class="student-names">
+                            <span v-for="student in getStopStudents(stop).pickup" :key="student._id" class="student-name">
+                              {{ student.firstName }} {{ student.lastName }}
+                            </span>
+                          </div>
+                        </div>
+                        <div v-if="getStopStudents(stop).dropoff.length > 0" class="student-group dropoff">
+                          <div class="student-group-header">🏁 Dropoff ({{ getStopStudents(stop).dropoff.length }}):</div>
+                          <div class="student-names">
+                            <span v-for="student in getStopStudents(stop).dropoff" :key="student._id" class="student-name">
+                              {{ student.firstName }} {{ student.lastName }}
+                            </span>
+                          </div>
+                        </div>
+                        <div v-if="getStopStudents(stop).pickup.length === 0 && getStopStudents(stop).dropoff.length === 0" class="student-group none">
+                          No students assigned
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -189,29 +209,88 @@
           </div>
         </div>
 
-        <!-- Student Assignment Section - Placeholder -->
-        <div class="students-section placeholder-section">
+        <!-- Assigned Students Section -->
+        <div class="students-section">
           <div class="section-header">
-            <h2>Student Assignment</h2>
-            <button class="section-action-btn" disabled>
-              Manage Students
-            </button>
+            <h2>Assigned Students</h2>
+            <span class="student-count">{{ studentAssignments.length }} students</span>
           </div>
-          <div class="placeholder-content">
-            <div class="placeholder-icon">👥</div>
-            <div class="placeholder-text">
-              <h3>Student Management</h3>
-              <p>
-                Student assignment features will be available here. You'll be able to:
-              </p>
-              <ul class="feature-list">
-                <li>Assign students to this line</li>
-                <li>Set pickup and dropoff stops for each student</li>
-                <li>Manage student capacity and seating</li>
-                <li>View student contact information</li>
-              </ul>
+          
+          <div v-if="studentAssignments.length === 0" class="no-students">
+            <div class="empty-icon">👥</div>
+            <div class="empty-text">
+              <h3>No Students Assigned</h3>
+              <p>No students are currently assigned to this line. Use the Route Manager to add students and configure their pickup/dropoff stops.</p>
             </div>
           </div>
+          
+          <div v-else class="students-list">
+            <div
+              v-for="assignment in studentAssignments"
+              :key="assignment._id"
+              class="student-assignment-item"
+            >
+              <div class="student-info">
+                <div class="student-name">
+                  {{ assignment.student.firstName }} {{ assignment.student.lastName }}
+                </div>
+                <div class="student-contact">
+                  <span class="phone">📞 {{ assignment.student.phone }}</span>
+                  <span v-if="assignment.student.email" class="email">✉️ {{ assignment.student.email }}</span>
+                </div>
+              </div>
+
+              <div class="assignment-details">
+                <div v-if="assignment.pickupStopDetails" class="stop-info pickup">
+                  <div class="stop-label">🚏 Pickup:</div>
+                  <div class="stop-details">
+                    <div class="stop-name">{{ assignment.pickupStopDetails.name }}</div>
+                    <div class="stop-time">{{ formatTime(assignment.pickupStopDetails.estimatedTime) }}</div>
+                  </div>
+                </div>
+                <div v-else class="stop-info no-stop">
+                  <div class="stop-label">🚏 Pickup:</div>
+                  <div class="no-stop-assigned">Not assigned</div>
+                </div>
+
+                <div v-if="assignment.dropoffStopDetails" class="stop-info dropoff">
+                  <div class="stop-label">🏁 Dropoff:</div>
+                  <div class="stop-details">
+                    <div class="stop-name">{{ assignment.dropoffStopDetails.name }}</div>
+                    <div class="stop-time">{{ formatTime(assignment.dropoffStopDetails.estimatedTime) }}</div>
+                  </div>
+                </div>
+                <div v-else class="stop-info no-stop">
+                  <div class="stop-label">🏁 Dropoff:</div>
+                  <div class="no-stop-assigned">Not assigned</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div v-if="studentAssignments.length > 0" class="capacity-info">
+            <div class="capacity-bar">
+              <div 
+                class="capacity-filled" 
+                :style="{ width: `${(studentAssignments.length / (line?.maxCapacity || 1)) * 100}%` }"
+              ></div>
+            </div>
+            <div class="capacity-text">
+              {{ studentAssignments.length }} / {{ line?.maxCapacity || 0 }} students assigned
+            </div>
+          </div>
+        </div>
+
+        <!-- Route Map Section -->
+        <div v-if="line.route && line.route.stops && line.route.stops.length > 0" class="map-section">
+          <RouteMap
+            :stops="line.route.stops"
+            :studentAssignments="studentAssignments"
+            :showDrivingInstructions="false"
+            :showDrivingRoute="true"
+            mapHeight="600px"
+            mapId="line-route-map"
+          />
         </div>
       </div>
 
@@ -230,9 +309,13 @@
 import { ref, inject, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import apiService from '../services/api'
+import RouteMap from '../components/RouteMap.vue'
 
 export default {
   name: 'LineView',
+  components: {
+    RouteMap
+  },
   setup() {
     const authStore = inject('authStore')
     const router = useRouter()
@@ -241,6 +324,7 @@ export default {
     const line = ref(null)
     const loading = ref(false)
     const error = ref(null)
+    const studentAssignments = ref([])
     
     const fetchLine = async () => {
       const lineId = route.params.id
@@ -254,11 +338,26 @@ export default {
         error.value = null
         const response = await apiService.get(`/lines/${lineId}`)
         line.value = response.line || response.data
+        
+        // Fetch student assignments after getting line data
+        if (line.value) {
+          await fetchStudentAssignments(lineId)
+        }
       } catch (err) {
         console.error('Failed to fetch line:', err)
         error.value = err.response?.data?.message || 'Failed to load line details'
       } finally {
         loading.value = false
+      }
+    }
+    
+    const fetchStudentAssignments = async (lineId) => {
+      try {
+        const response = await apiService.get(`/lines/${lineId}/student-assignments`)
+        studentAssignments.value = response.assignments || response.data || []
+      } catch (err) {
+        console.error('Failed to fetch student assignments:', err)
+        studentAssignments.value = []
       }
     }
     
@@ -319,6 +418,13 @@ export default {
       return typeMap[type] || type || 'Not specified'
     }
     
+    const formatTime = (minutes) => {
+      if (!minutes && minutes !== 0) return 'N/A'
+      const hours = Math.floor(minutes / 60)
+      const mins = minutes % 60
+      return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`
+    }
+    
     const getDriverName = (driver) => {
       if (!driver) return 'No driver assigned'
       if (typeof driver === 'string') return 'Driver assigned'
@@ -347,6 +453,23 @@ export default {
       }
     }
     
+    const getStopStudents = (stop) => {
+      const pickupStudents = studentAssignments.value
+        .filter(assignment => 
+          assignment.pickupStopDetails && String(assignment.pickupStopDetails.stopId) === String(stop.stopId)
+        )
+        .map(assignment => assignment.student)
+        
+      const dropoffStudents = studentAssignments.value
+        .filter(assignment => 
+          assignment.dropoffStopDetails && String(assignment.dropoffStopDetails.stopId) === String(stop.stopId)
+        )
+        .map(assignment => assignment.student)
+
+      return { pickup: pickupStudents, dropoff: dropoffStudents }
+    }
+    
+    
     onMounted(async () => {
       await fetchLine()
     })
@@ -355,16 +478,20 @@ export default {
       line,
       loading,
       error,
+      studentAssignments,
+      route,
       fetchLine,
       formatDate,
       formatScheduleDuration,
       formatScheduleDays,
       formatScheduleType,
+      formatTime,
       getDriverName,
       getVehicleName,
       handleEdit,
       goBack,
-      manageRoute
+      manageRoute,
+      getStopStudents
     }
   }
 }
@@ -508,7 +635,8 @@ export default {
     "info assignment"
     "schedule schedule"
     "route route"
-    "students students";
+    "students students"
+    "map map";
 }
 
 .notice-section {
@@ -533,6 +661,14 @@ export default {
 
 .students-section {
   grid-area: students;
+}
+
+.map-section {
+  grid-area: map;
+  background: white;
+  border-radius: 8px;
+  padding: 30px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .notice-section {
@@ -770,13 +906,78 @@ export default {
 .stop-info {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
   flex: 1;
+}
+
+.stop-main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .stop-name {
   font-weight: 500;
   color: #333;
+}
+
+.stop-students {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.student-group {
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  width: 100%;
+}
+
+.student-group.pickup {
+  background-color: #d4edda;
+  border-left: 3px solid #155724;
+}
+
+.student-group.dropoff {
+  background-color: #d1ecf1;
+  border-left: 3px solid #0c5460;
+}
+
+.student-group.none {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  font-style: italic;
+  text-align: center;
+  padding: 12px;
+}
+
+.student-group-header {
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.student-group.pickup .student-group-header {
+  color: #155724;
+}
+
+.student-group.dropoff .student-group-header {
+  color: #0c5460;
+}
+
+.student-names {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.student-name {
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
 }
 
 .stop-type {
@@ -914,7 +1115,8 @@ export default {
       "assignment"
       "schedule"
       "route"
-      "students";
+      "students"
+      "map";
   }
   
   .info-grid {
@@ -932,5 +1134,188 @@ export default {
     text-align: center;
     gap: 15px;
   }
+  
+  .student-assignment-item {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .assignment-details {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
 }
+
+/* Students Section */
+.student-count {
+  background-color: #e3f2fd;
+  color: #0d47a1;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.no-students {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 40px 20px;
+  text-align: left;
+  color: #666;
+}
+
+.no-students .empty-icon {
+  font-size: 3rem;
+  opacity: 0.5;
+}
+
+.no-students .empty-text h3 {
+  margin: 0 0 10px 0;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.no-students .empty-text p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.students-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.student-assignment-item {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 20px;
+  background-color: #f8f9fa;
+  transition: box-shadow 0.2s;
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.student-assignment-item:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.student-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.student-name {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
+  font-size: 1rem;
+}
+
+.student-contact {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.phone, .email {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.assignment-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.stop-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 6px;
+  background-color: white;
+  border: 1px solid #e9ecef;
+}
+
+.stop-info.pickup {
+  border-left: 4px solid #17a2b8;
+}
+
+.stop-info.dropoff {
+  border-left: 4px solid #ffc107;
+}
+
+.stop-info.no-stop {
+  border-left: 4px solid #dee2e6;
+}
+
+.stop-label {
+  font-weight: 600;
+  color: #495057;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.stop-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stop-name {
+  color: #333;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.stop-time {
+  color: #007bff;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.no-stop-assigned {
+  color: #999;
+  font-style: italic;
+  font-size: 0.85rem;
+}
+
+.capacity-info {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  border-left: 4px solid #007bff;
+}
+
+.capacity-bar {
+  width: 100%;
+  height: 8px;
+  background-color: #e9ecef;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.capacity-filled {
+  height: 100%;
+  background-color: #007bff;
+  transition: width 0.3s ease;
+}
+
+.capacity-text {
+  text-align: center;
+  font-size: 0.9rem;
+  color: #495057;
+  font-weight: 500;
+}
+
 </style>

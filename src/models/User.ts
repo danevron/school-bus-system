@@ -30,10 +30,8 @@ const userSchema = new Schema<IUser>({
     required: function(this: IUser) {
       return this.role !== UserRole.STUDENT;
     },
-    unique: true,
-    sparse: true,
     lowercase: true,
-    trim: true
+    trim: true,
   },
   password: {
     type: String,
@@ -99,17 +97,36 @@ const userSchema = new Schema<IUser>({
   timestamps: true
 });
 
-// Hash password before saving (only if password exists)
-userSchema.pre('save', async function(next) {
-  if (!this.password || !this.isModified('password')) return next();
-  
-  try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-  } catch (error) {
-    next(error as Error);
+// Create unique index for email only for non-student users
+userSchema.index(
+  { email: 1 }, 
+  { 
+    unique: true,
+    partialFilterExpression: { 
+      role: { $ne: UserRole.STUDENT },
+      email: { $exists: true, $ne: null }
+    }
   }
+);
+
+// Pre-save hook to handle students and password hashing
+userSchema.pre('save', async function(next) {
+  // Remove email field for students to avoid unique index conflicts
+  if (this.role === UserRole.STUDENT) {
+    this.email = undefined;
+  }
+  
+  // Hash password before saving (only if password exists)
+  if (this.password && this.isModified('password')) {
+    try {
+      const salt = await bcrypt.genSalt(10);
+      this.password = await bcrypt.hash(this.password, salt);
+    } catch (error) {
+      return next(error as Error);
+    }
+  }
+  
+  next();
 });
 
 // Compare password method

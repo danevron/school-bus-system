@@ -120,10 +120,11 @@
                       <button 
                         @click="deleteStop(index)"
                         class="delete-button"
-                        :disabled="loading"
-                        title="Delete stop"
+                        :class="{ 'delete-disabled': !canDeleteStop(stop) }"
+                        :disabled="loading || !canDeleteStop(stop)"
+                        :title="canDeleteStop(stop) ? 'Delete stop' : 'Cannot delete: stop has assigned students'"
                       >
-                        🗑️
+                        {{ canDeleteStop(stop) ? '🗑️' : '🔒' }}
                       </button>
                     </div>
                   </div>
@@ -136,6 +137,20 @@
                   <div class="stop-time">
                     <strong>Estimated Time:</strong> {{ stop.estimatedTime }} minutes from start
                   </div>
+                  <div v-if="getStopUsageInfo(stop)" class="stop-usage-info">
+                    <div class="usage-indicator">
+                      <span class="usage-icon">👥</span>
+                      <span class="usage-text">
+                        {{ getStopUsageInfo(stop).totalStudents }} student{{ getStopUsageInfo(stop).totalStudents !== 1 ? 's' : '' }} assigned
+                      </span>
+                      <span class="usage-details">
+                        ({{ getStopUsageInfo(stop).pickupCount }} pickup, {{ getStopUsageInfo(stop).dropoffCount }} dropoff)
+                      </span>
+                    </div>
+                    <div class="assigned-students">
+                      {{ getStopUsageInfo(stop).students.join(', ') }}
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -145,41 +160,109 @@
         </div>
 
         <!-- Route Map -->
-        <div class="route-map" v-if="routeData.stops.length > 0">
-          <h2>Route Map</h2>
-          <div class="map-container">
-            <div id="route-map" class="map"></div>
-          </div>
-          <div class="map-legend">
-            <div class="legend-item">
-              <div class="legend-marker pickup"></div>
-              <span>Pickup Stop</span>
-            </div>
-            <div class="legend-item">
-              <div class="legend-marker dropoff"></div>
-              <span>Dropoff Stop</span>
-            </div>
-            <div class="legend-item">
-              <div class="legend-line"></div>
-              <span>Route Path</span>
-            </div>
-          </div>
+        <div v-if="routeData.stops.length > 0">
+          <RouteMap
+            :stops="routeData.stops"
+            :studentAssignments="studentAssignments"
+            :showDrivingInstructions="true"
+            :showDrivingRoute="true"
+            :showDetailedPopups="true"
+            :formatTime="formatTime"
+            mapHeight="800px"
+            mapId="route-manager-map"
+            @route-updated="handleRouteUpdate"
+          />
         </div>
 
-        <!-- Driving Instructions -->
-        <div v-if="drivingInstructions.length > 0" class="driving-instructions">
-          <h2>Driving Instructions</h2>
-          <ol>
-            <li v-for="instruction in drivingInstructions" :key="instruction.index">
-              {{ instruction.text }}
-              <span v-if="instruction.distance > 0" class="instruction-distance">
-                ({{ formatDistance(instruction.distance) }})
-              </span>
-            </li>
-          </ol>
-          <div class="instructions-summary">
-            <strong>Total Distance:</strong> {{ formatTotalDistance() }} | 
-            <strong>Estimated Time:</strong> {{ formatTotalTime() }}
+        <!-- Student Management Section -->
+        <div class="student-management">
+          <div class="students-header">
+            <h2>Assigned Students</h2>
+            <button @click="showStudentDialog = true" class="add-student-button">
+              + Add Student
+            </button>
+          </div>
+          
+          <div v-if="loadingStudents" class="loading-students">
+            <div class="loading-spinner"></div>
+            Loading student assignments...
+          </div>
+
+          <div v-else-if="studentAssignments.length === 0" class="no-students">
+            <p>No students have been assigned to this line yet.</p>
+          </div>
+
+          <div v-else class="students-list">
+            <div
+              v-for="assignment in studentAssignments"
+              :key="assignment._id"
+              class="student-assignment-item"
+            >
+              <div class="student-info">
+                <div class="student-name">
+                  {{ assignment.student.firstName }} {{ assignment.student.lastName }}
+                </div>
+                <div class="student-contact">
+                  <span class="phone">📞 {{ assignment.student.phone }}</span>
+                  <span v-if="assignment.student.email" class="email">✉️ {{ assignment.student.email }}</span>
+                </div>
+              </div>
+
+              <div class="assignment-details">
+                <div v-if="assignment.pickupStopDetails" class="stop-info pickup">
+                  <div class="stop-label">🚏 Pickup:</div>
+                  <div class="stop-details">
+                    <div class="stop-name">{{ assignment.pickupStopDetails.name }}</div>
+                    <div class="stop-time">{{ formatTime(assignment.pickupStopDetails.estimatedTime) }}</div>
+                  </div>
+                </div>
+                <div v-else class="stop-info no-stop">
+                  <div class="stop-label">🚏 Pickup:</div>
+                  <div class="no-stop-assigned">Not assigned</div>
+                </div>
+
+                <div v-if="assignment.dropoffStopDetails" class="stop-info dropoff">
+                  <div class="stop-label">🏁 Dropoff:</div>
+                  <div class="stop-details">
+                    <div class="stop-name">{{ assignment.dropoffStopDetails.name }}</div>
+                    <div class="stop-time">{{ formatTime(assignment.dropoffStopDetails.estimatedTime) }}</div>
+                  </div>
+                </div>
+                <div v-else class="stop-info no-stop">
+                  <div class="stop-label">🏁 Dropoff:</div>
+                  <div class="no-stop-assigned">Not assigned</div>
+                </div>
+              </div>
+
+              <div class="assignment-actions">
+                <button 
+                  @click="editStudentAssignment(assignment)" 
+                  class="edit-button"
+                  title="Edit stops"
+                >
+                  ✏️
+                </button>
+                <button 
+                  @click="removeStudentAssignment(assignment)" 
+                  class="remove-button"
+                  title="Remove student"
+                >
+                  🗑️
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div v-if="studentAssignments.length > 0" class="capacity-info">
+            <div class="capacity-bar">
+              <div 
+                class="capacity-filled" 
+                :style="{ width: `${(studentAssignments.length / (line?.maxCapacity || 1)) * 100}%` }"
+              ></div>
+            </div>
+            <div class="capacity-text">
+              {{ studentAssignments.length }} / {{ line?.maxCapacity || 0 }} students assigned
+            </div>
           </div>
         </div>
 
@@ -200,6 +283,24 @@
       @close="showStopDialog = false"
       @save="handleAddStopFromDialog"
     />
+
+    <!-- Student Selection Dialog -->
+    <StudentSelectionDialog
+      :isOpen="showStudentDialog"
+      :lineId="route.params.id"
+      :assignedStudents="studentAssignments.map(a => a.student)"
+      @close="showStudentDialog = false"
+      @student-selected="handleStudentSelected"
+    />
+
+    <!-- Stop Selection Dialog -->
+    <StopSelectionDialog
+      :isOpen="showStopSelectionDialog"
+      :student="selectedStudentForStops"
+      :stops="routeData.stops"
+      @close="handleStopSelectionClose"
+      @save="handleStopAssignmentSave"
+    />
   </div>
 </template>
 
@@ -207,15 +308,18 @@
 import { ref, reactive, inject, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import apiService from '../services/api'
-import L from 'leaflet'
-import 'leaflet-routing-machine'
-import 'leaflet/dist/leaflet.css'
 import StopCreationDialog from '../components/StopCreationDialog.vue'
+import StudentSelectionDialog from '../components/StudentSelectionDialog.vue'
+import StopSelectionDialog from '../components/StopSelectionDialog.vue'
+import RouteMap from '../components/RouteMap.vue'
 
 export default {
   name: 'LineRouteManager',
   components: {
-    StopCreationDialog
+    StopCreationDialog,
+    StudentSelectionDialog,
+    StopSelectionDialog,
+    RouteMap
   },
   setup() {
     const authStore = inject('authStore')
@@ -225,12 +329,15 @@ export default {
     const loading = ref(false)
     const error = ref('')
     const line = ref(null)
-    const map = ref(null)
-    const mapMarkers = ref([])
-    const routeLine = ref(null)
-    const routingControl = ref(null)
     const showStopDialog = ref(false)
-    const drivingInstructions = ref([])
+    
+    // Student management state
+    const showStudentDialog = ref(false)
+    const showStopSelectionDialog = ref(false)
+    const selectedStudentForStops = ref(null)
+    const studentAssignments = ref([])
+    const loadingStudents = ref(false)
+    const stopUsage = ref({})
     
     // Route data - using reactive for embedded route
     const routeData = reactive({
@@ -278,13 +385,6 @@ export default {
         loading.value = false
       }
       
-      // Initialize map after loading is complete and DOM is updated
-      if (routeData.stops.length > 0) {
-        await nextTick()
-        setTimeout(() => {
-          initializeMap()
-        }, 100)
-      }
     }
     
     const formatDuration = (minutes) => {
@@ -318,162 +418,7 @@ export default {
       return vehicle.licensePlate || 'Vehicle assigned'
     }
     
-    const initializeMap = () => {
-      console.log('Attempting to initialize map...')
-      const mapContainer = document.getElementById('route-map')
-      
-      if (!mapContainer) {
-        console.error('Map container not found in DOM')
-        return
-      }
-      
-      if (!routeData.stops || routeData.stops.length === 0) {
-        console.error('No route data or stops available')
-        return
-      }
-      
-      console.log('Map container found, initializing map with', routeData.stops.length, 'stops')
 
-      // Calculate center point from all stops
-      const lats = routeData.stops.map(stop => stop.coordinates.latitude)
-      const lngs = routeData.stops.map(stop => stop.coordinates.longitude)
-      const centerLat = (Math.min(...lats) + Math.max(...lats)) / 2
-      const centerLng = (Math.min(...lngs) + Math.max(...lngs)) / 2
-
-      try {
-        // Initialize map
-        map.value = L.map('route-map').setView([centerLat, centerLng], 13)
-
-        // Add OpenStreetMap tiles
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '© OpenStreetMap contributors',
-          maxZoom: 19,
-        }).addTo(map.value)
-
-        // Add markers for stops
-        addStopMarkers()
-        
-        // Draw route line
-        drawRouteLine()
-        
-        // Fit map to show all markers
-        if (mapMarkers.value.length > 0) {
-          const group = new L.featureGroup(mapMarkers.value)
-          map.value.fitBounds(group.getBounds().pad(0.1))
-        }
-        
-        console.log('Map initialized successfully!')
-      } catch (mapError) {
-        console.error('Error initializing map:', mapError)
-      }
-    }
-
-    const addStopMarkers = () => {
-      if (!map.value || !routeData.stops) return
-
-      mapMarkers.value = []
-      
-      routeData.stops.forEach((stop, index) => {
-        const isPickup = stop.type === 'pickup'
-        
-        // Create custom icon based on stop type
-        const icon = L.divIcon({
-          className: `custom-marker ${stop.type}-marker`,
-          html: `
-            <div class="marker-content">
-              <div class="marker-number">${index + 1}</div>
-              <div class="marker-icon">${isPickup ? '📍' : '🏁'}</div>
-            </div>
-          `,
-          iconSize: [40, 50],
-          iconAnchor: [20, 50],
-          popupAnchor: [0, -50]
-        })
-
-        // Create marker
-        const marker = L.marker(
-          [stop.coordinates.latitude, stop.coordinates.longitude],
-          { icon }
-        ).addTo(map.value)
-
-        // Create popup content
-        const popupContent = `
-          <div class="stop-popup">
-            <h4>${stop.name}</h4>
-            <div class="popup-type">
-              <span class="type-badge ${stop.type}">${stop.type}</span>
-            </div>
-            <div class="popup-details">
-              <strong>Address:</strong><br>
-              ${stop.address}<br><br>
-              <strong>Coordinates:</strong><br>
-              ${stop.coordinates.latitude.toFixed(6)}, ${stop.coordinates.longitude.toFixed(6)}<br><br>
-              <strong>Time:</strong> ${formatTime(stop.estimatedTime)} (${stop.estimatedTime} min from start)
-            </div>
-          </div>
-        `
-
-        marker.bindPopup(popupContent)
-        mapMarkers.value.push(marker)
-      })
-    }
-
-    const drawRouteLine = (updateServerWithTimeAndDistance = false) => {
-      if (!map.value || !routeData.stops || routeData.stops.length < 2) return
-
-      // Remove previous route if exists
-      if (routingControl.value) {
-        map.value.removeControl(routingControl.value)
-        routingControl.value = null
-      }
-
-      const waypoints = routeData.stops.map(stop =>
-        L.latLng(stop.coordinates.latitude, stop.coordinates.longitude)
-      )
-
-      routingControl.value = L.Routing.control({
-        waypoints,
-        lineOptions: {
-          styles: [{ color: '#007baa', weight: 4, opacity: 0.8 }]
-        },
-        routeWhileDragging: false,
-        show: false,
-        addWaypoints: false,
-        draggableWaypoints: false,
-        fitSelectedRoutes: true,
-        createMarker: () => null, // We already add custom markers
-        router: L.Routing.osrmv1({
-          serviceUrl: 'https://router.project-osrm.org/route/v1'
-        }),
-        formatter: new L.Routing.Formatter()
-      }).on('routesfound', function(e) {
-        // Extract driving instructions when route is found
-        const routes = e.routes
-        if (routes && routes.length > 0) {
-          const route = routes[0]
-          drivingInstructions.value = route.instructions.map((instruction, index) => ({
-            index: index + 1,
-            text: instruction.text,
-            distance: instruction.distance,
-            time: instruction.time,
-            type: instruction.type
-          }))
-          
-          // Update route data with actual driving route information
-          if (updateServerWithTimeAndDistance) {
-            updateRouteWithDrivingData(route)
-          } 
-        }
-      }).addTo(map.value)
-
-      // Hide the routing instructions panel from the map
-      setTimeout(() => {
-        const routingContainer = document.querySelector('.leaflet-routing-container')
-        if (routingContainer) {
-          routingContainer.style.display = 'none'
-        }
-      }, 100)
-    }
     
     const handleAddStopFromDialog = async (newStop) => {
       try {
@@ -484,10 +429,6 @@ export default {
         // Refresh line data
         await fetchLine()
         
-        // Update server with total distance and estimated duration
-        nextTick(() => {
-          drawRouteLine(true)
-        })
 
         // Close dialog
         showStopDialog.value = false
@@ -523,22 +464,56 @@ export default {
     }
     
     const deleteStop = async (index) => {
-      if (!confirm('Are you sure you want to delete this stop?')) return
+      const stop = routeData.stops[index]
+      const usage = stopUsage.value[stop.stopId]
+      
+      // Check if stop has active assignments
+      if (usage && !usage.canDelete) {
+        const students = [...usage.pickupStudents, ...usage.dropoffStudents]
+        const uniqueStudents = [...new Set(students)]
+        
+        alert(`Cannot delete "${stop.name}": This stop is currently assigned to ${uniqueStudents.length} student(s): ${uniqueStudents.join(', ')}.\n\nPlease remove student assignments before deleting this stop.`)
+        return
+      }
+      
+      if (!confirm(`Are you sure you want to delete "${stop.name}"?`)) return
       
       try {
         loading.value = true
         await apiService.delete(`/lines/${route.params.id}/route/stops/${index}`)
         await fetchLine()
+        await fetchStopUsage()
 
-        // Update server with total distance and estimated duration
-        nextTick(() => {
-          drawRouteLine(true)
-        })
       } catch (error) {
         console.error('Failed to delete stop:', error)
-        alert(error.response?.data?.message || 'Failed to delete stop')
+        
+        // Handle detailed error from backend
+        if (error.response?.data?.affectedStudents) {
+          const details = error.response.data
+          alert(`${details.message}\n\n${details.details}\n\nPlease remove student assignments before deleting this stop.`)
+        } else {
+          alert(error.response?.data?.message || 'Failed to delete stop')
+        }
       } finally {
         loading.value = false
+      }
+    }
+
+    const canDeleteStop = (stop) => {
+      const usage = stopUsage.value[stop.stopId]
+      return !usage || usage.canDelete
+    }
+
+    const getStopUsageInfo = (stop) => {
+      const usage = stopUsage.value[stop.stopId]
+      if (!usage || usage.totalUsage === 0) return null
+      
+      const students = [...new Set([...usage.pickupStudents, ...usage.dropoffStudents])]
+      return {
+        totalStudents: students.length,
+        students: students,
+        pickupCount: usage.pickupStudents.length,
+        dropoffCount: usage.dropoffStudents.length
       }
     }
     
@@ -548,10 +523,6 @@ export default {
         await apiService.put(`/lines/${route.params.id}/route/stops`, { stops })
         await fetchLine()
 
-        // Update server with total distance and estimated duration
-        nextTick(() => {
-          drawRouteLine(true)
-        })
       } catch (error) {
         console.error('Failed to reorder stops:', error)
         alert(error.response?.data?.message || 'Failed to reorder stops')
@@ -576,77 +547,185 @@ export default {
       }
     }
     
-    const formatTotalDistance = () => {
-      const totalDistance = drivingInstructions.value.reduce((sum, instruction) => sum + instruction.distance, 0)
-      return formatDistance(totalDistance)
-    }
     
-    const formatTotalTime = () => {
-      const totalTime = drivingInstructions.value.reduce((sum, instruction) => sum + instruction.time, 0)
-      const hours = Math.floor(totalTime / 3600)
-      const minutes = Math.floor((totalTime % 3600) / 60)
-      
-      if (hours > 0) {
-        return `${hours}h ${minutes}m`
+    
+    
+    const handleRouteUpdate = (routeInfo) => {
+      routeData.totalDistance = routeInfo.totalDistance
+      routeData.estimatedDuration = routeInfo.estimatedDuration
+    }
+
+    // Student management functions
+    const fetchStudentAssignments = async () => {
+      const lineId = route.params.id
+      if (!lineId) return
+
+      try {
+        loadingStudents.value = true
+        const response = await apiService.get(`/lines/${lineId}/student-assignments`)
+        studentAssignments.value = response.assignments || []
+        
+        // Also fetch stop usage info
+        await fetchStopUsage()
+      } catch (error) {
+        console.error('Failed to fetch student assignments:', error)
+        // Could show error message to user
+      } finally {
+        loadingStudents.value = false
+      }
+    }
+
+    const fetchStopUsage = async () => {
+      const lineId = route.params.id
+      if (!lineId) return
+
+      try {
+        const response = await apiService.get(`/lines/${lineId}/stop-usage`)
+        stopUsage.value = response.stopUsage || {}
+      } catch (error) {
+        console.error('Failed to fetch stop usage:', error)
+        stopUsage.value = {}
+      }
+    }
+
+    const handleStudentSelected = (student) => {
+      showStudentDialog.value = false
+      selectedStudentForStops.value = student
+
+      // Check if route has stops, if so show stop selection dialog
+      if (routeData.stops && routeData.stops.length > 0) {
+        showStopSelectionDialog.value = true
       } else {
-        return `${minutes}m`
+        // No stops available, assign student without stops
+        assignStudentToLine(student, null, null, true)
+      }
+    }
+
+    const handleStopSelectionClose = () => {
+      showStopSelectionDialog.value = false
+      selectedStudentForStops.value = null
+    }
+
+    const handleStopAssignmentSave = async (assignment) => {
+      showStopSelectionDialog.value = false
+      
+      const { student, pickupStop, dropoffStop, skipStops } = assignment
+      
+      if (student._isEditing) {
+        // Update existing assignment
+        await updateStudentAssignment(student._assignmentId, pickupStop, dropoffStop, skipStops)
+      } else {
+        // Create new assignment
+        await assignStudentToLine(student, pickupStop, dropoffStop, skipStops)
+      }
+      
+      selectedStudentForStops.value = null
+    }
+
+    const assignStudentToLine = async (student, pickupStop, dropoffStop, skipStops) => {
+      const lineId = route.params.id
+      if (!lineId) return
+
+      try {
+        loading.value = true
+        
+        const requestData = {
+          studentId: student._id,
+          pickupStop: skipStops ? undefined : pickupStop?.stopId,
+          dropoffStop: skipStops ? undefined : dropoffStop?.stopId
+        }
+
+        await apiService.post(`/lines/${lineId}/student-assignments`, requestData)
+        
+        // Refresh student assignments
+        await fetchStudentAssignments()
+        
+      } catch (error) {
+        console.error('Failed to assign student to line:', error)
+        alert(error.response?.data?.message || 'Failed to assign student to line')
+      } finally {
+        loading.value = false
+      }
+    }
+
+    const updateStudentAssignment = async (assignmentId, pickupStop, dropoffStop, skipStops) => {
+      const lineId = route.params.id
+      if (!lineId) return
+
+      try {
+        loading.value = true
+        
+        const requestData = {
+          pickupStop: skipStops ? undefined : pickupStop?.stopId,
+          dropoffStop: skipStops ? undefined : dropoffStop?.stopId
+        }
+
+        await apiService.put(`/lines/${lineId}/student-assignments/${assignmentId}`, requestData)
+        
+        // Refresh student assignments
+        await fetchStudentAssignments()
+        
+      } catch (error) {
+        console.error('Failed to update student assignment:', error)
+        alert(error.response?.data?.message || 'Failed to update student assignment')
+      } finally {
+        loading.value = false
+      }
+    }
+
+    const editStudentAssignment = (assignment) => {
+      selectedStudentForStops.value = {
+        ...assignment.student,
+        _isEditing: true,
+        _assignmentId: assignment._id,
+        _currentPickupStop: assignment.pickupStop,
+        _currentDropoffStop: assignment.dropoffStop
+      }
+      showStopSelectionDialog.value = true
+    }
+
+    const removeStudentAssignment = async (assignment) => {
+      if (!confirm(`Remove ${assignment.student.firstName} ${assignment.student.lastName} from this line?`)) {
+        return
+      }
+
+      const lineId = route.params.id
+      if (!lineId) return
+
+      try {
+        loading.value = true
+        await apiService.delete(`/lines/${lineId}/student-assignments/${assignment._id}`)
+        await fetchStudentAssignments()
+      } catch (error) {
+        console.error('Failed to remove student assignment:', error)
+        alert(error.response?.data?.message || 'Failed to remove student from line')
+      } finally {
+        loading.value = false
       }
     }
     
-    const updateRouteWithDrivingData = (drivingRoute) => {
-      if (!line.value || !drivingRoute) return
-      
-      // Update total distance (convert meters to kilometers)
-      const totalDistanceKm = (drivingRoute.summary.totalDistance / 1000).toFixed(1)
-      routeData.totalDistance = parseFloat(totalDistanceKm)
-      
-      // Update estimated duration (convert seconds to minutes)
-      const totalDurationMinutes = Math.round(drivingRoute.summary.totalTime / 60)
-      routeData.estimatedDuration = totalDurationMinutes
-      
-      // Update the line route with driving data
-      apiService.put(`/lines/${line.value._id}/route`, {
-        name: routeData.name,
-        stops: routeData.stops,
-        totalDistance: routeData.totalDistance,
-        estimatedDuration: routeData.estimatedDuration
-      }).catch(err => {
-        console.error('Failed to update route with driving data:', err)
-      })
-    }
-    
-    // Watch for when route data is loaded and loading is complete
-    watch([routeData, loading], ([route, isLoading]) => {
-      if (route && route.stops && route.stops.length > 0 && !isLoading && !map.value) {
-        nextTick(() => {
-          setTimeout(() => {
-            initializeMap()
-          }, 100)
-        })
-      }
-    })
     
     onMounted(async () => {
       await fetchLine()
+      await fetchStudentAssignments()
     })
     
-    onUnmounted(() => {
-      // Clean up map resources
-      if (map.value) {
-        map.value.remove()
-        map.value = null
-      }
-      mapMarkers.value = []
-      routeLine.value = null
-    })
     
     return {
       loading,
       error,
       line,
       routeData,
+      route,
       showStopDialog,
-      drivingInstructions,
+      // Student management state
+      showStudentDialog,
+      showStopSelectionDialog,
+      selectedStudentForStops,
+      studentAssignments,
+      loadingStudents,
+      stopUsage,
+      // Functions
       fetchLine,
       handleAddStopFromDialog,
       moveStopUp,
@@ -654,13 +733,22 @@ export default {
       deleteStop,
       formatDuration,
       formatTime,
-      formatDistance,
-      formatTotalDistance,
-      formatTotalTime,
       getStopsByType,
       getDriverName,
       getVehicleName,
-      goBack
+      goBack,
+      handleRouteUpdate,
+      // Student management functions
+      fetchStudentAssignments,
+      fetchStopUsage,
+      handleStudentSelected,
+      handleStopSelectionClose,
+      handleStopAssignmentSave,
+      editStudentAssignment,
+      removeStudentAssignment,
+      updateStudentAssignment,
+      canDeleteStop,
+      getStopUsageInfo
     }
   }
 }
@@ -785,8 +873,8 @@ export default {
 
 .route-overview,
 .route-stops,
-.route-map,
-.route-summary {
+.route-summary,
+.student-management {
   background: white;
   border-radius: 8px;
   padding: 30px;
@@ -825,7 +913,6 @@ export default {
 
 .route-overview h2,
 .route-stops h2,
-.route-map h2,
 .route-summary h2 {
   color: #333;
   margin-bottom: 20px;
@@ -1007,6 +1094,18 @@ export default {
   cursor: not-allowed;
 }
 
+.delete-button.delete-disabled {
+  background-color: #ffeaea;
+  border-color: #dc3545;
+  color: #dc3545;
+  cursor: not-allowed;
+}
+
+.delete-button.delete-disabled:hover {
+  background-color: #ffeaea;
+  border-color: #dc3545;
+}
+
 .type-badge {
   padding: 4px 8px;
   border-radius: 12px;
@@ -1042,6 +1141,43 @@ export default {
 .stop-details > div {
   font-size: 0.9rem;
   color: #666;
+}
+
+.stop-usage-info {
+  margin-top: 12px;
+  padding: 8px 12px;
+  background-color: #e3f2fd;
+  border-radius: 6px;
+  border-left: 3px solid #2196f3;
+}
+
+.usage-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.usage-icon {
+  font-size: 0.9rem;
+}
+
+.usage-text {
+  font-weight: 600;
+  color: #1976d2;
+  font-size: 0.85rem;
+}
+
+.usage-details {
+  color: #666;
+  font-size: 0.75rem;
+}
+
+.assigned-students {
+  font-size: 0.75rem;
+  color: #555;
+  font-style: italic;
+  line-height: 1.3;
 }
 
 .route-connector {
@@ -1095,217 +1231,9 @@ export default {
   font-style: italic;
 }
 
-/* Map Styles */
-.map-container {
-  margin-bottom: 20px;
-}
 
-.map {
-  height: 800px;
-  width: 100%;
-  border-radius: 8px;
-  border: 1px solid #ddd;
-}
 
-.map-legend {
-  display: flex;
-  justify-content: center;
-  gap: 30px;
-  padding: 15px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  border: 1px solid #e9ecef;
-}
 
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.9rem;
-  color: #666;
-}
-
-.legend-marker {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.8rem;
-  font-weight: bold;
-  color: white;
-}
-
-.legend-marker.pickup {
-  background-color: #17a2b8;
-}
-
-.legend-marker.dropoff {
-  background-color: #ffc107;
-  color: #000;
-}
-
-.legend-line {
-  width: 30px;
-  height: 4px;
-  background-color: #007bff;
-  border-radius: 2px;
-  position: relative;
-}
-
-.legend-line::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: repeating-linear-gradient(
-    90deg,
-    transparent,
-    transparent 5px,
-    white 5px,
-    white 10px
-  );
-}
-
-/* Custom Leaflet Marker Styles */
-:deep(.custom-marker) {
-  background: transparent;
-  border: none;
-}
-
-:deep(.marker-content) {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-}
-
-:deep(.marker-number) {
-  background-color: #fff;
-  border: 2px solid #333;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.8rem;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 2px;
-  position: relative;
-  z-index: 2;
-}
-
-:deep(.marker-icon) {
-  font-size: 1.2rem;
-  text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-}
-
-:deep(.pickup-marker .marker-number) {
-  border-color: #17a2b8;
-  background-color: #17a2b8;
-  color: white;
-}
-
-:deep(.dropoff-marker .marker-number) {
-  border-color: #ffc107;
-  background-color: #ffc107;
-  color: #000;
-}
-
-/* Custom Popup Styles */
-:deep(.leaflet-popup-content-wrapper) {
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-
-:deep(.stop-popup) {
-  min-width: 200px;
-}
-
-:deep(.stop-popup h4) {
-  margin: 0 0 10px 0;
-  color: #333;
-  font-size: 1.1rem;
-}
-
-:deep(.popup-type) {
-  margin-bottom: 10px;
-}
-
-:deep(.popup-details) {
-  font-size: 0.85rem;
-  line-height: 1.4;
-  color: #666;
-}
-
-:deep(.popup-type .type-badge) {
-  padding: 3px 8px;
-  border-radius: 12px;
-  font-size: 0.7rem;
-  font-weight: bold;
-  text-transform: uppercase;
-}
-
-:deep(.popup-type .type-badge.pickup) {
-  background-color: #17a2b8;
-  color: white;
-}
-
-:deep(.popup-type .type-badge.dropoff) {
-  background-color: #ffc107;
-  color: #000;
-}
-
-/* Hide the Leaflet Routing Machine control panel */
-:deep(.leaflet-routing-container) {
-  display: none !important;
-}
-
-:deep(.leaflet-routing-alternatives-container) {
-  display: none !important;
-}
-
-.driving-instructions {
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-  padding: 30px;
-  margin-top: 20px;
-}
-.driving-instructions h2 {
-  margin-bottom: 16px;
-  color: #333;
-}
-.driving-instructions ol {
-  padding-left: 20px;
-}
-.driving-instructions li {
-  margin-bottom: 10px;
-  color: #555;
-  font-size: 1rem;
-  line-height: 1.4;
-}
-
-.instruction-distance {
-  color: #888;
-  font-size: 0.9rem;
-  font-weight: normal;
-}
-
-.instructions-summary {
-  margin-top: 20px;
-  padding: 15px;
-  background-color: #f8f9fa;
-  border-radius: 6px;
-  border-left: 4px solid #007bff;
-  font-size: 1rem;
-  color: #333;
-}
 
 .not-found-container {
   display: flex;
@@ -1356,14 +1284,252 @@ export default {
   .summary-grid {
     grid-template-columns: 1fr;
   }
-  
-  .map-legend {
-    flex-direction: column;
+}
+
+/* Student Management Styles */
+.students-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #e9ecef;
+  padding-bottom: 10px;
+}
+
+.students-header h2 {
+  margin: 0;
+  color: #333;
+}
+
+.add-student-button {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.add-student-button:hover {
+  background-color: #218838;
+}
+
+.loading-students {
+  text-align: center;
+  padding: 40px 20px;
+  color: #666;
+}
+
+.loading-students .loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #28a745;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 15px;
+}
+
+.no-students {
+  text-align: center;
+  color: #666;
+  font-style: italic;
+  padding: 40px 20px;
+}
+
+.students-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.student-assignment-item {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 20px;
+  background-color: #f8f9fa;
+  transition: box-shadow 0.2s;
+}
+
+.student-assignment-item:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.student-assignment-item {
+  display: grid;
+  grid-template-columns: 1fr 2fr auto;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.student-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.student-name {
+  font-weight: 600;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.student-contact {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.phone, .email {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.assignment-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.stop-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 6px;
+  background-color: white;
+  border: 1px solid #e9ecef;
+}
+
+.stop-info.pickup {
+  border-left: 4px solid #17a2b8;
+}
+
+.stop-info.dropoff {
+  border-left: 4px solid #ffc107;
+}
+
+.stop-info.no-stop {
+  border-left: 4px solid #dee2e6;
+}
+
+.stop-label {
+  font-weight: 600;
+  color: #495057;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.stop-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stop-name {
+  color: #333;
+  font-weight: 500;
+}
+
+.stop-time {
+  color: #007bff;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.no-stop-assigned {
+  color: #999;
+  font-style: italic;
+  font-size: 0.85rem;
+}
+
+.assignment-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.edit-button, .remove-button {
+  background: none;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.edit-button:hover {
+  border-color: #007bff;
+  background-color: #e3f2fd;
+}
+
+.remove-button:hover {
+  border-color: #dc3545;
+  background-color: #ffeaea;
+}
+
+.capacity-info {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+}
+
+.capacity-bar {
+  width: 100%;
+  height: 8px;
+  background-color: #e9ecef;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.capacity-filled {
+  height: 100%;
+  background: linear-gradient(90deg, #28a745 0%, #ffc107 70%, #dc3545 100%);
+  transition: width 0.3s ease;
+}
+
+.capacity-text {
+  text-align: center;
+  font-size: 0.9rem;
+  color: #495057;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .student-assignment-item {
+    grid-template-columns: 1fr;
     gap: 15px;
   }
   
-  .legend-item {
+  .assignment-details {
+    grid-template-columns: 1fr;
+  }
+  
+  .assignment-actions {
+    flex-direction: row;
     justify-content: center;
+  }
+  
+  .students-header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: stretch;
   }
 }
 </style>

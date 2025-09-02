@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import Line from '../models/Line';
 import User from '../models/User';
 import Vehicle from '../models/Vehicle';
+import StudentAssignment from '../models/StudentAssignment';
 import { lineValidation } from '../utils/validation';
 import { UserRole } from '../models/User';
 
@@ -525,6 +526,40 @@ export const deleteStopFromLineRoute = async (req: Request, res: Response): Prom
       return;
     }
 
+    const stopToDelete = line.route.stops[index];
+    
+    // Check if any active student assignments are using this stop
+    const assignmentsUsingStop = await StudentAssignment.find({
+      line: id,
+      isActive: true,
+      $or: [
+        { pickupStop: stopToDelete.stopId },
+        { dropoffStop: stopToDelete.stopId }
+      ]
+    }).populate('student', 'firstName lastName');
+
+    if (assignmentsUsingStop.length > 0) {
+      const affectedStudents = assignmentsUsingStop.map(assignment => {
+        const student = assignment.student as any;
+        const stopUsage = [];
+        if (assignment.pickupStop === stopToDelete.stopId) stopUsage.push('pickup');
+        if (assignment.dropoffStop === stopToDelete.stopId) stopUsage.push('dropoff');
+        
+        return {
+          name: `${student.firstName} ${student.lastName}`,
+          usage: stopUsage.join(' and ')
+        };
+      });
+
+      res.status(400).json({ 
+        message: 'Cannot delete stop: it is currently assigned to students',
+        details: `This stop is used as ${affectedStudents.map(s => `${s.usage} for ${s.name}`).join(', ')}`,
+        affectedStudents: affectedStudents,
+        stopName: stopToDelete.name
+      });
+      return;
+    }
+
     line.route.stops.splice(index, 1);
     await line.save();
 
@@ -538,6 +573,331 @@ export const deleteStopFromLineRoute = async (req: Request, res: Response): Prom
       message: 'Stop deleted successfully',
       line: populatedLine
     });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// Student Assignment Management Functions
+export const assignStudentToLineWithStops = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { studentId, pickupStop, dropoffStop, notes } = req.body;
+
+    if (!studentId) {
+      res.status(400).json({ message: 'Student ID is required' });
+      return;
+    }
+
+    // Verify student exists and is actually a student
+    const student = await User.findOne({
+      _id: studentId,
+      role: UserRole.STUDENT
+    });
+
+    if (!student) {
+      res.status(404).json({ message: 'Student not found or invalid role' });
+      return;
+    }
+
+    // Get the line
+    const line = await Line.findById(id);
+    if (!line) {
+      res.status(404).json({ message: 'Line not found' });
+      return;
+    }
+
+    // Check if student is already actively assigned to this line
+    const existingActiveAssignment = await StudentAssignment.findOne({
+      student: studentId,
+      line: id,
+      isActive: true
+    });
+
+    if (existingActiveAssignment) {
+      res.status(400).json({ message: 'Student is already assigned to this line' });
+      return;
+    }
+
+    // Get current active assignments for capacity check
+    const activeAssignments = await StudentAssignment.countDocuments({
+      line: id,
+      isActive: true
+    });
+
+    if (activeAssignments >= line.maxCapacity) {
+      res.status(400).json({ message: 'Line is at full capacity' });
+      return;
+    }
+
+    // Validate stops if provided
+    if (pickupStop || dropoffStop) {
+      if (!line.route || !line.route.stops || line.route.stops.length === 0) {
+        res.status(400).json({ message: 'Cannot assign stops: Line has no route defined' });
+        return;
+      }
+
+      const stopIds = line.route.stops.map(stop => stop.stopId);
+      
+      if (pickupStop && !stopIds.includes(pickupStop)) {
+        res.status(400).json({ message: 'Invalid pickup stop ID' });
+        return;
+      }
+
+      if (dropoffStop && !stopIds.includes(dropoffStop)) {
+        res.status(400).json({ message: 'Invalid dropoff stop ID' });
+        return;
+      }
+    }
+
+    // Check for inactive assignment that we can reactivate
+    const inactiveAssignment = await StudentAssignment.findOne({
+      student: studentId,
+      line: id,
+      isActive: false
+    });
+
+    let assignment;
+    
+    if (inactiveAssignment) {
+      // Reactivate existing inactive assignment
+      inactiveAssignment.pickupStop = pickupStop || undefined;
+      inactiveAssignment.dropoffStop = dropoffStop || undefined;
+      inactiveAssignment.notes = notes || undefined;
+      inactiveAssignment.isActive = true;
+      inactiveAssignment.assignedAt = new Date();
+      
+      assignment = await inactiveAssignment.save();
+    } else {
+      // Create new assignment
+      assignment = new StudentAssignment({
+        student: studentId,
+        line: id,
+        pickupStop: pickupStop || undefined,
+        dropoffStop: dropoffStop || undefined,
+        notes: notes || undefined
+      });
+
+      assignment = await assignment.save();
+    }
+
+    // Also add student to line.students array for backward compatibility
+    await Line.findByIdAndUpdate(id, { $addToSet: { students: studentId } });
+
+    // Return the assignment with populated data
+    const populatedAssignment = await assignment.populate([
+      { path: 'student', select: 'firstName lastName email phone' },
+      { path: 'line', select: 'name route' }
+    ]);
+
+    res.status(201).json({
+      message: 'Student assigned successfully',
+      assignment: populatedAssignment
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+export const getLineStudentAssignments = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    const line = await Line.findById(id);
+    if (!line) {
+      res.status(404).json({ message: 'Line not found' });
+      return;
+    }
+
+    const assignments = await StudentAssignment.find({
+      line: id,
+      isActive: true
+    }).populate([
+      { path: 'student', select: 'firstName lastName email phone' }
+    ]);
+
+    // Add stop details to each assignment
+    const assignmentsWithStops = assignments.map(assignment => {
+      const assignmentObj = assignment.toObject() as any;
+      
+      if (line.route && line.route.stops) {
+        if (assignmentObj.pickupStop) {
+          assignmentObj.pickupStopDetails = line.route.stops.find(
+            stop => stop.stopId === assignmentObj.pickupStop
+          );
+        }
+        
+        if (assignmentObj.dropoffStop) {
+          assignmentObj.dropoffStopDetails = line.route.stops.find(
+            stop => stop.stopId === assignmentObj.dropoffStop
+          );
+        }
+      }
+
+      return assignmentObj;
+    });
+
+    res.json({
+      assignments: assignmentsWithStops,
+      totalAssignments: assignments.length,
+      availableCapacity: line.maxCapacity - assignments.length
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+export const updateStudentAssignment = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id, assignmentId } = req.params;
+    const { pickupStop, dropoffStop, notes } = req.body;
+
+    const line = await Line.findById(id);
+    if (!line) {
+      res.status(404).json({ message: 'Line not found' });
+      return;
+    }
+
+    const assignment = await StudentAssignment.findOne({
+      _id: assignmentId,
+      line: id,
+      isActive: true
+    });
+
+    if (!assignment) {
+      res.status(404).json({ message: 'Student assignment not found' });
+      return;
+    }
+
+    // Validate stops if provided
+    if (pickupStop || dropoffStop) {
+      if (!line.route || !line.route.stops || line.route.stops.length === 0) {
+        res.status(400).json({ message: 'Cannot assign stops: Line has no route defined' });
+        return;
+      }
+
+      const stopIds = line.route.stops.map(stop => stop.stopId);
+      
+      if (pickupStop && !stopIds.includes(pickupStop)) {
+        res.status(400).json({ message: 'Invalid pickup stop ID' });
+        return;
+      }
+
+      if (dropoffStop && !stopIds.includes(dropoffStop)) {
+        res.status(400).json({ message: 'Invalid dropoff stop ID' });
+        return;
+      }
+    }
+
+    // Update assignment
+    assignment.pickupStop = pickupStop || assignment.pickupStop;
+    assignment.dropoffStop = dropoffStop || assignment.dropoffStop;
+    assignment.notes = notes !== undefined ? notes : assignment.notes;
+
+    await assignment.save();
+
+    const populatedAssignment = await assignment.populate([
+      { path: 'student', select: 'firstName lastName email phone' }
+    ]);
+
+    res.json({
+      message: 'Student assignment updated successfully',
+      assignment: populatedAssignment
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+export const removeStudentAssignment = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id, assignmentId } = req.params;
+
+    const assignment = await StudentAssignment.findOne({
+      _id: assignmentId,
+      line: id,
+      isActive: true
+    });
+
+    if (!assignment) {
+      res.status(404).json({ message: 'Student assignment not found' });
+      return;
+    }
+
+    // Mark assignment as inactive instead of deleting
+    assignment.isActive = false;
+    await assignment.save();
+
+    // Also remove student from line.students array for backward compatibility
+    await Line.findByIdAndUpdate(id, { $pull: { students: assignment.student } });
+
+    res.json({
+      message: 'Student assignment removed successfully'
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// Get stop usage information for data integrity checks
+export const getStopUsageInfo = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    const line = await Line.findById(id);
+    if (!line) {
+      res.status(404).json({ message: 'Line not found' });
+      return;
+    }
+
+    if (!line.route || !line.route.stops || line.route.stops.length === 0) {
+      res.json({ stopUsage: {} });
+      return;
+    }
+
+    // Get all active assignments for this line
+    const assignments = await StudentAssignment.find({
+      line: id,
+      isActive: true
+    }).populate('student', 'firstName lastName');
+
+    // Build stop usage map
+    const stopUsage: { [stopId: string]: { 
+      pickupStudents: string[], 
+      dropoffStudents: string[], 
+      totalUsage: number,
+      canDelete: boolean 
+    } } = {};
+
+    // Initialize all stops
+    line.route.stops.forEach(stop => {
+      stopUsage[stop.stopId] = {
+        pickupStudents: [],
+        dropoffStudents: [],
+        totalUsage: 0,
+        canDelete: true
+      };
+    });
+
+    // Count usage
+    assignments.forEach(assignment => {
+      const student = assignment.student as any;
+      const studentName = `${student.firstName} ${student.lastName}`;
+      
+      if (assignment.pickupStop && stopUsage[assignment.pickupStop]) {
+        stopUsage[assignment.pickupStop].pickupStudents.push(studentName);
+        stopUsage[assignment.pickupStop].totalUsage++;
+        stopUsage[assignment.pickupStop].canDelete = false;
+      }
+      
+      if (assignment.dropoffStop && stopUsage[assignment.dropoffStop]) {
+        stopUsage[assignment.dropoffStop].dropoffStudents.push(studentName);
+        stopUsage[assignment.dropoffStop].totalUsage++;
+        stopUsage[assignment.dropoffStop].canDelete = false;
+      }
+    });
+
+    res.json({ stopUsage });
   } catch (error: any) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
