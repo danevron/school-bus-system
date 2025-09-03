@@ -1,6 +1,6 @@
 # School Bus System
 
-A comprehensive school ride management system that supports four user roles: Admin, Driver, Parent, and Student. The system manages transportation lines, routes, vehicles, and bookings for school transportation with advanced ride scheduling and real-time tracking capabilities.
+A comprehensive school transportation management system that supports four user roles: Admin, Driver, Parent, and Student. The system manages transportation lines with embedded routes, vehicles, and student assignments.
 
 ## Features
 
@@ -22,18 +22,7 @@ A comprehensive school ride management system that supports four user roles: Adm
 - Capacity tracking and maintenance scheduling
 - License plate and vehicle information
 
-### 📅 Booking System
-- Parents can book rides for their children
-- Real-time capacity checking
-- Booking status tracking (pending, confirmed, cancelled, completed)
-- Date-specific bookings
 
-### 🚀 **NEW: Ride Management System**
-- **Automatic ride generation** based on line schedules
-- **Driver ride control** - start/end rides and track student pickup/dropoff
-- **Parent ride management** - remove students from future rides
-- **Guest student support** - admins can add temporary passengers
-- **Real-time status tracking** for rides and individual students
 
 ### 👥 User Management
 - Role-based access control (Admin, Driver, Parent, Student)
@@ -44,30 +33,22 @@ A comprehensive school ride management system that supports four user roles: Adm
 
 ### Admin
 - Full system access
-- Manage lines, routes, vehicles, and users
-- **Assign students to lines for persistent transportation**
-- **Generate rides automatically based on schedules**
-- **Add guest students to specific rides**
-- View all bookings and system reports
+- Manage lines, vehicles, and users
+- **Assign students to lines with pickup/dropoff stops**
+- View system reports
 - Assign drivers and vehicles to lines
 
 ### Driver
 - View assigned lines and schedules
-- **Start and end rides**
-- **Track individual student pickup and dropoff status**
-- **Update ride progress in real-time**
 - Access passenger lists for their routes
 
 ### Parent
-- Book rides for their children
-- View booking history and status
-- **Remove children from future rides**
 - Manage family accounts
+- View children's transportation assignments
 
 ### Student
-- View assigned rides and schedules
+- View assigned transportation lines
 - Access route information
-- **Track ride status and pickup/dropoff times**
 
 ## API Endpoints
 
@@ -93,24 +74,7 @@ A comprehensive school ride management system that supports four user roles: Adm
 - **`DELETE /api/lines/:id/route/stops/:index` - Delete route stop (Admin only)**
 - **`PUT /api/lines/:id/route` - Update route information (Admin only)**
 
-### **NEW: Rides**
-- **`POST /api/rides/generate` - Generate rides for lines (Admin only)**
-- **`GET /api/rides` - Get all rides (Admin only)**
-- **`GET /api/rides/:id` - Get ride by ID**
-- **`GET /api/rides/driver/my-rides` - Get driver's rides**
-- **`PUT /api/rides/:id/status` - Update ride status (Admin/Driver)**
-- **`PUT /api/rides/:rideId/students/:studentId/status` - Update student status (Driver)**
-- **`POST /api/rides/:rideId/guests` - Add guest student (Admin only)**
-- **`DELETE /api/rides/:rideId/students/:studentId` - Remove student from ride (Parent)**
-- **`GET /api/rides/student/my-rides` - Get student's rides**
 
-### Bookings
-- `GET /api/bookings` - Get all bookings (Admin only)
-- `POST /api/bookings` - Create booking (Parent only)
-- `GET /api/bookings/:id` - Get booking by ID (Admin only)
-- `PUT /api/bookings/:id` - Update booking (Admin only)
-- `GET /api/bookings/parent/my-bookings` - Get parent's bookings
-- `GET /api/bookings/line/:lineId` - Get bookings for specific line
 
 
 ### Vehicles
@@ -218,52 +182,23 @@ npm run dev  # Start development server on port 5173
 - `pickupStop`, `dropoffStop` (stop IDs)
 - `isActive`
 
-### **NEW: Ride**
-- `line` (reference to Line)
-- `date`
-- `status` (scheduled, in_progress, completed, cancelled)
-- `startTime`, `endTime`
-- `students` (array with pickup/dropoff status)
-- `guests` (array of guest students)
-- `driver` (reference to User)
-- `vehicle` (reference to Vehicle)
-- `route` (reference to Route)
-- `notes`
 
-### Booking
-- `student` (reference to User)
-- `parent` (reference to User)
-- `line` (reference to Line)
-- `date`
-- `pickupStop`, `dropoffStop`
-- `status` (pending, confirmed, cancelled, completed)
-- `notes`
 
-## **NEW: Workflow**
+## Workflow
 
 ### 1. Line Setup (Admin)
 1. Create vehicles and assign drivers
 2. Create lines with embedded route and stops
 3. Configure schedules for lines
 4. Assign students to lines with pickup/dropoff stops
-5. Generate rides automatically based on line schedules
 
 ### 2. Daily Operations (Driver)
-1. View assigned rides for the day
-2. Start ride when departing
-3. Mark students as picked up at each stop
-4. Mark students as dropped off at destination
-5. End ride when complete
+1. View assigned lines and schedules
+2. Access student lists for transportation
 
 ### 3. Parent Management
-1. View child's assigned rides
-2. Remove child from future rides if needed
-3. Track ride progress in real-time
-
-### 4. Guest Management (Admin)
-1. Add guest students to specific rides
-2. Ensure capacity limits are respected
-3. Track guest information separately
+1. View children's transportation assignments
+2. Manage family information
 
 ## Security Features
 

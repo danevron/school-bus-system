@@ -1,6 +1,5 @@
 import Joi from 'joi';
 import { UserRole } from '../models/User';
-import { RideStatus, StudentRideStatus } from '../models/Ride';
 
 export const userValidation = {
   register: Joi.object({
@@ -137,52 +136,7 @@ export const lineValidation = {
   })
 };
 
-export const bookingValidation = {
-  create: Joi.object({
-    student: Joi.string().hex().length(24).required(),
-    line: Joi.string().hex().length(24).required(),
-    date: Joi.date().min('now').required(),
-    pickupStop: Joi.string().required(),
-    dropoffStop: Joi.string().required(),
-    notes: Joi.string()
-  }),
 
-  update: Joi.object({
-    status: Joi.string().valid('pending', 'confirmed', 'cancelled', 'completed'),
-    notes: Joi.string()
-  })
-};
-
-export const rideValidation = {
-  generateRides: Joi.object({
-    startDate: Joi.date().required(),
-    endDate: Joi.date().min(Joi.ref('startDate')).required()
-  }),
-
-  updateRideStatus: Joi.object({
-    status: Joi.string().valid(...Object.values(RideStatus)).required()
-  }),
-
-  updateStudentStatus: Joi.object({
-    studentId: Joi.string().hex().length(24).required(),
-    status: Joi.string().valid(...Object.values(StudentRideStatus)).required(),
-    notes: Joi.string()
-  }),
-
-  addGuestStudent: Joi.object({
-    firstName: Joi.string().min(2).max(50).required(),
-    lastName: Joi.string().min(2).max(50).required(),
-    phone: Joi.string().pattern(/^\+?[\d\s\-\(\)]+$/).required(),
-    pickupStop: Joi.string().required(),
-    dropoffStop: Joi.string().required(),
-    notes: Joi.string()
-  }),
-
-  removeStudent: Joi.object({
-    studentId: Joi.string().hex().length(24).required(),
-    reason: Joi.string()
-  })
-};
 
 export const invitationValidation = {
   invite: Joi.object({

@@ -44,11 +44,11 @@ This is a **School Bus Ride Management System** built with:
 - **Rides** → Generated instances of line schedules with real-time tracking
 
 **Key Business Flow:**
-1. Admin creates Routes, Vehicles, and Lines
-2. Admin assigns Students to Lines permanently
-3. System generates Rides automatically based on Line schedules
-4. Drivers control ride status and track individual student pickup/dropoff
-5. Parents can remove students from future rides
+1. Admin creates Vehicles and Lines with embedded routes
+2. Admin assigns Students to Lines with pickup/dropoff stops
+3. Lines provide scheduled transportation services
+4. Drivers manage assigned transportation lines
+5. Parents can view children's transportation assignments
 
 ### Project Structure
 
@@ -58,11 +58,11 @@ src/
 ├── app.ts              # Express app configuration
 ├── server.ts           # Server startup and DB connection
 ├── config/database.ts  # MongoDB connection setup
-├── models/             # Mongoose schemas (User, Line, Route, Vehicle, Ride, Booking)
+├── models/             # Mongoose schemas (User, Line, Vehicle)
 ├── controllers/        # Route handlers for each domain
 ├── routes/            # Express route definitions
 ├── middlewares/auth.ts # JWT authentication & role authorization
-├── services/          # Business logic (RideService for scheduling)
+├── services/          # Business logic
 └── utils/             # JWT helpers, validation, seeder
 ```
 
@@ -79,11 +79,6 @@ frontend/src/
 ```
 
 ### Key Services
-
-**RideService** (`src/services/rideService.ts`):
-- Generates rides based on line schedules (daily, weekdays, weekends, custom)
-- Handles driver ride queries and student ride lookups
-- Manages capacity calculations
 
 **Authentication** (`src/middlewares/auth.ts`):
 - Exports role-specific middleware: `requireAdmin`, `requireDriver`, `requireParent`, `requireStudent`

@@ -205,7 +205,7 @@
               </div>
               <div class="preview-item">
                 <span class="preview-icon">🚌</span>
-                <span>Assign a vehicle and generate ride schedules</span>
+                <span>Assign a vehicle for transportation services</span>
               </div>
             </div>
             <div class="info-note">

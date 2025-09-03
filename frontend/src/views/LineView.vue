@@ -39,9 +39,8 @@
             <div class="notice-content">
               <h3>Active Line Notice</h3>
               <p>
-                This line is currently <strong>active</strong> and rides are being generated from it. 
-                Changes to this line should only be made for adding/removing students or modifying the route. 
-                Other modifications may affect existing rides and schedules.
+                This line is currently <strong>active</strong> and providing scheduled transportation services. 
+                Changes to this line should be made carefully as they may affect ongoing schedules and student assignments.
               </p>
             </div>
           </div>

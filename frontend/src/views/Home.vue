@@ -29,11 +29,6 @@
                 <button class="action-button" @click="goToLineManagement">Manage Lines</button>
               </div>
               <div class="dashboard-card">
-                <h4>Rides Management</h4>
-                <p>Generate and monitor rides</p>
-                <button class="action-button" disabled>Manage Rides</button>
-              </div>
-              <div class="dashboard-card">
                 <h4>Users Management</h4>
                 <p>Manage drivers, parents, and students</p>
                 <button class="action-button" @click="goToUserManagement">Manage Users</button>
@@ -46,13 +41,13 @@
             <h3>Driver Dashboard</h3>
             <div class="dashboard-cards">
               <div class="dashboard-card">
-                <h4>My Rides</h4>
-                <p>View and manage your assigned rides</p>
-                <button class="action-button" disabled>View Rides</button>
+                <h4>My Lines</h4>
+                <p>View and manage your assigned transportation lines</p>
+                <button class="action-button" disabled>View Lines</button>
               </div>
               <div class="dashboard-card">
                 <h4>Today's Schedule</h4>
-                <p>Check today's ride schedule</p>
+                <p>Check today's transportation schedule</p>
                 <button class="action-button" disabled>View Schedule</button>
               </div>
               <div class="dashboard-card">
@@ -68,19 +63,14 @@
             <h3>Parent Dashboard</h3>
             <div class="dashboard-cards">
               <div class="dashboard-card">
-                <h4>My Children's Rides</h4>
-                <p>View your children's ride schedules</p>
-                <button class="action-button" disabled>View Rides</button>
+                <h4>My Children's Transportation</h4>
+                <p>View your children's transportation schedules</p>
+                <button class="action-button" disabled>View Transportation</button>
               </div>
               <div class="dashboard-card">
-                <h4>Book New Ride</h4>
-                <p>Book rides for your children</p>
-                <button class="action-button" disabled>Book Ride</button>
-              </div>
-              <div class="dashboard-card">
-                <h4>Ride History</h4>
-                <p>View past ride bookings</p>
-                <button class="action-button" disabled>View History</button>
+                <h4>Transportation Status</h4>
+                <p>View your children's current transportation assignments</p>
+                <button class="action-button" disabled>View Assignments</button>
               </div>
             </div>
           </div>
@@ -90,13 +80,13 @@
             <h3>Student Dashboard</h3>
             <div class="dashboard-cards">
               <div class="dashboard-card">
-                <h4>My Rides</h4>
-                <p>View your upcoming rides</p>
-                <button class="action-button" disabled>View Rides</button>
+                <h4>My Transportation</h4>
+                <p>View your assigned transportation lines</p>
+                <button class="action-button" disabled>View Transportation</button>
               </div>
               <div class="dashboard-card">
-                <h4>Today's Ride</h4>
-                <p>Check today's ride information</p>
+                <h4>Today's Schedule</h4>
+                <p>Check today's transportation information</p>
                 <button class="action-button" disabled>Today's Info</button>
               </div>
               <div class="dashboard-card">

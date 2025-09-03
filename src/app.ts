@@ -10,9 +10,7 @@ import { log } from './utils/logger';
 // Import routes
 import authRoutes from './routes/auth';
 import lineRoutes from './routes/lines';
-import bookingRoutes from './routes/bookings';
 import vehicleRoutes from './routes/vehicles';
-import rideRoutes from './routes/rides';
 import invitationRoutes from './routes/invitations';
 
 // Load environment variables
@@ -57,9 +55,7 @@ app.get('/health', (req, res) => {
 // API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/lines', lineRoutes);
-app.use('/api/bookings', bookingRoutes);
 app.use('/api/vehicles', vehicleRoutes);
-app.use('/api/rides', rideRoutes);
 app.use('/api/invitations', invitationRoutes);
 
 // Root endpoint
@@ -70,9 +66,7 @@ app.get('/', (req, res) => {
     endpoints: {
       auth: '/api/auth',
       lines: '/api/lines',
-      bookings: '/api/bookings',
       vehicles: '/api/vehicles',
-      rides: '/api/rides',
       invitations: '/api/invitations'
     }
   });

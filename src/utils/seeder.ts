@@ -2,7 +2,6 @@ import mongoose from 'mongoose';
 import User, { UserRole } from '../models/User';
 import Vehicle from '../models/Vehicle';
 import Line, { ScheduleType } from '../models/Line';
-import { RideService } from '../services/rideService';
 import { connectDB } from '../config/database';
 import { log } from './logger';
 
@@ -144,7 +143,6 @@ export const seedDatabase = async () => {
     await User.deleteMany({});
     await Vehicle.deleteMany({});
     await Line.deleteMany({});
-    await mongoose.model('Ride').deleteMany({});
 
     log.info('Cleared existing data');
 
@@ -216,21 +214,13 @@ export const seedDatabase = async () => {
     const createdLines = await Line.insertMany(lines);
     log.info('Created lines with student assignments', { count: createdLines.length });
 
-    // Generate rides for the next 30 days
-    const startDate = new Date();
-    const endDate = new Date();
-    endDate.setDate(endDate.getDate() + 30);
-
-    log.info('Generating rides');
-    const generatedRides = await RideService.generateRidesForAllLines(startDate, endDate);
-    log.info('Generated rides', { count: generatedRides.length });
+    log.info('Lines created with embedded routes and student assignments');
 
     log.info('Database seeding completed successfully', {
       summary: {
         users: createdUsers.length,
         vehicles: createdVehicles.length,
-        lines: createdLines.length,
-        rides: generatedRides.length
+        lines: createdLines.length
       },
       credentials: {
         admin: 'admin@schoolbus.com / admin123',
@@ -239,11 +229,9 @@ export const seedDatabase = async () => {
         student: 'student1@schoolbus.com / student123'
       },
       features: [
-        'Lines now have assigned students',
-        'Rides are automatically generated based on line schedules',
-        'Drivers can manage ride status and student pickup/dropoff',
-        'Parents can remove students from future rides',
-        'Admins can add guest students to rides'
+        'Lines have embedded routes with stops',
+        'Students can be assigned to lines',
+        'Route management integrated into line management'
       ]
     });
 
