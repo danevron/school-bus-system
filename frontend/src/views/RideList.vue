@@ -134,12 +134,6 @@
                 >
                   Cancel
                 </button>
-                <button 
-                  @click="viewBookings(ride._id)"
-                  class="action-button bookings-button"
-                >
-                  View Bookings
-                </button>
               </div>
             </div>
           </div>
@@ -289,10 +283,6 @@ export default {
       }
     }
 
-    const viewBookings = (rideId) => {
-      // TODO: Navigate to ride bookings page when implemented
-      alert(`View bookings for ride ${rideId} - bookings page not yet implemented`)
-    }
 
     const viewLine = (lineId) => {
       router.push(`/lines/${lineId}`)
@@ -325,7 +315,6 @@ export default {
       startRide,
       endRide,
       cancelRide,
-      viewBookings,
       viewLine
     }
   }
@@ -614,14 +603,6 @@ export default {
   background-color: #c82333;
 }
 
-.bookings-button {
-  background-color: #6f42c1;
-  color: white;
-}
-
-.bookings-button:hover {
-  background-color: #5a36a0;
-}
 
 .line-link-button {
   background: none;

@@ -220,21 +220,32 @@
         <div class="bookings-section">
           <div class="section-header">
             <h2>Passenger Bookings</h2>
-            <button @click="loadBookings" class="refresh-button">🔄 Refresh</button>
+            <div class="header-controls">
+              <label class="show-cancelled-toggle">
+                <input 
+                  type="checkbox" 
+                  v-model="showCancelled"
+                  class="toggle-checkbox"
+                />
+                <span class="toggle-text">Show Cancelled</span>
+              </label>
+              <button @click="loadBookings" class="refresh-button">🔄 Refresh</button>
+            </div>
           </div>
           
           <div v-if="bookingsLoading" class="bookings-loading">
             Loading bookings...
           </div>
           
-          <div v-else-if="bookings.length === 0" class="empty-bookings">
+          <div v-else-if="filteredBookings.length === 0" class="empty-bookings">
             <div class="empty-icon">📋</div>
             <h3>No Bookings</h3>
-            <p>No passengers have booked this ride yet.</p>
+            <p v-if="!showCancelled && bookings.length > 0">All bookings are cancelled. Toggle "Show Cancelled" to view them.</p>
+            <p v-else>No passengers have booked this ride yet.</p>
           </div>
           
           <div v-else class="bookings-list">
-            <div v-for="booking in bookings" :key="booking._id" class="booking-item">
+            <div v-for="booking in filteredBookings" :key="booking._id" class="booking-item">
               <div class="booking-header">
                 <span class="passenger-name">{{ getPassengerName(booking.passenger) }}</span>
                 <span class="booking-status-badge" :class="getBookingStatusClass(booking.status)">
@@ -471,6 +482,7 @@ export default {
     const bookingsLoading = ref(false)
     const error = ref('')
     const successMessage = ref('')
+    const showCancelled = ref(false)
     
     // Booking modal state
     const showBookingModal = ref(false)
@@ -504,6 +516,13 @@ export default {
 
     const waitingListCount = computed(() => {
       return bookings.value.filter(booking => booking.status === 'waiting_list').length
+    })
+
+    const filteredBookings = computed(() => {
+      if (showCancelled.value) {
+        return bookings.value
+      }
+      return bookings.value.filter(booking => booking.status !== 'cancelled')
     })
 
     const showSuccessMessage = (message) => {
@@ -763,6 +782,8 @@ export default {
       bookingsLoading,
       error,
       successMessage,
+      showCancelled,
+      filteredBookings,
       fetchRide,
       loadBookings,
       formatDate,
@@ -1058,6 +1079,12 @@ export default {
   border-bottom: 2px solid #f8f9fa;
 }
 
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
 .section-header h2 {
   margin: 0;
   color: #333;
@@ -1078,6 +1105,50 @@ export default {
 .refresh-button:hover {
   background-color: #f8f9fa;
   border-color: #adb5bd;
+}
+
+.show-cancelled-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #666;
+  user-select: none;
+}
+
+.toggle-checkbox {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #ddd;
+  border-radius: 3px;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.toggle-checkbox:checked {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+.toggle-checkbox:checked::after {
+  content: '✓';
+  position: absolute;
+  top: -2px;
+  left: 1px;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.toggle-checkbox:hover {
+  border-color: #007bff;
+}
+
+.toggle-text {
+  cursor: pointer;
 }
 
 .info-grid {
