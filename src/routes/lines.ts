@@ -11,6 +11,7 @@ router.use(authenticate);
 router.post('/', requireAdmin, lineController.createLine);
 router.put('/:id', requireAdmin, lineController.updateLine);
 router.delete('/:id', requireAdmin, lineController.deleteLine);
+router.post('/:id/activate', requireAdmin, lineController.activateLine);
 router.post('/:id/assign-students', requireAdmin, lineController.assignStudentsToLine);
 router.post('/:id/students', requireAdmin, lineController.addStudentToLine);
 router.delete('/:id/students/:studentId', requireAdmin, lineController.removeStudentFromLine);

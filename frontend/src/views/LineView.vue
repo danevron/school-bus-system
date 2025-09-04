@@ -11,6 +11,14 @@
         </div>
         <div class="header-actions">
           <button @click="goBack" class="back-button">← Back to Lines</button>
+          <button 
+            v-if="canActivateLine"
+            @click="activateLineAction" 
+            class="activate-button"
+            :disabled="activating"
+          >
+            {{ activating ? 'Activating...' : 'Activate Line' }}
+          </button>
           <button @click="manageRoute" class="edit-button" :disabled="!line">
             Manage Stops and Students
           </button>
@@ -28,6 +36,14 @@
           <h3>Error Loading Line</h3>
           <p>{{ error }}</p>
           <button @click="fetchLine" class="retry-button">Try Again</button>
+        </div>
+      </div>
+
+      <!-- Success Message -->
+      <div v-if="successMessage" class="success-message-container">
+        <div class="success-message">
+          <div class="success-icon">✓</div>
+          <span>{{ successMessage }}</span>
         </div>
       </div>
 
@@ -305,7 +321,7 @@
 </template>
 
 <script>
-import { ref, inject, onMounted } from 'vue'
+import { ref, inject, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import apiService from '../services/api'
 import RouteMap from '../components/RouteMap.vue'
@@ -324,6 +340,8 @@ export default {
     const loading = ref(false)
     const error = ref(null)
     const studentAssignments = ref([])
+    const activating = ref(false)
+    const successMessage = ref('')
     
     const fetchLine = async () => {
       const lineId = route.params.id
@@ -467,6 +485,48 @@ export default {
 
       return { pickup: pickupStudents, dropoff: dropoffStudents }
     }
+
+    // Check if user can activate the line
+    const canActivateLine = computed(() => {
+      return line.value && 
+             !line.value.isActive && 
+             authStore.user?.role === 'admin' &&
+             line.value.route &&
+             line.value.route.stops &&
+             line.value.route.stops.length > 0 &&
+             studentAssignments.value.length > 0
+    })
+
+    // Show success message with auto-hide
+    const showSuccessMessage = (message) => {
+      successMessage.value = message
+      setTimeout(() => {
+        successMessage.value = ''
+      }, 3000)
+    }
+
+    // Activate line function
+    const activateLineAction = async () => {
+      if (!line.value || activating.value) return
+      
+      try {
+        activating.value = true
+        const response = await apiService.post(`/lines/${line.value._id}/activate`)
+        
+        // Refresh line data to show activated status
+        await fetchLine()
+        
+        showSuccessMessage(
+          `Line activated successfully! Generated ${response.generatedRides} future rides.`
+        )
+      } catch (err) {
+        console.error('Failed to activate line:', err)
+        const errorMessage = err.response?.data?.message || 'Failed to activate line'
+        alert(`Error: ${errorMessage}`)
+      } finally {
+        activating.value = false
+      }
+    }
     
     
     onMounted(async () => {
@@ -478,6 +538,8 @@ export default {
       loading,
       error,
       studentAssignments,
+      activating,
+      successMessage,
       route,
       fetchLine,
       formatDate,
@@ -490,7 +552,9 @@ export default {
       handleEdit,
       goBack,
       manageRoute,
-      getStopStudents
+      getStopStudents,
+      canActivateLine,
+      activateLineAction
     }
   }
 }
@@ -552,7 +616,7 @@ export default {
   gap: 12px;
 }
 
-.back-button, .edit-button {
+.back-button, .edit-button, .activate-button {
   padding: 8px 16px;
   border: none;
   border-radius: 4px;
@@ -580,6 +644,20 @@ export default {
 }
 
 .edit-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.activate-button {
+  background-color: #fd7e14;
+  color: white;
+}
+
+.activate-button:hover:not(:disabled) {
+  background-color: #e8690b;
+}
+
+.activate-button:disabled {
   background-color: #ccc;
   cursor: not-allowed;
 }
@@ -623,6 +701,50 @@ export default {
   border-radius: 4px;
   cursor: pointer;
   margin-top: 15px;
+}
+
+.success-message-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1001;
+  animation: slideInRight 0.3s ease-out;
+}
+
+.success-message {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+  padding: 15px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+  max-width: 350px;
+}
+
+.success-icon {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 .content-grid {

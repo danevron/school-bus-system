@@ -48,6 +48,10 @@ export interface ILine extends Document {
   students: Types.ObjectId[]; // Assigned students to this line
   createdAt: Date;
   updatedAt: Date;
+  
+  // Methods
+  canBeActivated(): { canActivate: boolean; reason?: string };
+  activate(): Promise<ILine>;
 }
 
 const scheduleSchema = new Schema<ISchedule>({
@@ -194,5 +198,35 @@ lineSchema.virtual('availableCapacity').get(function() {
 // Ensure virtuals are serialized
 lineSchema.set('toJSON', { virtuals: true });
 lineSchema.set('toObject', { virtuals: true });
+
+// Method to check if line can be activated
+lineSchema.methods.canBeActivated = function() {
+  if (this.isActive) {
+    return { canActivate: false, reason: 'Line is already active' };
+  }
+  
+  // Check if line has a route with stops
+  if (!this.route || !this.route.stops || this.route.stops.length === 0) {
+    return { canActivate: false, reason: 'Line must have a route with stops' };
+  }
+  
+  // Check if line has at least one assigned student
+  if (!this.students || this.students.length === 0) {
+    return { canActivate: false, reason: 'Line must have at least one assigned student' };
+  }
+  
+  return { canActivate: true };
+};
+
+// Method to activate line
+lineSchema.methods.activate = async function() {
+  const validation = this.canBeActivated();
+  if (!validation.canActivate) {
+    throw new Error(validation.reason);
+  }
+  
+  this.isActive = true;
+  return await this.save();
+};
 
 export default mongoose.model<ILine>('Line', lineSchema); 

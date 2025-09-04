@@ -3,8 +3,10 @@ import Line from '../models/Line';
 import User from '../models/User';
 import Vehicle from '../models/Vehicle';
 import StudentAssignment from '../models/StudentAssignment';
+import Ride from '../models/Ride';
 import { lineValidation } from '../utils/validation';
 import { UserRole } from '../models/User';
+import { generateRidesForLine } from '../services/rideGenerationService';
 
 export const createLine = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -898,6 +900,57 @@ export const getStopUsageInfo = async (req: Request, res: Response): Promise<voi
     });
 
     res.json({ stopUsage });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// Activate line (Admin only)
+export const activateLine = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    const line = await Line.findById(id);
+    if (!line) {
+      res.status(404).json({ message: 'Line not found' });
+      return;
+    }
+
+    // Check if line can be activated
+    const validation = line.canBeActivated();
+    if (!validation.canActivate) {
+      res.status(400).json({ message: validation.reason });
+      return;
+    }
+
+    // Activate the line
+    const activatedLine = await line.activate();
+
+    // Generate future rides for this line
+    try {
+      const generatedRides = await generateRidesForLine(activatedLine);
+      
+      const populatedLine = await Line.findById(id).populate([
+        { path: 'driver', select: 'firstName lastName email phone' },
+        { path: 'vehicle', select: 'licensePlate make vehicleModel capacity' },
+        { path: 'students', select: 'firstName lastName email phone' }
+      ]);
+
+      res.json({
+        message: 'Line activated successfully',
+        line: populatedLine,
+        generatedRides: generatedRides.length,
+        details: `Generated ${generatedRides.length} future rides`
+      });
+    } catch (rideGenerationError: any) {
+      // If ride generation fails, deactivate the line and return error
+      await Line.findByIdAndUpdate(id, { isActive: false });
+      res.status(500).json({ 
+        message: 'Failed to generate rides for activated line', 
+        error: rideGenerationError.message 
+      });
+      return;
+    }
   } catch (error: any) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
