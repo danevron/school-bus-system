@@ -7,6 +7,8 @@ import LineList from './views/LineList.vue'
 import LineCreate from './views/LineCreate.vue'
 import LineView from './views/LineView.vue'
 import LineRouteManager from './views/LineRouteManager.vue'
+import RideList from './views/RideList.vue'
+import RideView from './views/RideView.vue'
 import authStore from './stores/auth'
 
 const routes = [
@@ -60,6 +62,18 @@ const routes = [
     path: '/lines/:id/route',
     name: 'LineRouteManager',
     component: LineRouteManager,
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/rides',
+    name: 'RideList',
+    component: RideList,
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/rides/:id',
+    name: 'RideView',
+    component: RideView,
     meta: { requiresAuth: true, requiresAdmin: true }
   }
 ]

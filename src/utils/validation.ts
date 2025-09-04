@@ -152,6 +152,89 @@ export const invitationValidation = {
   })
 };
 
+export const rideValidation = {
+  create: Joi.object({
+    date: Joi.date().min('now').required(),
+    startTime: Joi.date().optional(),
+    route: Joi.object({
+      name: Joi.string().required(),
+      stops: Joi.array().items(
+        Joi.object({
+          stopId: Joi.string().required(),
+          name: Joi.string().required(),
+          address: Joi.string().required(),
+          coordinates: Joi.object({
+            latitude: Joi.number().min(-90).max(90).required(),
+            longitude: Joi.number().min(-180).max(180).required()
+          }).required(),
+          estimatedArrivalTime: Joi.date().optional(),
+          actualArrivalTime: Joi.date().optional(),
+          type: Joi.string().valid('pickup', 'dropoff').required()
+        })
+      ).min(2).required(),
+      estimatedDuration: Joi.number().min(0).required(),
+      totalDistance: Joi.number().min(0).required()
+    }).required(),
+    driver: Joi.string().hex().length(24).required(),
+    vehicle: Joi.string().hex().length(24).required(),
+    lineId: Joi.string().hex().length(24).optional(),
+    notes: Joi.string().optional()
+  }),
+
+  update: Joi.object({
+    date: Joi.date().min('now').optional(),
+    startTime: Joi.date().optional(),
+    route: Joi.object({
+      name: Joi.string().required(),
+      stops: Joi.array().items(
+        Joi.object({
+          stopId: Joi.string().required(),
+          name: Joi.string().required(),
+          address: Joi.string().required(),
+          coordinates: Joi.object({
+            latitude: Joi.number().min(-90).max(90).required(),
+            longitude: Joi.number().min(-180).max(180).required()
+          }).required(),
+          estimatedArrivalTime: Joi.date().optional(),
+          actualArrivalTime: Joi.date().optional(),
+          type: Joi.string().valid('pickup', 'dropoff').required()
+        })
+      ).min(2).required(),
+      estimatedDuration: Joi.number().min(0).required(),
+      totalDistance: Joi.number().min(0).required()
+    }).optional(),
+    driver: Joi.string().hex().length(24).optional(),
+    vehicle: Joi.string().hex().length(24).optional(),
+    lineId: Joi.string().hex().length(24).optional(),
+    notes: Joi.string().optional(),
+    status: Joi.string().valid('scheduled', 'in_progress', 'completed', 'cancelled').optional()
+  })
+};
+
+export const bookingValidation = {
+  create: Joi.object({
+    rideId: Joi.string().hex().length(24).required(),
+    passengerId: Joi.string().hex().length(24).required(),
+    pickupStop: Joi.object({
+      stopId: Joi.string().required(),
+      name: Joi.string().optional(),
+      address: Joi.string().optional(),
+      estimatedTime: Joi.date().optional()
+    }).required(),
+    dropoffStop: Joi.object({
+      stopId: Joi.string().required(),
+      name: Joi.string().optional(),
+      address: Joi.string().optional(),
+      estimatedTime: Joi.date().optional()
+    }).optional(),
+    notes: Joi.string().optional()
+  }),
+
+  cancel: Joi.object({
+    reason: Joi.string().optional()
+  })
+};
+
 export const parentStudentValidation = {
   connectStudentToParents: Joi.object({
     studentId: Joi.string().hex().length(24).required(),

@@ -12,6 +12,8 @@ import authRoutes from './routes/auth';
 import lineRoutes from './routes/lines';
 import vehicleRoutes from './routes/vehicles';
 import invitationRoutes from './routes/invitations';
+import rideRoutes from './routes/rides';
+import bookingRoutes from './routes/bookings';
 
 // Load environment variables
 dotenv.config();
@@ -57,6 +59,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/lines', lineRoutes);
 app.use('/api/vehicles', vehicleRoutes);
 app.use('/api/invitations', invitationRoutes);
+app.use('/api/rides', rideRoutes);
+app.use('/api/bookings', bookingRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {
@@ -67,7 +71,9 @@ app.get('/', (req, res) => {
       auth: '/api/auth',
       lines: '/api/lines',
       vehicles: '/api/vehicles',
-      invitations: '/api/invitations'
+      invitations: '/api/invitations',
+      rides: '/api/rides',
+      bookings: '/api/bookings'
     }
   });
 });

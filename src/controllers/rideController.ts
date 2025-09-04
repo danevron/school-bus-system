@@ -1,0 +1,399 @@
+import { Request, Response } from 'express';
+import Ride, { RideStatus } from '../models/Ride';
+import Vehicle from '../models/Vehicle';
+import User, { UserRole } from '../models/User';
+import { rideValidation } from '../utils/validation';
+
+export const rideController = {
+  // Get all rides (Admin only)
+  getAllRides: async (req: Request, res: Response) => {
+    try {
+      const { status, date, driverId } = req.query;
+      
+      const filter: any = {};
+      
+      if (status) {
+        filter.status = status;
+      }
+      
+      if (date) {
+        const queryDate = new Date(date as string);
+        filter.date = {
+          $gte: new Date(queryDate.setHours(0, 0, 0, 0)),
+          $lt: new Date(queryDate.setHours(23, 59, 59, 999))
+        };
+      }
+      
+      if (driverId) {
+        filter.driver = driverId;
+      }
+      
+      const rides = await Ride.find(filter)
+        .populate('driver', 'firstName lastName phone email')
+        .populate('vehicle', 'licensePlate make vehicleModel capacity')
+        .populate('createdBy', 'firstName lastName')
+        .populate('lineId', 'name description isActive')
+        .sort({ date: 1, startTime: 1 });
+      
+      res.json({
+        message: 'Rides retrieved successfully',
+        data: { rides }
+      });
+    } catch (error) {
+      console.error('Error getting rides:', error);
+      res.status(500).json({ 
+        message: 'Failed to retrieve rides',
+        error: process.env.NODE_ENV === 'development' ? error : 'Internal server error'
+      });
+    }
+  },
+
+  // Get ride by ID
+  getRideById: async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      
+      const ride = await Ride.findById(id)
+        .populate('driver', 'firstName lastName phone email')
+        .populate('vehicle', 'licensePlate make vehicleModel capacity')
+        .populate('createdBy', 'firstName lastName')
+        .populate('lineId', 'name description'); // for future line integration
+      
+      if (!ride) {
+        return res.status(404).json({ message: 'Ride not found' });
+      }
+      
+      res.json({
+        message: 'Ride retrieved successfully',
+        data: { ride }
+      });
+    } catch (error) {
+      console.error('Error getting ride:', error);
+      res.status(500).json({ 
+        message: 'Failed to retrieve ride',
+        error: process.env.NODE_ENV === 'development' ? error : 'Internal server error'
+      });
+    }
+  },
+
+  // Create new ride (Admin only)
+  createRide: async (req: Request, res: Response) => {
+    try {
+      const { error } = rideValidation.create.validate(req.body);
+      if (error) {
+        return res.status(400).json({ message: error.details[0].message });
+      }
+
+      const {
+        date,
+        startTime,
+        route,
+        driver: driverId,
+        vehicle: vehicleId,
+        lineId,
+        notes
+      } = req.body;
+
+      // Validate driver exists and has driver role
+      const driver = await User.findById(driverId);
+      if (!driver || driver.role !== UserRole.DRIVER) {
+        return res.status(400).json({ message: 'Invalid driver specified' });
+      }
+
+      // Validate vehicle exists and is active
+      const vehicle = await Vehicle.findById(vehicleId);
+      if (!vehicle || !vehicle.isActive) {
+        return res.status(400).json({ message: 'Invalid or inactive vehicle specified' });
+      }
+
+      // Check if driver is already assigned to another ride at the same date/time
+      const existingRide = await Ride.findOne({
+        driver: driverId,
+        date: new Date(date),
+        status: { $in: [RideStatus.SCHEDULED, RideStatus.IN_PROGRESS] }
+      });
+
+      if (existingRide) {
+        return res.status(400).json({ 
+          message: 'Driver is already assigned to another ride on this date' 
+        });
+      }
+
+      // Check if vehicle is already assigned to another ride at the same date/time
+      const existingVehicleRide = await Ride.findOne({
+        vehicle: vehicleId,
+        date: new Date(date),
+        status: { $in: [RideStatus.SCHEDULED, RideStatus.IN_PROGRESS] }
+      });
+
+      if (existingVehicleRide) {
+        return res.status(400).json({ 
+          message: 'Vehicle is already assigned to another ride on this date' 
+        });
+      }
+
+      const newRide = new Ride({
+        date: new Date(date),
+        startTime: startTime ? new Date(startTime) : undefined,
+        route,
+        driver: driverId,
+        vehicle: vehicleId,
+        maxCapacity: vehicle.capacity,
+        availableSeats: vehicle.capacity, // Initially all seats are available
+        lineId: lineId || undefined,
+        notes,
+        createdBy: req.user?.userId
+      });
+
+      const savedRide = await newRide.save();
+      
+      const populatedRide = await Ride.findById(savedRide._id)
+        .populate('driver', 'firstName lastName phone email')
+        .populate('vehicle', 'licensePlate make vehicleModel capacity')
+        .populate('createdBy', 'firstName lastName');
+
+      res.status(201).json({
+        message: 'Ride created successfully',
+        data: { ride: populatedRide }
+      });
+    } catch (error) {
+      console.error('Error creating ride:', error);
+      res.status(500).json({ 
+        message: 'Failed to create ride',
+        error: process.env.NODE_ENV === 'development' ? error : 'Internal server error'
+      });
+    }
+  },
+
+  // Update ride (Admin only)
+  updateRide: async (req: Request, res: Response) => {
+    try {
+      const { error } = rideValidation.update.validate(req.body);
+      if (error) {
+        return res.status(400).json({ message: error.details[0].message });
+      }
+
+      const { id } = req.params;
+      const updates = req.body;
+
+      const ride = await Ride.findById(id);
+      if (!ride) {
+        return res.status(404).json({ message: 'Ride not found' });
+      }
+
+      // Prevent updates to rides that have started or completed
+      if (ride.status === RideStatus.IN_PROGRESS || ride.status === RideStatus.COMPLETED) {
+        return res.status(400).json({ 
+          message: 'Cannot update ride that is in progress or completed' 
+        });
+      }
+
+      // If updating driver, validate the new driver
+      if (updates.driver) {
+        const driver = await User.findById(updates.driver);
+        if (!driver || driver.role !== UserRole.DRIVER) {
+          return res.status(400).json({ message: 'Invalid driver specified' });
+        }
+      }
+
+      // If updating vehicle, validate the new vehicle and update capacity
+      if (updates.vehicle) {
+        const vehicle = await Vehicle.findById(updates.vehicle);
+        if (!vehicle || !vehicle.isActive) {
+          return res.status(400).json({ message: 'Invalid or inactive vehicle specified' });
+        }
+        updates.maxCapacity = vehicle.capacity;
+        // Recalculate available seats
+        await ride.updateAvailableSeats();
+      }
+
+      const updatedRide = await Ride.findByIdAndUpdate(id, updates, { 
+        new: true, 
+        runValidators: true 
+      })
+        .populate('driver', 'firstName lastName phone email')
+        .populate('vehicle', 'licensePlate make vehicleModel capacity')
+        .populate('createdBy', 'firstName lastName');
+
+      res.json({
+        message: 'Ride updated successfully',
+        data: { ride: updatedRide }
+      });
+    } catch (error) {
+      console.error('Error updating ride:', error);
+      res.status(500).json({ 
+        message: 'Failed to update ride',
+        error: process.env.NODE_ENV === 'development' ? error : 'Internal server error'
+      });
+    }
+  },
+
+  // Delete ride (Admin only)
+  deleteRide: async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+
+      const ride = await Ride.findById(id);
+      if (!ride) {
+        return res.status(404).json({ message: 'Ride not found' });
+      }
+
+      // Prevent deletion of rides that have started
+      if (ride.status === RideStatus.IN_PROGRESS || ride.status === RideStatus.COMPLETED) {
+        return res.status(400).json({ 
+          message: 'Cannot delete ride that is in progress or completed' 
+        });
+      }
+
+      // Check if ride has any confirmed bookings
+      const Booking = require('../models/Booking').default;
+      const confirmedBookings = await Booking.countDocuments({
+        ride: id,
+        status: { $in: ['confirmed', 'checked_in'] }
+      });
+
+      if (confirmedBookings > 0) {
+        return res.status(400).json({ 
+          message: `Cannot delete ride with ${confirmedBookings} confirmed booking(s). Cancel bookings first.` 
+        });
+      }
+
+      await Ride.findByIdAndDelete(id);
+
+      res.json({ message: 'Ride deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting ride:', error);
+      res.status(500).json({ 
+        message: 'Failed to delete ride',
+        error: process.env.NODE_ENV === 'development' ? error : 'Internal server error'
+      });
+    }
+  },
+
+  // Start ride (Driver only)
+  startRide: async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const driverId = req.user?.userId;
+
+      const ride = await Ride.findById(id);
+      if (!ride) {
+        return res.status(404).json({ message: 'Ride not found' });
+      }
+
+      // Verify the driver is assigned to this ride
+      if (ride.driver.toString() !== driverId) {
+        return res.status(403).json({ message: 'You are not assigned to this ride' });
+      }
+
+      if (ride.status !== RideStatus.SCHEDULED) {
+        return res.status(400).json({ message: 'Ride cannot be started' });
+      }
+
+      ride.status = RideStatus.IN_PROGRESS;
+      ride.actualStartTime = new Date();
+      
+      const updatedRide = await ride.save();
+
+      res.json({
+        message: 'Ride started successfully',
+        data: { ride: updatedRide }
+      });
+    } catch (error) {
+      console.error('Error starting ride:', error);
+      res.status(500).json({ 
+        message: 'Failed to start ride',
+        error: process.env.NODE_ENV === 'development' ? error : 'Internal server error'
+      });
+    }
+  },
+
+  // End ride (Driver only)
+  endRide: async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const driverId = req.user?.userId;
+
+      const ride = await Ride.findById(id);
+      if (!ride) {
+        return res.status(404).json({ message: 'Ride not found' });
+      }
+
+      // Verify the driver is assigned to this ride
+      if (ride.driver.toString() !== driverId) {
+        return res.status(403).json({ message: 'You are not assigned to this ride' });
+      }
+
+      if (ride.status !== RideStatus.IN_PROGRESS) {
+        return res.status(400).json({ message: 'Ride is not in progress' });
+      }
+
+      ride.status = RideStatus.COMPLETED;
+      ride.actualEndTime = new Date();
+      
+      const updatedRide = await ride.save();
+
+      // Mark all checked-in bookings as completed
+      const Booking = require('../models/Booking').default;
+      await Booking.updateMany(
+        { 
+          ride: id, 
+          status: 'checked_in' 
+        },
+        { 
+          status: 'completed',
+          droppedOffAt: new Date(),
+          droppedOffBy: driverId
+        }
+      );
+
+      res.json({
+        message: 'Ride completed successfully',
+        data: { ride: updatedRide }
+      });
+    } catch (error) {
+      console.error('Error ending ride:', error);
+      res.status(500).json({ 
+        message: 'Failed to end ride',
+        error: process.env.NODE_ENV === 'development' ? error : 'Internal server error'
+      });
+    }
+  },
+
+  // Get driver's rides
+  getDriverRides: async (req: Request, res: Response) => {
+    try {
+      const driverId = req.user?.userId;
+      const { status, date } = req.query;
+
+      const filter: any = { driver: driverId };
+      
+      if (status) {
+        filter.status = status;
+      }
+      
+      if (date) {
+        const queryDate = new Date(date as string);
+        filter.date = {
+          $gte: new Date(queryDate.setHours(0, 0, 0, 0)),
+          $lt: new Date(queryDate.setHours(23, 59, 59, 999))
+        };
+      }
+
+      const rides = await Ride.find(filter)
+        .populate('vehicle', 'licensePlate make vehicleModel capacity')
+        .sort({ date: 1, startTime: 1 });
+
+      res.json({
+        message: 'Driver rides retrieved successfully',
+        data: { rides }
+      });
+    } catch (error) {
+      console.error('Error getting driver rides:', error);
+      res.status(500).json({ 
+        message: 'Failed to retrieve driver rides',
+        error: process.env.NODE_ENV === 'development' ? error : 'Internal server error'
+      });
+    }
+  }
+};

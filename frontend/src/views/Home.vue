@@ -33,6 +33,11 @@
                 <p>Manage drivers, parents, and students</p>
                 <button class="action-button" @click="goToUserManagement">Manage Users</button>
               </div>
+              <div class="dashboard-card">
+                <h4>Ride Management</h4>
+                <p>Create and manage individual rides</p>
+                <button class="action-button" @click="goToRideManagement">Manage Rides</button>
+              </div>
             </div>
           </div>
 
@@ -152,13 +157,18 @@ export default {
       router.push('/lines')
     }
     
+    const goToRideManagement = () => {
+      router.push('/rides')
+    }
+    
     return {
       authStore,
       userRole,
       roleClass,
       handleLogout,
       goToUserManagement,
-      goToLineManagement
+      goToLineManagement,
+      goToRideManagement
     }
   }
 }
