@@ -1,6 +1,25 @@
 # School Bus System
 
-A comprehensive school transportation management system that supports four user roles: Admin, Driver, Parent, and Student. The system manages transportation lines with embedded routes, vehicles, and student assignments.
+A comprehensive school transportation management system built as a monorepo supporting multiple applications. The system supports four user roles: Admin, Driver, Parent, and Student, and manages transportation lines with embedded routes, vehicles, and student assignments.
+
+## Project Structure
+
+```
+school-bus-system/                 # Monorepo root
+├── backend/                      # Node.js + TypeScript REST API
+│   ├── src/                      # Backend source code
+│   ├── package.json              # Backend dependencies
+│   └── .env                      # Backend configuration
+├── frontend/                     # Vue.js admin interface
+│   ├── src/                      # Frontend source code
+│   └── package.json              # Frontend dependencies
+├── mobile/                       # Flutter mobile app (coming soon)
+├── shared/                       # Shared resources
+│   ├── api-docs/                # OpenAPI spec & documentation
+│   └── config/                  # Shared configurations
+├── package.json                  # Monorepo orchestration
+└── README.md                     # This file
+```
 
 ## Features
 
@@ -89,22 +108,23 @@ A comprehensive school transportation management system that supports four user 
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd school-bus-system-backend
+cd school-bus-system
 ```
 
-2. Install dependencies:
+2. Install all dependencies:
 ```bash
-npm install
+# Install root dependencies and all workspaces
+npm run install:all
 ```
 
-3. Create a `.env` file in the root directory:
+3. Create a `.env` file in the `backend/` directory:
 ```env
 PORT=3000
 MONGODB_URI=mongodb://localhost:27017/school-bus-system
 JWT_SECRET=your-secret-key-here
 JWT_EXPIRES_IN=7d
 NODE_ENV=development
-ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001
+ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
 ```
 
 4. Start MongoDB (make sure MongoDB is installed and running)
@@ -116,11 +136,15 @@ npm run seed
 
 6. Run the application:
 ```bash
-# Development mode
+# Development mode (runs both backend and frontend)
 npm run dev
 
+# Run individual components
+npm run dev:backend    # Backend only
+npm run dev:frontend   # Frontend only
+
 # Production mode
-npm start
+npm run start
 ```
 
 ## Frontend Architecture
@@ -142,9 +166,8 @@ The system includes a Vue.js frontend located in the `frontend/` directory:
 
 ### Development Commands
 ```bash
-cd frontend
-npm install
-npm run dev  # Start development server on port 5173
+# Run from the root directory:
+npm run dev:frontend   # Start frontend dev server on port 5173
 ```
 
 ## Database Schema
@@ -212,12 +235,18 @@ npm run dev  # Start development server on port 5173
 
 ## Development
 
-### Scripts
-- `npm run dev` - Start development server with nodemon
-- `npm start` - Start production server
-- `npm run build` - Build TypeScript to JavaScript
-- `npm test` - Run tests
+### Monorepo Scripts
+- `npm run dev` - Start both backend and frontend in development mode
+- `npm run dev:backend` - Start backend development server only
+- `npm run dev:frontend` - Start frontend development server only
+- `npm run build` - Build both backend and frontend
+- `npm run build:backend` - Build backend TypeScript to JavaScript
+- `npm run build:frontend` - Build frontend for production
+- `npm run test` - Run backend tests
+- `npm run start` - Start backend in production mode
 - `npm run seed` - Seed database with sample data
+- `npm run install:all` - Install dependencies for all workspaces
+- `npm run clean:all` - Clean all node_modules and build artifacts
 
 ### Environment Variables
 - `PORT` - Server port (default: 3000)
