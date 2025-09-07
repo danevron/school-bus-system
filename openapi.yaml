@@ -220,7 +220,6 @@ paths:
             type: string
         - name: studentId
           in: path
-          required: true
           schema:
             type: string
       responses:
@@ -270,8 +269,8 @@ paths:
         - bearerAuth: []
       parameters:
         - name: id
-          in: path
           required: true
+          in: path
           schema:
             type: string
       responses:
@@ -315,7 +314,6 @@ paths:
       parameters:
         - name: id
           in: path
-          required: true
           schema:
             type: string
       requestBody:
@@ -426,6 +424,612 @@ paths:
       responses:
         '204':
           description: Vehicle deleted
+  /auth/users:
+    get:
+      summary: Get all users (admin only)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of all users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+  /auth/students:
+    post:
+      summary: Create a new student (admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudentCreation'
+      responses:
+        '201':
+          description: Student created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+  /auth/students/with-parents:
+    get:
+      summary: Get students with parent information (admin only)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of students with parent info
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StudentWithParents'
+  /auth/students/connect-parents:
+    post:
+      summary: Connect student to parents (admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                studentId:
+                  type: string
+                parentIds:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Student connected to parents successfully
+  /lines/{id}/activate:
+    post:
+      summary: Activate a line (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Line activated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Line'
+  /lines/{id}/student-assignments:
+    post:
+      summary: Assign student to line with pickup/dropoff stops (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudentAssignment'
+      responses:
+        '201':
+          description: Student assigned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Line'
+    get:
+      summary: Get student assignments for a line
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of student assignments for the line
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StudentAssignment'
+  /lines/{id}/student-assignments/{assignmentId}:
+    put:
+      summary: Update student assignment (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: assignmentId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudentAssignment'
+      responses:
+        '200':
+          description: Student assignment updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Line'
+    delete:
+      summary: Remove student assignment (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: assignmentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Student assignment removed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Line'
+  /lines/{id}/stop-usage:
+    get:
+      summary: Get stop usage information for a line
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Stop usage information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  stopUsage:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        stopIndex:
+                          type: integer
+                        pickupCount:
+                          type: integer
+                        dropoffCount:
+                          type: integer
+  /rides:
+    get:
+      summary: Get all rides (admin only)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of all rides
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Ride'
+    post:
+      summary: Create a new ride (admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RideCreation'
+      responses:
+        '201':
+          description: Ride created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ride'
+  /rides/{id}:
+    get:
+      summary: Get ride by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Ride details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ride'
+    put:
+      summary: Update ride (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RideUpdate'
+      responses:
+        '200':
+          description: Ride updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ride'
+    delete:
+      summary: Delete ride (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Ride deleted successfully
+  /rides/driver/my-rides:
+    get:
+      summary: Get rides assigned to the authenticated driver
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of rides for driver
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Ride'
+  /rides/{id}/start:
+    post:
+      summary: Start a ride (driver only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Ride started successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ride'
+  /rides/{id}/end:
+    post:
+      summary: End a ride (driver only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Ride ended successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ride'
+  /bookings:
+    get:
+      summary: Get all bookings (admin only)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of all bookings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Booking'
+    post:
+      summary: Create a new booking
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingCreation'
+      responses:
+        '201':
+          description: Booking created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+  /bookings/{id}:
+    get:
+      summary: Get booking by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Booking details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+  /bookings/{id}/confirm:
+    post:
+      summary: Confirm a booking (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Booking confirmed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+  /bookings/{id}/admit:
+    post:
+      summary: Admit waiting list booking (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Waiting list booking admitted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+  /bookings/{id}/cancel:
+    post:
+      summary: Cancel a booking
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Booking cancelled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+  /bookings/{id}/checkin:
+    post:
+      summary: Check in passenger for a booking (driver only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Passenger checked in successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+  /bookings/{id}/dropoff:
+    post:
+      summary: Drop off passenger for a booking (driver only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Passenger dropped off successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+  /bookings/ride/{rideId}:
+    get:
+      summary: Get all bookings for a specific ride
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: rideId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of bookings for the ride
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Booking'
+  /bookings/user/{userId}:
+    get:
+      summary: Get all bookings for a specific user
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of bookings for the user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Booking'
+  /invitations:
+    get:
+      summary: Get all invitations (admin only)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of all invitations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Invitation'
+    post:
+      summary: Send invitation to user (admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvitationCreation'
+      responses:
+        '201':
+          description: Invitation sent successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invitation'
+  /invitations/{id}:
+    delete:
+      summary: Delete invitation (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Invitation deleted successfully
+  /invitations/token/{token}:
+    get:
+      summary: Get invitation by token (public)
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Invitation details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invitation'
+  /invitations/accept/{token}:
+    post:
+      summary: Accept invitation by token (public)
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvitationAcceptance'
+      responses:
+        '200':
+          description: Invitation accepted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
 components:
   securitySchemes:
     bearerAuth:
@@ -634,4 +1238,244 @@ components:
           enum: [pending, confirmed, cancelled, completed]
           default: pending
         notes:
+          type: string
+    User:
+      type: object
+      required:
+        - username
+        - email
+        - role
+      properties:
+        _id:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [admin, driver, parent, student]
+        firstName:
+          type: string
+        lastName:
+          type: string
+        phone:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    StudentCreation:
+      type: object
+      required:
+        - username
+        - email
+        - firstName
+        - lastName
+      properties:
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+        firstName:
+          type: string
+        lastName:
+          type: string
+        phone:
+          type: string
+        password:
+          type: string
+    StudentWithParents:
+      type: object
+      properties:
+        _id:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        parents:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+    StudentAssignment:
+      type: object
+      required:
+        - studentId
+        - pickupStopIndex
+        - dropoffStopIndex
+      properties:
+        studentId:
+          type: string
+        pickupStopIndex:
+          type: integer
+          minimum: 0
+        dropoffStopIndex:
+          type: integer
+          minimum: 0
+        notes:
+          type: string
+    Ride:
+      type: object
+      required:
+        - line
+        - date
+        - status
+      properties:
+        _id:
+          type: string
+        line:
+          type: string
+          description: ID of the associated line
+        date:
+          type: string
+          format: date
+        status:
+          type: string
+          enum: [scheduled, in_progress, completed, cancelled]
+          default: scheduled
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        actualStartTime:
+          type: string
+          format: date-time
+        actualEndTime:
+          type: string
+          format: date-time
+        notes:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    RideCreation:
+      type: object
+      required:
+        - line
+        - date
+      properties:
+        line:
+          type: string
+        date:
+          type: string
+          format: date
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        notes:
+          type: string
+    RideUpdate:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [scheduled, in_progress, completed, cancelled]
+        notes:
+          type: string
+    BookingCreation:
+      type: object
+      required:
+        - student
+        - ride
+        - pickupStop
+        - dropoffStop
+      properties:
+        student:
+          type: string
+        ride:
+          type: string
+        pickupStop:
+          type: string
+        dropoffStop:
+          type: string
+        notes:
+          type: string
+    Invitation:
+      type: object
+      required:
+        - email
+        - role
+        - token
+        - expiresAt
+      properties:
+        _id:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [admin, driver, parent, student]
+        token:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        isUsed:
+          type: boolean
+          default: false
+    InvitationCreation:
+      type: object
+      required:
+        - email
+        - role
+      properties:
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [admin, driver, parent, student]
+        firstName:
+          type: string
+        lastName:
+          type: string
+    InvitationAcceptance:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        phone:
           type: string
