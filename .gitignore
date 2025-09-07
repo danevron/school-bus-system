@@ -61,28 +61,22 @@ lerna-debug.log*
 /frontend/.env.test
 
 # ============================================================================
-# FLUTTER / MOBILE (Prepared for future)
+# FLUTTER / MOBILE
 # ============================================================================
 
-# Flutter/Dart/Pub related
-/mobile/.dart_tool/
-/mobile/.packages
-/mobile/.pub-cache/
-/mobile/.pub/
+# Note: The mobile/ directory has its own .gitignore file
+# These are additional monorepo-level patterns
+
+# Flutter build artifacts at root level
 /mobile/build/
-/mobile/.flutter-plugins
-/mobile/.flutter-plugins-dependencies
 
-# iOS
-/mobile/ios/Flutter/flutter_export_environment.sh
-/mobile/ios/Flutter/Flutter.framework
-/mobile/ios/Flutter/Flutter.podspec
-/mobile/ios/Runner.xcworkspace
+# Generated files that might be created outside mobile dir
+flutter_*.log
+.flutter-plugins*
+.packages
 
-# Android
-/mobile/android/app/debug
-/mobile/android/app/profile
-/mobile/android/app/release
+# Mobile development artifacts
+/mobile/*.iml
 
 # ============================================================================
 # IDE / EDITOR FILES
@@ -143,6 +137,9 @@ Desktop.ini
 /backend/logs
 /frontend/logs
 
+# Flutter logs
+flutter_*.log
+
 # ============================================================================
 # TEMPORARY FILES
 # ============================================================================
@@ -160,7 +157,11 @@ Desktop.ini
 /coverage
 /backend/coverage
 /frontend/coverage
+/mobile/coverage/
 *.lcov
+
+# Flutter test results
+/mobile/test_results/
 
 # ============================================================================
 # MISCELLANEOUS
@@ -169,6 +170,18 @@ Desktop.ini
 # Lock files (optional - some teams prefer to commit these)
 # package-lock.json
 # yarn.lock
+# Note: pubspec.lock should generally be committed for applications
 
 # Local development files
 .local
+
+# Backup files
+*.backup
+*.bak
+*~
+
+# Archive files (often created during development)
+*.tar
+*.tar.gz
+*.zip
+*.rar

@@ -1,0 +1,87 @@
+{
+  "@@locale": "he",
+  "appTitle": "מערכת הסעות",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
+  "appSubtitle": "בית הספר זומר",
+  "@appSubtitle": {
+    "description": "The subtitle of the application"
+  },
+  "welcomeTitle": "🚌 ברוכים הבאים לאפליקציית ההסעות!",
+  "@welcomeTitle": {
+    "description": "Welcome message title on the home screen"
+  },
+  "welcomeDescription": "אפליקציה זו תעזור לנהגים לשתף נסיעות ולהורים לעקוב אחר הסעות ילדיהם.",
+  "@welcomeDescription": {
+    "description": "Welcome message description explaining the app's purpose"
+  },
+  "language": "שפה",
+  "@language": {
+    "description": "Language selection label"
+  },
+  "english": "English",
+  "@english": {
+    "description": "English language option"
+  },
+  "hebrew": "עברית",
+  "@hebrew": {
+    "description": "Hebrew language option"
+  },
+  "settings": "הגדרות",
+  "@settings": {
+    "description": "Settings menu label"
+  },
+  "home": "בית",
+  "@home": {
+    "description": "Home navigation label"
+  },
+  "profile": "פרופיל",
+  "@profile": {
+    "description": "Profile navigation label"
+  },
+  "rides": "נסיעות",
+  "@rides": {
+    "description": "Rides navigation label"
+  },
+  "notifications": "התראות",
+  "@notifications": {
+    "description": "Notifications navigation label"
+  },
+  "login": "התחברות",
+  "@login": {
+    "description": "Login button text"
+  },
+  "logout": "התנתקות",
+  "@logout": {
+    "description": "Logout button text"
+  },
+  "email": "דוא\"ל",
+  "@email": {
+    "description": "Email input field label"
+  },
+  "password": "סיסמה",
+  "@password": {
+    "description": "Password input field label"
+  },
+  "forgotPassword": "שכחת סיסמה?",
+  "@forgotPassword": {
+    "description": "Forgot password link text"
+  },
+  "driver": "נהג",
+  "@driver": {
+    "description": "Driver role label"
+  },
+  "parent": "הורה",
+  "@parent": {
+    "description": "Parent role label"
+  },
+  "student": "תלמיד",
+  "@student": {
+    "description": "Student role label"
+  },
+  "admin": "מנהל",
+  "@admin": {
+    "description": "Admin role label"
+  }
+}

@@ -1,0 +1,87 @@
+{
+  "@@locale": "en",
+  "appTitle": "School Bus System",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
+  "appSubtitle": "Mobile App",
+  "@appSubtitle": {
+    "description": "The subtitle of the application"
+  },
+  "welcomeTitle": "🚌 Welcome to School Bus App!",
+  "@welcomeTitle": {
+    "description": "Welcome message title on the home screen"
+  },
+  "welcomeDescription": "This mobile app will help drivers track rides and parents monitor their children's transportation.",
+  "@welcomeDescription": {
+    "description": "Welcome message description explaining the app's purpose"
+  },
+  "language": "Language",
+  "@language": {
+    "description": "Language selection label"
+  },
+  "english": "English",
+  "@english": {
+    "description": "English language option"
+  },
+  "hebrew": "עברית",
+  "@hebrew": {
+    "description": "Hebrew language option"
+  },
+  "settings": "Settings",
+  "@settings": {
+    "description": "Settings menu label"
+  },
+  "home": "Home",
+  "@home": {
+    "description": "Home navigation label"
+  },
+  "profile": "Profile",
+  "@profile": {
+    "description": "Profile navigation label"
+  },
+  "rides": "Rides",
+  "@rides": {
+    "description": "Rides navigation label"
+  },
+  "notifications": "Notifications",
+  "@notifications": {
+    "description": "Notifications navigation label"
+  },
+  "login": "Login",
+  "@login": {
+    "description": "Login button text"
+  },
+  "logout": "Logout",
+  "@logout": {
+    "description": "Logout button text"
+  },
+  "email": "Email",
+  "@email": {
+    "description": "Email input field label"
+  },
+  "password": "Password",
+  "@password": {
+    "description": "Password input field label"
+  },
+  "forgotPassword": "Forgot Password?",
+  "@forgotPassword": {
+    "description": "Forgot password link text"
+  },
+  "driver": "Driver",
+  "@driver": {
+    "description": "Driver role label"
+  },
+  "parent": "Parent",
+  "@parent": {
+    "description": "Parent role label"
+  },
+  "student": "Student",
+  "@student": {
+    "description": "Student role label"
+  },
+  "admin": "Admin",
+  "@admin": {
+    "description": "Admin role label"
+  }
+}
