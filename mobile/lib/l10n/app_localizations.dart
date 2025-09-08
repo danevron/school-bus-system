@@ -223,6 +223,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Admin'**
   String get admin;
+
+  /// Email field validation - required
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your email'**
+  String get emailRequired;
+
+  /// Email field validation - invalid format
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid email address'**
+  String get emailInvalid;
+
+  /// Password field validation - required
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your password'**
+  String get passwordRequired;
+
+  /// Password field validation - too short
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 6 characters'**
+  String get passwordTooShort;
+
+  /// Temporary message for forgot password feature
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot password feature coming soon'**
+  String get forgotPasswordComingSoon;
+
+  /// Generic network error message
+  ///
+  /// In en, this message translates to:
+  /// **'Network error occurred'**
+  String get networkError;
+
+  /// Generic login failure message
+  ///
+  /// In en, this message translates to:
+  /// **'Login failed'**
+  String get loginFailed;
+
+  /// Personalized welcome message with user's first name
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome back, {firstName}!'**
+  String welcomePersonalized(String firstName);
+
+  /// Personalized welcome description for logged in users
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re successfully logged in to the School Bus System. Manage your rides and stay updated with transportation information.'**
+  String get welcomePersonalizedDescription;
 }
 
 class _AppLocalizationsDelegate

@@ -8,14 +8,6 @@
   "@appSubtitle": {
     "description": "The subtitle of the application"
   },
-  "welcomeTitle": "🚌 ברוכים הבאים לאפליקציית ההסעות!",
-  "@welcomeTitle": {
-    "description": "Welcome message title on the home screen"
-  },
-  "welcomeDescription": "אפליקציה זו תעזור לנהגים לשתף נסיעות ולהורים לעקוב אחר הסעות ילדיהם.",
-  "@welcomeDescription": {
-    "description": "Welcome message description explaining the app's purpose"
-  },
   "language": "שפה",
   "@language": {
     "description": "Language selection label"
@@ -83,5 +75,51 @@
   "admin": "מנהל",
   "@admin": {
     "description": "Admin role label"
+  },
+  "emailRequired": "נא להזין כתובת אימייל",
+  "@emailRequired": {
+    "description": "Email field validation - required"
+  },
+  "emailInvalid": "נא להזין כתובת אימייל תקינה",
+  "@emailInvalid": {
+    "description": "Email field validation - invalid format"
+  },
+  "passwordRequired": "נא להזין סיסמה",
+  "@passwordRequired": {
+    "description": "Password field validation - required"
+  },
+  "passwordTooShort": "הסיסמה חייבת להכיל לפחות 6 תווים",
+  "@passwordTooShort": {
+    "description": "Password field validation - too short"
+  },
+  "forgotPasswordComingSoon": "תכונת שחזור סיסמה תגיע בקרוב",
+  "@forgotPasswordComingSoon": {
+    "description": "Temporary message for forgot password feature"
+  },
+  "networkError": "אירעה שגיאת רשת",
+  "@networkError": {
+    "description": "Generic network error message"
+  },
+  "loginFailed": "הכניסה נכשלה",
+  "@loginFailed": {
+    "description": "Generic login failure message"
+  },
+  "welcomePersonalized": "ברוך הבא, {firstName}!",
+  "@welcomePersonalized": {
+    "description": "Personalized welcome message with user's first name",
+    "placeholders": {
+      "firstName": {
+        "type": "String",
+        "description": "User's first name"
+      }
+    }
+  },
+  "welcomePersonalizedDescription": "התחברת בהצלחה למערכת ההסעות. נהל את הנסיעות שלך והישאר מעודכן עם מידע תחבורתי.",
+  "@welcomePersonalizedDescription": {
+    "description": "Personalized welcome description for logged in users"
+  },
+  "welcomeFallbackDescription": "אפליקציה לניהול הסעות בית ספר.",
+  "@welcomeFallbackDescription": {
+    "description": "Generic welcome description fallback when user data is not available"
   }
 }

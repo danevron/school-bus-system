@@ -71,4 +71,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get admin => 'Admin';
+
+  @override
+  String get emailRequired => 'Please enter your email';
+
+  @override
+  String get emailInvalid => 'Please enter a valid email address';
+
+  @override
+  String get passwordRequired => 'Please enter your password';
+
+  @override
+  String get passwordTooShort => 'Password must be at least 6 characters';
+
+  @override
+  String get forgotPasswordComingSoon => 'Forgot password feature coming soon';
+
+  @override
+  String get networkError => 'Network error occurred';
+
+  @override
+  String get loginFailed => 'Login failed';
+
+  @override
+  String welcomePersonalized(String firstName) {
+    return 'Welcome back, $firstName!';
+  }
+
+  @override
+  String get welcomePersonalizedDescription =>
+      'You\'re successfully logged in to the School Bus System. Manage your rides and stay updated with transportation information.';
 }

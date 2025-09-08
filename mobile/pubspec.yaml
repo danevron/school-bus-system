@@ -39,6 +39,12 @@ dependencies:
   
   # Internationalization support
   intl: any
+  
+  # HTTP client for API calls
+  http: ^1.1.0
+  
+  # Shared preferences for storing auth tokens
+  shared_preferences: ^2.2.2
 
 dev_dependencies:
   flutter_test:

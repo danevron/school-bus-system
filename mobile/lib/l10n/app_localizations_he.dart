@@ -71,4 +71,34 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get admin => 'מנהל';
+
+  @override
+  String get emailRequired => 'נא להזין כתובת אימייל';
+
+  @override
+  String get emailInvalid => 'נא להזין כתובת אימייל תקינה';
+
+  @override
+  String get passwordRequired => 'נא להזין סיסמה';
+
+  @override
+  String get passwordTooShort => 'הסיסמה חייבת להכיל לפחות 6 תווים';
+
+  @override
+  String get forgotPasswordComingSoon => 'תכונת שחזור סיסמה תגיע בקרוב';
+
+  @override
+  String get networkError => 'אירעה שגיאת רשת';
+
+  @override
+  String get loginFailed => 'הכניסה נכשלה';
+
+  @override
+  String welcomePersonalized(String firstName) {
+    return 'ברוך הבא, $firstName!';
+  }
+
+  @override
+  String get welcomePersonalizedDescription =>
+      'התחברת בהצלחה למערכת ההסעות. נהל את הנסיעות שלך והישאר מעודכן עם מידע תחבורתי.';
 }

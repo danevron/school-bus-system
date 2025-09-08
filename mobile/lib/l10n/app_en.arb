@@ -8,14 +8,6 @@
   "@appSubtitle": {
     "description": "The subtitle of the application"
   },
-  "welcomeTitle": "🚌 Welcome to School Bus App!",
-  "@welcomeTitle": {
-    "description": "Welcome message title on the home screen"
-  },
-  "welcomeDescription": "This mobile app will help drivers track rides and parents monitor their children's transportation.",
-  "@welcomeDescription": {
-    "description": "Welcome message description explaining the app's purpose"
-  },
   "language": "Language",
   "@language": {
     "description": "Language selection label"
@@ -83,5 +75,51 @@
   "admin": "Admin",
   "@admin": {
     "description": "Admin role label"
+  },
+  "emailRequired": "Please enter your email",
+  "@emailRequired": {
+    "description": "Email field validation - required"
+  },
+  "emailInvalid": "Please enter a valid email address",
+  "@emailInvalid": {
+    "description": "Email field validation - invalid format"
+  },
+  "passwordRequired": "Please enter your password",
+  "@passwordRequired": {
+    "description": "Password field validation - required"
+  },
+  "passwordTooShort": "Password must be at least 6 characters",
+  "@passwordTooShort": {
+    "description": "Password field validation - too short"
+  },
+  "forgotPasswordComingSoon": "Forgot password feature coming soon",
+  "@forgotPasswordComingSoon": {
+    "description": "Temporary message for forgot password feature"
+  },
+  "networkError": "Network error occurred",
+  "@networkError": {
+    "description": "Generic network error message"
+  },
+  "loginFailed": "Login failed",
+  "@loginFailed": {
+    "description": "Generic login failure message"
+  },
+  "welcomePersonalized": "Welcome back, {firstName}!",
+  "@welcomePersonalized": {
+    "description": "Personalized welcome message with user's first name",
+    "placeholders": {
+      "firstName": {
+        "type": "String",
+        "description": "User's first name"
+      }
+    }
+  },
+  "welcomePersonalizedDescription": "You're successfully logged in to the School Bus System. Manage your rides and stay updated with transportation information.",
+  "@welcomePersonalizedDescription": {
+    "description": "Personalized welcome description for logged in users"
+  },
+  "welcomeFallbackDescription": "Mobile application for school bus transportation management.",
+  "@welcomeFallbackDescription": {
+    "description": "Generic welcome description fallback when user data is not available"
   }
 }
