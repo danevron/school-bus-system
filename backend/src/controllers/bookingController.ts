@@ -349,8 +349,8 @@ export const bookingController = {
         return res.status(400).json({ message: 'Ride is not in progress' });
       }
 
-      if (booking.status !== BookingStatus.CONFIRMED) {
-        return res.status(400).json({ message: 'Only confirmed bookings can be checked in' });
+      if (booking.status !== BookingStatus.CONFIRMED && booking.status !== BookingStatus.UNCONFIRMED) {
+        return res.status(400).json({ message: 'Only confirmed or unconfirmed bookings can be checked in' });
       }
 
       await booking.checkIn(new Types.ObjectId(driverId));

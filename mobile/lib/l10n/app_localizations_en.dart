@@ -126,4 +126,89 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rideStatusScheduled => 'Scheduled';
+
+  @override
+  String get rideDetails => 'Ride Details';
+
+  @override
+  String get startRide => 'Start Ride';
+
+  @override
+  String get startingRide => 'Starting...';
+
+  @override
+  String get rideStartedSuccessfully => 'Ride started successfully';
+
+  @override
+  String get failedToStartRide => 'Failed to start ride';
+
+  @override
+  String get passengers => 'Passengers';
+
+  @override
+  String get noBookingsForRide => 'No bookings for this ride';
+
+  @override
+  String get bookingStatusConfirmed => 'Confirmed';
+
+  @override
+  String get bookingStatusUnconfirmed => 'Unconfirmed';
+
+  @override
+  String get bookingStatusCheckedIn => 'Checked In';
+
+  @override
+  String get bookingStatusCancelled => 'Cancelled';
+
+  @override
+  String get bookingStatusCompleted => 'Completed';
+
+  @override
+  String get pickup => 'Pickup';
+
+  @override
+  String get dropoff => 'Dropoff';
+
+  @override
+  String get checkIn => 'Check In';
+
+  @override
+  String get confirm => 'Confirm';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get bookingUpdatedSuccessfully => 'Booking updated successfully';
+
+  @override
+  String get failedToUpdateBooking => 'Failed to update booking';
+
+  @override
+  String passengersCount(int count) {
+    return 'Passengers ($count)';
+  }
+
+  @override
+  String get dropOff => 'Drop Off';
+
+  @override
+  String get passengerCheckedInSuccessfully =>
+      'Passenger checked in successfully';
+
+  @override
+  String get passengerDroppedOffSuccessfully =>
+      'Passenger dropped off successfully';
+
+  @override
+  String get endRide => 'End Ride';
+
+  @override
+  String get endingRide => 'Ending...';
+
+  @override
+  String get rideEndedSuccessfully => 'Ride ended successfully';
+
+  @override
+  String get failedToEndRide => 'Failed to end ride';
 }

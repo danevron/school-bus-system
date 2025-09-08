@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 import '../services/auth_service.dart';
+import 'ride_detail_screen.dart';
 
 class MyRidesScreen extends StatefulWidget {
   const MyRidesScreen({super.key});
@@ -263,7 +264,11 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
           color: colorScheme.onSurfaceVariant,
         ),
         onTap: () {
-          // TODO: Navigate to ride details or show actions
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => RideDetailScreen(ride: ride),
+            ),
+          );
         },
       ),
     );

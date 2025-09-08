@@ -325,6 +325,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Scheduled'**
   String get rideStatusScheduled;
+
+  /// Ride details screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Ride Details'**
+  String get rideDetails;
+
+  /// Start ride button text
+  ///
+  /// In en, this message translates to:
+  /// **'Start Ride'**
+  String get startRide;
+
+  /// Starting ride loading text
+  ///
+  /// In en, this message translates to:
+  /// **'Starting...'**
+  String get startingRide;
+
+  /// Success message when ride is started
+  ///
+  /// In en, this message translates to:
+  /// **'Ride started successfully'**
+  String get rideStartedSuccessfully;
+
+  /// Error message when ride fails to start
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to start ride'**
+  String get failedToStartRide;
+
+  /// Passengers section title
+  ///
+  /// In en, this message translates to:
+  /// **'Passengers'**
+  String get passengers;
+
+  /// Message when no bookings exist for ride
+  ///
+  /// In en, this message translates to:
+  /// **'No bookings for this ride'**
+  String get noBookingsForRide;
+
+  /// Booking status - confirmed
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed'**
+  String get bookingStatusConfirmed;
+
+  /// Booking status - unconfirmed
+  ///
+  /// In en, this message translates to:
+  /// **'Unconfirmed'**
+  String get bookingStatusUnconfirmed;
+
+  /// Booking status - checked in
+  ///
+  /// In en, this message translates to:
+  /// **'Checked In'**
+  String get bookingStatusCheckedIn;
+
+  /// Booking status - cancelled
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get bookingStatusCancelled;
+
+  /// Booking status - completed
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get bookingStatusCompleted;
+
+  /// Pickup location label
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup'**
+  String get pickup;
+
+  /// Dropoff location label
+  ///
+  /// In en, this message translates to:
+  /// **'Dropoff'**
+  String get dropoff;
+
+  /// Check in button text
+  ///
+  /// In en, this message translates to:
+  /// **'Check In'**
+  String get checkIn;
+
+  /// Confirm button text
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get confirm;
+
+  /// Cancel button text
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// Success message when booking is updated
+  ///
+  /// In en, this message translates to:
+  /// **'Booking updated successfully'**
+  String get bookingUpdatedSuccessfully;
+
+  /// Error message when booking update fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update booking'**
+  String get failedToUpdateBooking;
+
+  /// Passengers count with number
+  ///
+  /// In en, this message translates to:
+  /// **'Passengers ({count})'**
+  String passengersCount(int count);
+
+  /// Drop off button text
+  ///
+  /// In en, this message translates to:
+  /// **'Drop Off'**
+  String get dropOff;
+
+  /// Success message when passenger is checked in
+  ///
+  /// In en, this message translates to:
+  /// **'Passenger checked in successfully'**
+  String get passengerCheckedInSuccessfully;
+
+  /// Success message when passenger is dropped off
+  ///
+  /// In en, this message translates to:
+  /// **'Passenger dropped off successfully'**
+  String get passengerDroppedOffSuccessfully;
+
+  /// End ride button text
+  ///
+  /// In en, this message translates to:
+  /// **'End Ride'**
+  String get endRide;
+
+  /// Ending ride loading text
+  ///
+  /// In en, this message translates to:
+  /// **'Ending...'**
+  String get endingRide;
+
+  /// Success message when ride is ended
+  ///
+  /// In en, this message translates to:
+  /// **'Ride ended successfully'**
+  String get rideEndedSuccessfully;
+
+  /// Error message when ride fails to end
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to end ride'**
+  String get failedToEndRide;
 }
 
 class _AppLocalizationsDelegate

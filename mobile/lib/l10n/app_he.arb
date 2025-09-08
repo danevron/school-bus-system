@@ -157,5 +157,119 @@
   "rideStatusScheduled": "מתוכנן",
   "@rideStatusScheduled": {
     "description": "Ride status - scheduled"
+  },
+  "rideDetails": "פרטי נסיעה",
+  "@rideDetails": {
+    "description": "Ride details screen title"
+  },
+  "startRide": "התחל נסיעה",
+  "@startRide": {
+    "description": "Start ride button text"
+  },
+  "startingRide": "מתחיל...",
+  "@startingRide": {
+    "description": "Starting ride loading text"
+  },
+  "rideStartedSuccessfully": "הנסיעה החלה בהצלחה",
+  "@rideStartedSuccessfully": {
+    "description": "Success message when ride is started"
+  },
+  "failedToStartRide": "נכשל בהתחלת הנסיעה",
+  "@failedToStartRide": {
+    "description": "Error message when ride fails to start"
+  },
+  "passengers": "נוסעים",
+  "@passengers": {
+    "description": "Passengers section title"
+  },
+  "noBookingsForRide": "אין הזמנות לנסיעה זו",
+  "@noBookingsForRide": {
+    "description": "Message when no bookings exist for ride"
+  },
+  "bookingStatusConfirmed": "מאושר",
+  "@bookingStatusConfirmed": {
+    "description": "Booking status - confirmed"
+  },
+  "bookingStatusUnconfirmed": "לא מאושר",
+  "@bookingStatusUnconfirmed": {
+    "description": "Booking status - unconfirmed"
+  },
+  "bookingStatusCheckedIn": "עלה לאוטובוס",
+  "@bookingStatusCheckedIn": {
+    "description": "Booking status - checked in"
+  },
+  "bookingStatusCancelled": "בוטל",
+  "@bookingStatusCancelled": {
+    "description": "Booking status - cancelled"
+  },
+  "bookingStatusCompleted": "הושלם",
+  "@bookingStatusCompleted": {
+    "description": "Booking status - completed"
+  },
+  "pickup": "עליה",
+  "@pickup": {
+    "description": "Pickup location label"
+  },
+  "dropoff": "ירידה",
+  "@dropoff": {
+    "description": "Dropoff location label"
+  },
+  "checkIn": "עליה לאוטובוס",
+  "@checkIn": {
+    "description": "Check in button text"
+  },
+  "confirm": "אשר",
+  "@confirm": {
+    "description": "Confirm button text"
+  },
+  "cancel": "בטל",
+  "@cancel": {
+    "description": "Cancel button text"
+  },
+  "bookingUpdatedSuccessfully": "ההזמנה עודכנה בהצלחה",
+  "@bookingUpdatedSuccessfully": {
+    "description": "Success message when booking is updated"
+  },
+  "failedToUpdateBooking": "נכשל בעדכון ההזמנה",
+  "@failedToUpdateBooking": {
+    "description": "Error message when booking update fails"
+  },
+  "passengersCount": "נוסעים ({count})",
+  "@passengersCount": {
+    "description": "Passengers count with number",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Number of passengers"
+      }
+    }
+  },
+  "dropOff": "ירידה מהאוטובוס",
+  "@dropOff": {
+    "description": "Drop off button text"
+  },
+  "passengerCheckedInSuccessfully": "הנוסע עלה לאוטובוס בהצלחה",
+  "@passengerCheckedInSuccessfully": {
+    "description": "Success message when passenger is checked in"
+  },
+  "passengerDroppedOffSuccessfully": "הנוסע ירד מהאוטובוס בהצלחה",
+  "@passengerDroppedOffSuccessfully": {
+    "description": "Success message when passenger is dropped off"
+  },
+  "endRide": "סיים נסיעה",
+  "@endRide": {
+    "description": "End ride button text"
+  },
+  "endingRide": "מסיים...",
+  "@endingRide": {
+    "description": "Ending ride loading text"
+  },
+  "rideEndedSuccessfully": "הנסיעה הסתיימה בהצלחה",
+  "@rideEndedSuccessfully": {
+    "description": "Success message when ride is ended"
+  },
+  "failedToEndRide": "נכשל בסיום הנסיעה",
+  "@failedToEndRide": {
+    "description": "Error message when ride fails to end"
   }
 }

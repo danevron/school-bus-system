@@ -157,5 +157,119 @@
   "rideStatusScheduled": "Scheduled",
   "@rideStatusScheduled": {
     "description": "Ride status - scheduled"
+  },
+  "rideDetails": "Ride Details",
+  "@rideDetails": {
+    "description": "Ride details screen title"
+  },
+  "startRide": "Start Ride",
+  "@startRide": {
+    "description": "Start ride button text"
+  },
+  "startingRide": "Starting...",
+  "@startingRide": {
+    "description": "Starting ride loading text"
+  },
+  "rideStartedSuccessfully": "Ride started successfully",
+  "@rideStartedSuccessfully": {
+    "description": "Success message when ride is started"
+  },
+  "failedToStartRide": "Failed to start ride",
+  "@failedToStartRide": {
+    "description": "Error message when ride fails to start"
+  },
+  "passengers": "Passengers",
+  "@passengers": {
+    "description": "Passengers section title"
+  },
+  "noBookingsForRide": "No bookings for this ride",
+  "@noBookingsForRide": {
+    "description": "Message when no bookings exist for ride"
+  },
+  "bookingStatusConfirmed": "Confirmed",
+  "@bookingStatusConfirmed": {
+    "description": "Booking status - confirmed"
+  },
+  "bookingStatusUnconfirmed": "Unconfirmed",
+  "@bookingStatusUnconfirmed": {
+    "description": "Booking status - unconfirmed"
+  },
+  "bookingStatusCheckedIn": "Checked In",
+  "@bookingStatusCheckedIn": {
+    "description": "Booking status - checked in"
+  },
+  "bookingStatusCancelled": "Cancelled",
+  "@bookingStatusCancelled": {
+    "description": "Booking status - cancelled"
+  },
+  "bookingStatusCompleted": "Completed",
+  "@bookingStatusCompleted": {
+    "description": "Booking status - completed"
+  },
+  "pickup": "Pickup",
+  "@pickup": {
+    "description": "Pickup location label"
+  },
+  "dropoff": "Dropoff",
+  "@dropoff": {
+    "description": "Dropoff location label"
+  },
+  "checkIn": "Check In",
+  "@checkIn": {
+    "description": "Check in button text"
+  },
+  "confirm": "Confirm",
+  "@confirm": {
+    "description": "Confirm button text"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel button text"
+  },
+  "bookingUpdatedSuccessfully": "Booking updated successfully",
+  "@bookingUpdatedSuccessfully": {
+    "description": "Success message when booking is updated"
+  },
+  "failedToUpdateBooking": "Failed to update booking",
+  "@failedToUpdateBooking": {
+    "description": "Error message when booking update fails"
+  },
+  "passengersCount": "Passengers ({count})",
+  "@passengersCount": {
+    "description": "Passengers count with number",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Number of passengers"
+      }
+    }
+  },
+  "dropOff": "Drop Off",
+  "@dropOff": {
+    "description": "Drop off button text"
+  },
+  "passengerCheckedInSuccessfully": "Passenger checked in successfully",
+  "@passengerCheckedInSuccessfully": {
+    "description": "Success message when passenger is checked in"
+  },
+  "passengerDroppedOffSuccessfully": "Passenger dropped off successfully",
+  "@passengerDroppedOffSuccessfully": {
+    "description": "Success message when passenger is dropped off"
+  },
+  "endRide": "End Ride",
+  "@endRide": {
+    "description": "End ride button text"
+  },
+  "endingRide": "Ending...",
+  "@endingRide": {
+    "description": "Ending ride loading text"
+  },
+  "rideEndedSuccessfully": "Ride ended successfully",
+  "@rideEndedSuccessfully": {
+    "description": "Success message when ride is ended"
+  },
+  "failedToEndRide": "Failed to end ride",
+  "@failedToEndRide": {
+    "description": "Error message when ride fails to end"
   }
 }

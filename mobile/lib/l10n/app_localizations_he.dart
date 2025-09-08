@@ -125,4 +125,87 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get rideStatusScheduled => 'מתוכנן';
+
+  @override
+  String get rideDetails => 'פרטי נסיעה';
+
+  @override
+  String get startRide => 'התחל נסיעה';
+
+  @override
+  String get startingRide => 'מתחיל...';
+
+  @override
+  String get rideStartedSuccessfully => 'הנסיעה החלה בהצלחה';
+
+  @override
+  String get failedToStartRide => 'נכשל בהתחלת הנסיעה';
+
+  @override
+  String get passengers => 'נוסעים';
+
+  @override
+  String get noBookingsForRide => 'אין הזמנות לנסיעה זו';
+
+  @override
+  String get bookingStatusConfirmed => 'מאושר';
+
+  @override
+  String get bookingStatusUnconfirmed => 'לא מאושר';
+
+  @override
+  String get bookingStatusCheckedIn => 'עלה לאוטובוס';
+
+  @override
+  String get bookingStatusCancelled => 'בוטל';
+
+  @override
+  String get bookingStatusCompleted => 'הושלם';
+
+  @override
+  String get pickup => 'עליה';
+
+  @override
+  String get dropoff => 'ירידה';
+
+  @override
+  String get checkIn => 'עליה לאוטובוס';
+
+  @override
+  String get confirm => 'אשר';
+
+  @override
+  String get cancel => 'בטל';
+
+  @override
+  String get bookingUpdatedSuccessfully => 'ההזמנה עודכנה בהצלחה';
+
+  @override
+  String get failedToUpdateBooking => 'נכשל בעדכון ההזמנה';
+
+  @override
+  String passengersCount(int count) {
+    return 'נוסעים ($count)';
+  }
+
+  @override
+  String get dropOff => 'ירידה מהאוטובוס';
+
+  @override
+  String get passengerCheckedInSuccessfully => 'הנוסע עלה לאוטובוס בהצלחה';
+
+  @override
+  String get passengerDroppedOffSuccessfully => 'הנוסע ירד מהאוטובוס בהצלחה';
+
+  @override
+  String get endRide => 'סיים נסיעה';
+
+  @override
+  String get endingRide => 'מסיים...';
+
+  @override
+  String get rideEndedSuccessfully => 'הנסיעה הסתיימה בהצלחה';
+
+  @override
+  String get failedToEndRide => 'נכשל בסיום הנסיעה';
 }
