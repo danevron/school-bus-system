@@ -208,4 +208,16 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get failedToEndRide => 'נכשל בסיום הנסיעה';
+
+  @override
+  String get startLocationSharing => 'התחל שיתוף מיקום';
+
+  @override
+  String get stopLocationSharing => 'הפסק שיתוף מיקום';
+
+  @override
+  String get locationSharingActive => 'משתף מיקום...';
+
+  @override
+  String get locationPermissionRequired => 'נדרשת הרשאת מיקום למעקב אחר הנסיעה';
 }

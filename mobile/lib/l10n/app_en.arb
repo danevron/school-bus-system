@@ -271,5 +271,21 @@
   "failedToEndRide": "Failed to end ride",
   "@failedToEndRide": {
     "description": "Error message when ride fails to end"
+  },
+  "startLocationSharing": "Start Location Sharing",
+  "@startLocationSharing": {
+    "description": "Start location sharing button text"
+  },
+  "stopLocationSharing": "Stop Location Sharing",
+  "@stopLocationSharing": {
+    "description": "Stop location sharing button text"
+  },
+  "locationSharingActive": "Sharing Location...",
+  "@locationSharingActive": {
+    "description": "Location sharing active status text"
+  },
+  "locationPermissionRequired": "Location permission is required for ride tracking",
+  "@locationPermissionRequired": {
+    "description": "Message when location permission is needed"
   }
 }

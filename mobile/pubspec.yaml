@@ -45,6 +45,9 @@ dependencies:
   
   # Shared preferences for storing auth tokens
   shared_preferences: ^2.2.2
+  
+  # Location services for GPS tracking
+  geolocator: ^12.0.0
 
 dev_dependencies:
   flutter_test:

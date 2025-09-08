@@ -211,4 +211,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get failedToEndRide => 'Failed to end ride';
+
+  @override
+  String get startLocationSharing => 'Start Location Sharing';
+
+  @override
+  String get stopLocationSharing => 'Stop Location Sharing';
+
+  @override
+  String get locationSharingActive => 'Sharing Location...';
+
+  @override
+  String get locationPermissionRequired =>
+      'Location permission is required for ride tracking';
 }

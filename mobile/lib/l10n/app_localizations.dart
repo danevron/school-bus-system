@@ -487,6 +487,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to end ride'**
   String get failedToEndRide;
+
+  /// Start location sharing button text
+  ///
+  /// In en, this message translates to:
+  /// **'Start Location Sharing'**
+  String get startLocationSharing;
+
+  /// Stop location sharing button text
+  ///
+  /// In en, this message translates to:
+  /// **'Stop Location Sharing'**
+  String get stopLocationSharing;
+
+  /// Location sharing active status text
+  ///
+  /// In en, this message translates to:
+  /// **'Sharing Location...'**
+  String get locationSharingActive;
+
+  /// Message when location permission is needed
+  ///
+  /// In en, this message translates to:
+  /// **'Location permission is required for ride tracking'**
+  String get locationPermissionRequired;
 }
 
 class _AppLocalizationsDelegate

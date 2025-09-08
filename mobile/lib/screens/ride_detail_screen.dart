@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import '../l10n/app_localizations.dart';
 import '../services/auth_service.dart';
 
@@ -19,14 +21,22 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
   bool _isLoading = false;
   bool _isStartingRide = false;
   bool _isEndingRide = false;
+  bool _isSharingLocation = false;
   List<Map<String, dynamic>> _bookings = [];
   late Map<String, dynamic> _currentRide;
+  Timer? _locationTimer;
 
   @override
   void initState() {
     super.initState();
     _currentRide = Map<String, dynamic>.from(widget.ride);
     _loadBookings();
+  }
+
+  @override
+  void dispose() {
+    _locationTimer?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadBookings() async {
@@ -150,6 +160,9 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
           _isEndingRide = false;
         });
         
+        // Stop location sharing when ride ends
+        _stopLocationSharing();
+        
         if (mounted) {
           final localizations = AppLocalizations.of(context)!;
           ScaffoldMessenger.of(context).showSnackBar(
@@ -177,6 +190,110 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
           ),
         );
       }
+    }
+  }
+
+  Future<void> _toggleLocationSharing() async {
+    if (_isSharingLocation) {
+      _stopLocationSharing();
+    } else {
+      await _startLocationSharing();
+    }
+  }
+
+  Future<void> _startLocationSharing() async {
+    try {
+      // Check location permission
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          if (mounted) {
+            final localizations = AppLocalizations.of(context)!;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(localizations.locationPermissionRequired),
+                backgroundColor: Theme.of(context).colorScheme.error,
+              ),
+            );
+          }
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        if (mounted) {
+          final localizations = AppLocalizations.of(context)!;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(localizations.locationPermissionRequired),
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+          );
+        }
+        return;
+      }
+
+      setState(() {
+        _isSharingLocation = true;
+      });
+
+      // Send location every 10 seconds
+      _locationTimer = Timer.periodic(const Duration(seconds: 10), (_) async {
+        await _sendCurrentLocation();
+      });
+
+      // Send initial location
+      await _sendCurrentLocation();
+
+    } catch (e) {
+      setState(() {
+        _isSharingLocation = false;
+      });
+    }
+  }
+
+  void _stopLocationSharing() {
+    setState(() {
+      _isSharingLocation = false;
+    });
+    _locationTimer?.cancel();
+    _locationTimer = null;
+  }
+
+  Future<void> _sendCurrentLocation() async {
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      final locationData = <String, dynamic>{
+        'latitude': position.latitude,
+        'longitude': position.longitude,
+      };
+
+      // Only include optional fields if they have valid values
+      if (position.speed >= 0) {
+        locationData['speed'] = position.speed;
+      }
+      
+      if (position.heading >= 0 && position.heading <= 360) {
+        locationData['heading'] = position.heading;
+      }
+      
+      if (position.accuracy > 0) {
+        locationData['accuracy'] = position.accuracy;
+      }
+
+      await AuthService.authenticatedRequest(
+        'POST',
+        '/api/rides/${_currentRide['_id']}/location',
+        body: locationData,
+      );
+
+    } catch (e) {
+      print('Error sending location: $e');
+      // Don't show error to user for individual location updates to avoid spam
     }
   }
 
@@ -277,6 +394,10 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
             // End Ride Button (only for in-progress rides)
             if (_currentRide['status'] == 'in_progress')
               _buildEndRideButton(theme, colorScheme, localizations),
+            
+            // Location Sharing Button (only for in-progress rides)
+            if (_currentRide['status'] == 'in_progress')
+              _buildLocationSharingButton(theme, colorScheme, localizations),
             
             // Bookings List
             Expanded(
@@ -435,6 +556,32 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
           padding: const EdgeInsets.symmetric(vertical: 16),
           backgroundColor: Colors.red,
           foregroundColor: Colors.white,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLocationSharingButton(ThemeData theme, ColorScheme colorScheme, AppLocalizations localizations) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: OutlinedButton.icon(
+        onPressed: _toggleLocationSharing,
+        icon: _isSharingLocation 
+            ? const Icon(Icons.location_off, size: 20)
+            : const Icon(Icons.location_on, size: 20),
+        label: Text(
+          _isSharingLocation 
+              ? localizations.stopLocationSharing 
+              : localizations.startLocationSharing
+        ),
+        style: OutlinedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          foregroundColor: _isSharingLocation ? Colors.red : Colors.blue,
+          side: BorderSide(
+            color: _isSharingLocation ? Colors.red : Colors.blue,
+            width: 2,
+          ),
         ),
       ),
     );

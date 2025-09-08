@@ -271,5 +271,21 @@
   "failedToEndRide": "נכשל בסיום הנסיעה",
   "@failedToEndRide": {
     "description": "Error message when ride fails to end"
+  },
+  "startLocationSharing": "התחל שיתוף מיקום",
+  "@startLocationSharing": {
+    "description": "Start location sharing button text"
+  },
+  "stopLocationSharing": "הפסק שיתוף מיקום",
+  "@stopLocationSharing": {
+    "description": "Stop location sharing button text"
+  },
+  "locationSharingActive": "משתף מיקום...",
+  "@locationSharingActive": {
+    "description": "Location sharing active status text"
+  },
+  "locationPermissionRequired": "נדרשת הרשאת מיקום למעקב אחר הנסיעה",
+  "@locationPermissionRequired": {
+    "description": "Message when location permission is needed"
   }
 }

@@ -159,9 +159,6 @@ RideProgressSchema.index({ currentStatus: 1 });
 RideProgressSchema.index({ startedAt: 1 });
 RideProgressSchema.index({ lastUpdated: 1 });
 
-// Geospatial index for location queries (if needed later)
-RideProgressSchema.index({ 'currentLocation': '2dsphere' });
-
 // Method to add location point
 RideProgressSchema.methods.addLocationPoint = async function(point: ILocationPoint) {
   this.locationPoints.push(point);
