@@ -121,5 +121,41 @@
   "welcomeFallbackDescription": "Mobile application for school bus transportation management.",
   "@welcomeFallbackDescription": {
     "description": "Generic welcome description fallback when user data is not available"
+  },
+  "myRides": "My Rides",
+  "@myRides": {
+    "description": "Bottom navigation tab for driver's rides"
+  },
+  "myRidesTitle": "My Rides",
+  "@myRidesTitle": {
+    "description": "Title for the my rides screen"
+  },
+  "myRidesEmpty": "No rides assigned yet",
+  "@myRidesEmpty": {
+    "description": "Message when driver has no rides"
+  },
+  "myRidesEmptyDescription": "Your assigned rides will appear here. Contact your administrator if you should have rides assigned.",
+  "@myRidesEmptyDescription": {
+    "description": "Description for empty rides state"
+  },
+  "refresh": "Refresh",
+  "@refresh": {
+    "description": "Refresh button text"
+  },
+  "rideStatusActive": "Active",
+  "@rideStatusActive": {
+    "description": "Ride status - currently active"
+  },
+  "rideStatusCompleted": "Completed",
+  "@rideStatusCompleted": {
+    "description": "Ride status - completed"
+  },
+  "rideStatusCancelled": "Cancelled",
+  "@rideStatusCancelled": {
+    "description": "Ride status - cancelled"
+  },
+  "rideStatusScheduled": "Scheduled",
+  "@rideStatusScheduled": {
+    "description": "Ride status - scheduled"
   }
 }

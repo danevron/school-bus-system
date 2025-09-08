@@ -15,13 +15,6 @@ class AppLocalizationsHe extends AppLocalizations {
   String get appSubtitle => 'בית הספר זומר';
 
   @override
-  String get welcomeTitle => '🚌 ברוכים הבאים לאפליקציית ההסעות!';
-
-  @override
-  String get welcomeDescription =>
-      'אפליקציה זו תעזור לנהגים לשתף נסיעות ולהורים לעקוב אחר הסעות ילדיהם.';
-
-  @override
   String get language => 'שפה';
 
   @override
@@ -101,4 +94,35 @@ class AppLocalizationsHe extends AppLocalizations {
   @override
   String get welcomePersonalizedDescription =>
       'התחברת בהצלחה למערכת ההסעות. נהל את הנסיעות שלך והישאר מעודכן עם מידע תחבורתי.';
+
+  @override
+  String get welcomeFallbackDescription => 'אפליקציה לניהול הסעות בית ספר.';
+
+  @override
+  String get myRides => 'הנסיעות שלי';
+
+  @override
+  String get myRidesTitle => 'הנסיעות שלי';
+
+  @override
+  String get myRidesEmpty => 'עדיין לא הוקצו נסיעות';
+
+  @override
+  String get myRidesEmptyDescription =>
+      'הנסיעות שהוקצו לך יופיעו כאן. פנה למנהל המערכת אם אמורות להיות לך נסיעות מוקצות.';
+
+  @override
+  String get refresh => 'רענן';
+
+  @override
+  String get rideStatusActive => 'פעיל';
+
+  @override
+  String get rideStatusCompleted => 'הושלם';
+
+  @override
+  String get rideStatusCancelled => 'בוטל';
+
+  @override
+  String get rideStatusScheduled => 'מתוכנן';
 }

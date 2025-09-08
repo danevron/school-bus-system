@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import '/screens/welcome_screen.dart';
+import 'screens/main_navigation_screen.dart';
 import 'l10n/app_localizations.dart';
 import 'services/auth_service.dart';
 import 'screens/login_screen.dart';
@@ -59,10 +59,10 @@ class _SchoolBusAppState extends State<SchoolBusApp> {
       ],
       routes: {
         '/': (context) => AuthService.isAuthenticated 
-            ? WelcomeScreen(onLanguageChange: _changeLanguage, onAuthChanged: _onAuthChanged)
+            ? MainNavigationScreen(onLanguageChange: _changeLanguage, onAuthChanged: _onAuthChanged)
             : LoginScreen(onAuthChanged: _onAuthChanged, onLanguageChange: _changeLanguage),
         '/login': (context) => LoginScreen(onAuthChanged: _onAuthChanged, onLanguageChange: _changeLanguage),
-        '/welcome': (context) => WelcomeScreen(onLanguageChange: _changeLanguage, onAuthChanged: _onAuthChanged),
+        '/home': (context) => MainNavigationScreen(onLanguageChange: _changeLanguage, onAuthChanged: _onAuthChanged),
       },
       initialRoute: '/',
     );

@@ -15,13 +15,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appSubtitle => 'Mobile App';
 
   @override
-  String get welcomeTitle => '🚌 Welcome to School Bus App!';
-
-  @override
-  String get welcomeDescription =>
-      'This mobile app will help drivers track rides and parents monitor their children\'s transportation.';
-
-  @override
   String get language => 'Language';
 
   @override
@@ -101,4 +94,36 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get welcomePersonalizedDescription =>
       'You\'re successfully logged in to the School Bus System. Manage your rides and stay updated with transportation information.';
+
+  @override
+  String get welcomeFallbackDescription =>
+      'Mobile application for school bus transportation management.';
+
+  @override
+  String get myRides => 'My Rides';
+
+  @override
+  String get myRidesTitle => 'My Rides';
+
+  @override
+  String get myRidesEmpty => 'No rides assigned yet';
+
+  @override
+  String get myRidesEmptyDescription =>
+      'Your assigned rides will appear here. Contact your administrator if you should have rides assigned.';
+
+  @override
+  String get refresh => 'Refresh';
+
+  @override
+  String get rideStatusActive => 'Active';
+
+  @override
+  String get rideStatusCompleted => 'Completed';
+
+  @override
+  String get rideStatusCancelled => 'Cancelled';
+
+  @override
+  String get rideStatusScheduled => 'Scheduled';
 }

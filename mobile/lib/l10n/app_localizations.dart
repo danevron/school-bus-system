@@ -110,18 +110,6 @@ abstract class AppLocalizations {
   /// **'Mobile App'**
   String get appSubtitle;
 
-  /// Welcome message title on the home screen
-  ///
-  /// In en, this message translates to:
-  /// **'🚌 Welcome to School Bus App!'**
-  String get welcomeTitle;
-
-  /// Welcome message description explaining the app's purpose
-  ///
-  /// In en, this message translates to:
-  /// **'This mobile app will help drivers track rides and parents monitor their children\'s transportation.'**
-  String get welcomeDescription;
-
   /// Language selection label
   ///
   /// In en, this message translates to:
@@ -277,6 +265,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You\'re successfully logged in to the School Bus System. Manage your rides and stay updated with transportation information.'**
   String get welcomePersonalizedDescription;
+
+  /// Generic welcome description fallback when user data is not available
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile application for school bus transportation management.'**
+  String get welcomeFallbackDescription;
+
+  /// Bottom navigation tab for driver's rides
+  ///
+  /// In en, this message translates to:
+  /// **'My Rides'**
+  String get myRides;
+
+  /// Title for the my rides screen
+  ///
+  /// In en, this message translates to:
+  /// **'My Rides'**
+  String get myRidesTitle;
+
+  /// Message when driver has no rides
+  ///
+  /// In en, this message translates to:
+  /// **'No rides assigned yet'**
+  String get myRidesEmpty;
+
+  /// Description for empty rides state
+  ///
+  /// In en, this message translates to:
+  /// **'Your assigned rides will appear here. Contact your administrator if you should have rides assigned.'**
+  String get myRidesEmptyDescription;
+
+  /// Refresh button text
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get refresh;
+
+  /// Ride status - currently active
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get rideStatusActive;
+
+  /// Ride status - completed
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get rideStatusCompleted;
+
+  /// Ride status - cancelled
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get rideStatusCancelled;
+
+  /// Ride status - scheduled
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled'**
+  String get rideStatusScheduled;
 }
 
 class _AppLocalizationsDelegate

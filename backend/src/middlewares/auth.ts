@@ -18,10 +18,8 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
       res.status(401).json({ message: 'Authorization header required' });
       return;
     }
-
     const token = extractTokenFromHeader(authHeader);
     const payload = verifyToken(token);
-    
     req.user = payload;
     next();
   } catch (error) {

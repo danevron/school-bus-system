@@ -121,5 +121,41 @@
   "welcomeFallbackDescription": "אפליקציה לניהול הסעות בית ספר.",
   "@welcomeFallbackDescription": {
     "description": "Generic welcome description fallback when user data is not available"
+  },
+  "myRides": "הנסיעות שלי",
+  "@myRides": {
+    "description": "Bottom navigation tab for driver's rides"
+  },
+  "myRidesTitle": "הנסיעות שלי",
+  "@myRidesTitle": {
+    "description": "Title for the my rides screen"
+  },
+  "myRidesEmpty": "עדיין לא הוקצו נסיעות",
+  "@myRidesEmpty": {
+    "description": "Message when driver has no rides"
+  },
+  "myRidesEmptyDescription": "הנסיעות שהוקצו לך יופיעו כאן. פנה למנהל המערכת אם אמורות להיות לך נסיעות מוקצות.",
+  "@myRidesEmptyDescription": {
+    "description": "Description for empty rides state"
+  },
+  "refresh": "רענן",
+  "@refresh": {
+    "description": "Refresh button text"
+  },
+  "rideStatusActive": "פעיל",
+  "@rideStatusActive": {
+    "description": "Ride status - currently active"
+  },
+  "rideStatusCompleted": "הושלם",
+  "@rideStatusCompleted": {
+    "description": "Ride status - completed"
+  },
+  "rideStatusCancelled": "בוטל",
+  "@rideStatusCancelled": {
+    "description": "Ride status - cancelled"
+  },
+  "rideStatusScheduled": "מתוכנן",
+  "@rideStatusScheduled": {
+    "description": "Ride status - scheduled"
   }
 }
