@@ -46,5 +46,6 @@ export const authorize = (...roles: UserRole[]) => {
 export const requireAuth = authenticate;
 export const requireAdmin = authorize(UserRole.ADMIN);
 export const requireDriver = authorize(UserRole.DRIVER);
+export const requireDriverOrAdmin = authorize(UserRole.DRIVER, UserRole.ADMIN);
 export const requireParent = authorize(UserRole.PARENT);
 export const requireStudent = authorize(UserRole.STUDENT); 

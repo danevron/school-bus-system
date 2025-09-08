@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import Ride, { RideStatus } from '../models/Ride';
 import Vehicle from '../models/Vehicle';
 import User, { UserRole } from '../models/User';
+import RideProgressService from '../services/rideProgressService';
 import { rideValidation } from '../utils/validation';
 
 export const rideController = {
@@ -274,33 +275,39 @@ export const rideController = {
   startRide: async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
-      const driverId = req.user?.userId;
+      const userId = req.user?.userId;
 
-      const ride = await Ride.findById(id);
-      if (!ride) {
-        return res.status(404).json({ message: 'Ride not found' });
+      if (!userId) {
+        return res.status(401).json({ message: 'User not authenticated' });
       }
 
-      // Verify the driver is assigned to this ride
-      if (ride.driver.toString() !== driverId) {
-        return res.status(403).json({ message: 'You are not assigned to this ride' });
-      }
-
-      if (ride.status !== RideStatus.SCHEDULED) {
-        return res.status(400).json({ message: 'Ride cannot be started' });
-      }
-
-      ride.status = RideStatus.IN_PROGRESS;
-      ride.actualStartTime = new Date();
-      
-      const updatedRide = await ride.save();
+      const result = await RideProgressService.startRide(id, userId);
 
       res.json({
         message: 'Ride started successfully',
-        data: { ride: updatedRide }
+        data: result
       });
     } catch (error) {
       console.error('Error starting ride:', error);
+      
+      if (error instanceof Error) {
+        if (error.message === 'Ride not found') {
+          return res.status(404).json({ message: error.message });
+        }
+        if (error.message === 'User not found') {
+          return res.status(404).json({ message: error.message });
+        }
+        if (error.message === 'Only assigned driver or admin can start this ride') {
+          return res.status(403).json({ message: error.message });
+        }
+        if (error.message.includes('Cannot start ride') || 
+            error.message === 'Ride has already been started' ||
+            error.message === 'Ride progress already exists' ||
+            error.message === 'Cannot start ride with no active bookings') {
+          return res.status(400).json({ message: error.message });
+        }
+      }
+
       res.status(500).json({ 
         message: 'Failed to start ride',
         error: process.env.NODE_ENV === 'development' ? error : 'Internal server error'
@@ -312,26 +319,13 @@ export const rideController = {
   endRide: async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
-      const driverId = req.user?.userId;
+      const userId = req.user?.userId;
 
-      const ride = await Ride.findById(id);
-      if (!ride) {
-        return res.status(404).json({ message: 'Ride not found' });
+      if (!userId) {
+        return res.status(401).json({ message: 'User not authenticated' });
       }
 
-      // Verify the driver is assigned to this ride
-      if (ride.driver.toString() !== driverId) {
-        return res.status(403).json({ message: 'You are not assigned to this ride' });
-      }
-
-      if (ride.status !== RideStatus.IN_PROGRESS) {
-        return res.status(400).json({ message: 'Ride is not in progress' });
-      }
-
-      ride.status = RideStatus.COMPLETED;
-      ride.actualEndTime = new Date();
-      
-      const updatedRide = await ride.save();
+      const result = await RideProgressService.endRide(id, userId);
 
       // Mark all checked-in bookings as completed
       const Booking = require('../models/Booking').default;
@@ -343,18 +337,133 @@ export const rideController = {
         { 
           status: 'completed',
           droppedOffAt: new Date(),
-          droppedOffBy: driverId
+          droppedOffBy: userId
         }
       );
 
       res.json({
         message: 'Ride completed successfully',
-        data: { ride: updatedRide }
+        data: result
       });
     } catch (error) {
       console.error('Error ending ride:', error);
+      
+      if (error instanceof Error) {
+        if (error.message === 'Ride not found') {
+          return res.status(404).json({ message: error.message });
+        }
+        if (error.message === 'User not found') {
+          return res.status(404).json({ message: error.message });
+        }
+        if (error.message === 'Only assigned driver or admin can end this ride') {
+          return res.status(403).json({ message: error.message });
+        }
+        if (error.message.includes('Cannot end ride') || 
+            error.message === 'Ride progress not found') {
+          return res.status(400).json({ message: error.message });
+        }
+      }
+
       res.status(500).json({ 
         message: 'Failed to end ride',
+        error: process.env.NODE_ENV === 'development' ? error : 'Internal server error'
+      });
+    }
+  },
+
+  // Update ride location (Driver only)
+  updateLocation: async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user?.userId;
+
+      if (!userId) {
+        return res.status(401).json({ message: 'User not authenticated' });
+      }
+
+      const { latitude, longitude, speed, heading, accuracy } = req.body;
+
+      if (!latitude || !longitude) {
+        return res.status(400).json({ message: 'Latitude and longitude are required' });
+      }
+
+      const result = await RideProgressService.updateLocation(id, userId, {
+        latitude,
+        longitude,
+        speed,
+        heading,
+        accuracy
+      });
+
+      res.json({
+        message: 'Location updated successfully',
+        data: result
+      });
+    } catch (error) {
+      console.error('Error updating location:', error);
+      
+      if (error instanceof Error) {
+        if (error.message === 'Ride progress not found. Ride must be started first.') {
+          return res.status(404).json({ message: error.message });
+        }
+        if (error.message === 'Only assigned driver can update location') {
+          return res.status(403).json({ message: error.message });
+        }
+        if (error.message === 'Cannot update location for completed ride') {
+          return res.status(400).json({ message: error.message });
+        }
+      }
+
+      res.status(500).json({ 
+        message: 'Failed to update location',
+        error: process.env.NODE_ENV === 'development' ? error : 'Internal server error'
+      });
+    }
+  },
+
+  // Get ride progress data
+  getRideProgress: async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const { from } = req.query;
+      const userId = req.user?.userId;
+
+      if (!userId) {
+        return res.status(401).json({ message: 'User not authenticated' });
+      }
+
+      // Parse from timestamp if provided
+      let fromTimestamp: Date | undefined;
+      if (from) {
+        fromTimestamp = new Date(from as string);
+        if (isNaN(fromTimestamp.getTime())) {
+          return res.status(400).json({ message: 'Invalid from timestamp format' });
+        }
+      }
+
+      const result = await RideProgressService.getRideProgress(id, userId, fromTimestamp);
+
+      res.json({
+        message: 'Ride progress retrieved successfully',
+        data: result
+      });
+    } catch (error) {
+      console.error('Error getting ride progress:', error);
+      
+      if (error instanceof Error) {
+        if (error.message === 'Ride not found' || error.message === 'Ride progress not found') {
+          return res.status(404).json({ message: error.message });
+        }
+        if (error.message === 'User not found') {
+          return res.status(404).json({ message: error.message });
+        }
+        if (error.message === 'Access denied to ride progress') {
+          return res.status(403).json({ message: error.message });
+        }
+      }
+
+      res.status(500).json({ 
+        message: 'Failed to retrieve ride progress',
         error: process.env.NODE_ENV === 'development' ? error : 'Internal server error'
       });
     }
