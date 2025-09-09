@@ -17,10 +17,12 @@ router.delete('/:id', requireAdmin, rideController.deleteRide);
 router.get('/:id', rideController.getRideById);
 
 // Driver-specific routes
-router.get('/driver/my-rides', requireDriver, rideController.getDriverRides);
 router.post('/:id/start', requireDriverOrAdmin, rideController.startRide);
 router.post('/:id/end', requireDriverOrAdmin, rideController.endRide);
 router.post('/:id/location', requireDriverOrAdmin, rideController.updateLocation);
+
+// User-specific route to get their rides (drivers, parents with children on ride, passengers)
+router.get('/user/my-rides', rideController.getUserRides);
 
 // Progress data route - accessible by drivers, parents with children on ride, and passengers
 router.get('/:id/progress', rideController.getRideProgress);

@@ -45,7 +45,7 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
     try {
       final response = await AuthService.authenticatedRequest(
         'GET',
-        '/api/rides/driver/my-rides',
+        '/api/rides/user/my-rides',
       );
       
       if (response.statusCode == 200) {

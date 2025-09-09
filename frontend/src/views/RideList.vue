@@ -57,85 +57,88 @@
             </div>
           </div>
 
-          <div v-else class="rides-grid">
-            <div 
-              v-for="ride in filteredRides" 
-              :key="ride._id" 
-              class="ride-card"
-              @click="viewRide(ride._id)"
-            >
-              <div class="ride-header">
-                <h3 class="ride-route">{{ ride.route?.name || 'Unnamed Route' }}</h3>
-                <span class="status-badge" :class="getStatusClass(ride.status)">
-                  {{ getStatusLabel(ride.status) }}
-                </span>
-              </div>
-
-              <div class="ride-info">
-                <div class="ride-stats">
-                  <div class="stat-item">
-                    <span class="stat-label">Date:</span>
-                    <span class="stat-value">{{ formatDate(ride.date) }}</span>
-                  </div>
-                  <div class="stat-item">
-                    <span class="stat-label">Start Time:</span>
-                    <span class="stat-value">{{ formatTime(ride.startTime) }}</span>
-                  </div>
-                  <div class="stat-item">
-                    <span class="stat-label">Driver:</span>
-                    <span class="stat-value">{{ getDriverName(ride.driver) }}</span>
-                  </div>
-                  <div class="stat-item">
-                    <span class="stat-label">Vehicle:</span>
-                    <span class="stat-value">{{ getVehicleName(ride.vehicle) }}</span>
-                  </div>
-                  <div class="stat-item">
-                    <span class="stat-label">Available Seats:</span>
-                    <span class="stat-value">{{ ride.availableSeats }}/{{ ride.maxCapacity }}</span>
-                  </div>
-                  <div class="stat-item">
-                    <span class="stat-label">Stops:</span>
-                    <span class="stat-value">{{ ride.route?.stops?.length || 0 }} stops</span>
-                  </div>
-                  <div v-if="ride.lineId" class="stat-item">
-                    <span class="stat-label">Line:</span>
-                    <span class="stat-value">
-                      <button 
-                        @click.stop="viewLine(ride.lineId._id)"
-                        class="line-link-button"
-                        :title="`View line: ${ride.lineId.name}`"
-                      >
-                        {{ ride.lineId.name }}
-                      </button>
+          <div v-else class="rides-table-container">
+            <table class="rides-table">
+              <thead>
+                <tr>
+                  <th>Route</th>
+                  <th>Date</th>
+                  <th>Start Time</th>
+                  <th>Driver</th>
+                  <th>Vehicle</th>
+                  <th>Seats</th>
+                  <th>Status</th>
+                  <th>Line</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr 
+                  v-for="ride in filteredRides" 
+                  :key="ride._id" 
+                  class="ride-row"
+                  @click="viewRide(ride._id)"
+                >
+                  <td class="route-cell">
+                    <strong>{{ ride.route?.name || 'Unnamed Route' }}</strong>
+                    <div class="route-stops">{{ ride.route?.stops?.length || 0 }} stops</div>
+                  </td>
+                  <td>{{ formatDate(ride.date) }}</td>
+                  <td>{{ formatTime(ride.startTime) }}</td>
+                  <td>{{ getDriverName(ride.driver) }}</td>
+                  <td class="vehicle-cell">
+                    <div>{{ getVehicleName(ride.vehicle) }}</div>
+                  </td>
+                  <td class="seats-cell">
+                    <span class="seats-info">{{ ride.availableSeats }}/{{ ride.maxCapacity }}</span>
+                  </td>
+                  <td>
+                    <span class="status-badge" :class="getStatusClass(ride.status)">
+                      {{ getStatusLabel(ride.status) }}
                     </span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="ride-actions" @click.stop>
-                <button 
-                  v-if="ride.status === 'scheduled'" 
-                  @click="startRide(ride._id)"
-                  class="action-button start-button"
-                >
-                  Start Ride
-                </button>
-                <button 
-                  v-if="ride.status === 'in_progress'" 
-                  @click="endRide(ride._id)"
-                  class="action-button end-button"
-                >
-                  End Ride
-                </button>
-                <button 
-                  v-if="['scheduled', 'in_progress'].includes(ride.status)" 
-                  @click="cancelRide(ride._id)"
-                  class="action-button cancel-button"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
+                  </td>
+                  <td>
+                    <button 
+                      v-if="ride.lineId"
+                      @click.stop="viewLine(ride.lineId._id)"
+                      class="line-link-button"
+                      :title="`View line: ${ride.lineId.name}`"
+                    >
+                      {{ ride.lineId.name }}
+                    </button>
+                    <span v-else class="no-line">-</span>
+                  </td>
+                  <td class="actions-cell" @click.stop>
+                    <div class="action-buttons">
+                      <button 
+                        v-if="ride.status === 'scheduled'" 
+                        @click="startRide(ride._id)"
+                        class="action-button start-button"
+                        title="Start Ride"
+                      >
+                        Start
+                      </button>
+                      <button 
+                        v-if="ride.status === 'in_progress'" 
+                        @click="endRide(ride._id)"
+                        class="action-button end-button"
+                        title="End Ride"
+                      >
+                        End
+                      </button>
+                      <button 
+                        v-if="['scheduled', 'in_progress'].includes(ride.status)" 
+                        @click="cancelRide(ride._id)"
+                        class="action-button cancel-button"
+                        title="Cancel Ride"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -482,48 +485,81 @@ export default {
   background-color: #218838;
 }
 
-.rides-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-  gap: 20px;
+.rides-table-container {
+  overflow-x: auto;
 }
 
-.ride-card {
-  border: 1px solid #dee2e6;
-  border-radius: 8px;
-  padding: 20px;
-  cursor: pointer;
-  transition: all 0.2s;
+.rides-table {
+  width: 100%;
+  border-collapse: collapse;
   background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
-.ride-card:hover {
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  transform: translateY(-1px);
+.rides-table th {
+  background-color: #f8f9fa;
+  padding: 16px 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #495057;
+  border-bottom: 2px solid #dee2e6;
+  white-space: nowrap;
 }
 
-.ride-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 15px;
+.rides-table td {
+  padding: 16px 12px;
+  border-bottom: 1px solid #dee2e6;
+  vertical-align: top;
 }
 
-.ride-route {
-  margin: 0;
+.ride-row {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.ride-row:hover {
+  background-color: #f8f9fa;
+}
+
+.route-cell {
+  min-width: 180px;
+}
+
+.route-cell strong {
+  display: block;
+  margin-bottom: 4px;
   color: #333;
-  font-size: 1.2rem;
-  flex: 1;
+}
+
+.route-stops {
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+.vehicle-cell {
+  min-width: 200px;
+  font-size: 0.875rem;
+}
+
+.seats-cell {
+  text-align: center;
+}
+
+.seats-info {
+  font-weight: 500;
+  color: #495057;
 }
 
 .status-badge {
-  padding: 4px 12px;
-  border-radius: 20px;
+  padding: 4px 8px;
+  border-radius: 12px;
   font-size: 0.75rem;
-  font-weight: bold;
+  font-weight: 600;
   text-transform: uppercase;
   white-space: nowrap;
-  margin-left: 10px;
+  display: inline-block;
 }
 
 .status-scheduled { background-color: #17a2b8; color: white; }
@@ -531,40 +567,19 @@ export default {
 .status-completed { background-color: #28a745; color: white; }
 .status-cancelled { background-color: #dc3545; color: white; }
 
-.ride-info {
-  margin-bottom: 15px;
+.no-line {
+  color: #6c757d;
+  font-style: italic;
 }
 
-.ride-stats {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-bottom: 10px;
+.actions-cell {
+  min-width: 120px;
 }
 
-.stat-item {
+.action-buttons {
   display: flex;
-  justify-content: space-between;
-  padding: 4px 0;
-  border-bottom: 1px solid #f8f9fa;
-}
-
-.stat-label {
-  font-weight: 500;
-  color: #666;
-}
-
-.stat-value {
-  color: #333;
-}
-
-.ride-actions {
-  display: flex;
-  gap: 8px;
+  gap: 4px;
   flex-wrap: wrap;
-  margin-top: 15px;
-  padding-top: 15px;
-  border-top: 1px solid #eee;
 }
 
 .action-button {
@@ -626,10 +641,6 @@ export default {
     align-items: stretch;
   }
   
-  .rides-grid {
-    grid-template-columns: 1fr;
-  }
-  
   .header-content {
     flex-direction: column;
     gap: 15px;
@@ -638,6 +649,31 @@ export default {
   
   .header-actions {
     justify-content: center;
+  }
+  
+  .rides-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .rides-table {
+    min-width: 800px;
+  }
+  
+  .rides-table th,
+  .rides-table td {
+    padding: 12px 8px;
+    font-size: 0.875rem;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    gap: 2px;
+  }
+  
+  .action-button {
+    padding: 4px 8px;
+    font-size: 0.75rem;
   }
 }
 </style>

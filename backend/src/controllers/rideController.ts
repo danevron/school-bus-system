@@ -4,6 +4,7 @@ import Vehicle from '../models/Vehicle';
 import User, { UserRole } from '../models/User';
 import RideProgressService from '../services/rideProgressService';
 import { rideValidation } from '../utils/validation';
+import Booking from '../models/Booking';
 
 export const rideController = {
   // Get all rides (Admin only)
@@ -469,14 +470,35 @@ export const rideController = {
     }
   },
 
-  // Get driver's rides
-  getDriverRides: async (req: Request, res: Response) => {
+  // Get user's rides
+  getUserRides: async (req: Request, res: Response) => {
     try {
-      const driverId = req.user?.userId;
+    
+      const user = req.user;
       const { status, date } = req.query;
+      const filter: any = {};
 
-      const filter: any = { driver: driverId };
-      
+      if (user?.role === UserRole.DRIVER) {
+        filter.driver = user.userId;
+      } else {
+        const passengerIds = [user?.userId];
+        const userFromDb = await User.findById(user?.userId);
+        if (userFromDb?.children) {
+          // Include rides for children of parent users
+          userFromDb.children.map(child => passengerIds.push(child._id.toString()));
+        }
+        
+        // Find rides that have bookings for this user or their children
+        const bookingFilter: any = {
+          passenger: { $in: passengerIds },
+          status: { $nin: ['cancelled'] }
+        };
+
+        filter._id = {
+          $in: await Booking.find(bookingFilter).distinct('ride')
+        };
+      }
+
       if (status) {
         filter.status = status;
       }
@@ -494,13 +516,13 @@ export const rideController = {
         .sort({ date: 1, startTime: 1 });
 
       res.json({
-        message: 'Driver rides retrieved successfully',
+        message: 'Rides retrieved successfully',
         data: { rides }
       });
     } catch (error) {
-      console.error('Error getting driver rides:', error);
+      console.error('Error getting rides:', error);
       res.status(500).json({ 
-        message: 'Failed to retrieve driver rides',
+        message: 'Failed to retrieve rides',
         error: process.env.NODE_ENV === 'development' ? error : 'Internal server error'
       });
     }
