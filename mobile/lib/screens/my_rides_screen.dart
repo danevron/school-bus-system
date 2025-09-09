@@ -15,11 +15,26 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
   bool _isLoading = false;
   List<Map<String, dynamic>> _rides = [];
   bool _showAllRides = false;
+  late final AppLifecycleListener _lifecycleListener;
 
   @override
   void initState() {
     super.initState();
     _loadRides();
+    
+    // Listen for app lifecycle changes to refresh data when screen regains focus
+    _lifecycleListener = AppLifecycleListener(
+      onResume: () {
+        // Refresh rides when app resumes (user returns from ride detail or other apps)
+        _loadRides();
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _lifecycleListener.dispose();
+    super.dispose();
   }
 
   Future<void> _loadRides() async {
@@ -98,6 +113,14 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
         ),
         automaticallyImplyLeading: false, // Remove back button since we use bottom nav
         actions: [
+          IconButton(
+            onPressed: _loadRides,
+            icon: Icon(
+              Icons.refresh,
+              color: colorScheme.primary,
+            ),
+            tooltip: localizations.refresh,
+          ),
           TextButton.icon(
             onPressed: () {
               setState(() {
