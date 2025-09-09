@@ -27,6 +27,13 @@
           </button>
           <button 
             v-if="ride && ride.status === 'in_progress'" 
+            @click="openLiveTracking" 
+            class="action-button tracking-button"
+          >
+            📍 Track on Map
+          </button>
+          <button 
+            v-if="ride && ride.status === 'in_progress'" 
             @click="endRide" 
             class="action-button end-button"
           >
@@ -457,19 +464,74 @@
         </div>
       </div>
     </div>
+
+    <!-- Live Tracking Modal -->
+    <div v-if="showLiveTrackingModal" class="modal-overlay" @click="closeLiveTracking">
+      <div class="modal-content live-tracking-modal" @click.stop>
+        <div class="modal-header">
+          <h3>🚌 Live Ride Tracking</h3>
+          <div class="tracking-status">
+            <span v-if="trackingActive" class="status-indicator active">● Live</span>
+            <span v-else class="status-indicator inactive">● Disconnected</span>
+          </div>
+          <button @click="closeLiveTracking" class="close-button">×</button>
+        </div>
+        
+        <div class="modal-body tracking-body">
+          <div v-if="trackingLoading" class="loading-text">
+            Loading ride tracking data...
+          </div>
+          
+          <div v-else-if="trackingError" class="error-text">
+            <p>{{ trackingError }}</p>
+            <button @click="startTracking" class="retry-button">Retry</button>
+          </div>
+          
+          <div v-else class="tracking-container">
+            <!-- Tracking Info Header -->
+            <div class="tracking-info">
+              <div class="info-item">
+                <span class="info-label">Last Update:</span>
+                <span class="info-value">{{ lastUpdateTime || 'No data yet' }}</span>
+              </div>
+              <div v-if="rideProgress" class="info-item">
+                <span class="info-label">Status:</span>
+                <span class="info-value">{{ rideProgress.status }}</span>
+              </div>
+              <div v-if="rideProgress && rideProgress.totalDistance" class="info-item">
+                <span class="info-label">Distance Traveled:</span>
+                <span class="info-value">{{ Math.round(rideProgress.totalDistance * 100) / 100 }} km</span>
+              </div>
+            </div>
+            
+            <!-- Map Container -->
+            <div class="map-container">
+              <LiveTrackingMap
+                :ride="ride"
+                :rideProgress="rideProgress"
+                :busLocation="currentBusLocation"
+                mapHeight="500px"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import apiService from '../services/api.js'
 import RouteMap from '../components/RouteMap.vue'
+import LiveTrackingMap from '../components/LiveTrackingMap.vue'
 
 export default {
   name: 'RideView',
   components: {
-    RouteMap
+    RouteMap,
+    LiveTrackingMap
   },
   setup() {
     const router = useRouter()
@@ -495,6 +557,16 @@ export default {
       dropoffStopId: '',
       notes: ''
     })
+
+    // Live tracking state
+    const showLiveTrackingModal = ref(false)
+    const trackingLoading = ref(false)
+    const trackingError = ref('')
+    const trackingActive = ref(false)
+    const rideProgress = ref(null)
+    const currentBusLocation = ref(null)
+    const lastUpdateTime = ref('')
+    let trackingInterval = null
 
     // Computed properties
     const canBookRide = computed(() => {
@@ -697,6 +769,81 @@ export default {
       }
     }
 
+    // Live tracking functions
+    const fetchRideProgress = async () => {
+      try {
+        trackingError.value = ''
+        const response = await apiService.get(`/rides/${rideId}/progress`)
+        rideProgress.value = response.data
+        
+        if (response.data.currentLocation) {
+          currentBusLocation.value = response.data.currentLocation.coordinates
+          lastUpdateTime.value = new Date(response.data.lastUpdated).toLocaleTimeString()
+          trackingActive.value = true
+        } else {
+          trackingActive.value = false
+        }
+        
+        return response.data
+      } catch (err) {
+        console.error('Error fetching ride progress:', err)
+        trackingError.value = err.response?.data?.message || 'Failed to load tracking data'
+        trackingActive.value = false
+        throw err
+      }
+    }
+
+    const startTracking = async () => {
+      try {
+        trackingLoading.value = true
+        trackingError.value = ''
+        
+        // Initial fetch
+        await fetchRideProgress()
+        
+        // Set up polling every 10 seconds
+        if (trackingInterval) {
+          clearInterval(trackingInterval)
+        }
+        
+        trackingInterval = setInterval(async () => {
+          try {
+            await fetchRideProgress()
+          } catch (err) {
+            console.error('Error in tracking poll:', err)
+            // Don't stop tracking on individual poll failures
+          }
+        }, 10000) // Poll every 10 seconds
+        
+      } catch (err) {
+        console.error('Error starting tracking:', err)
+        trackingError.value = 'Failed to start live tracking'
+      } finally {
+        trackingLoading.value = false
+      }
+    }
+
+    const stopTracking = () => {
+      if (trackingInterval) {
+        clearInterval(trackingInterval)
+        trackingInterval = null
+      }
+      trackingActive.value = false
+      rideProgress.value = null
+      currentBusLocation.value = null
+      lastUpdateTime.value = ''
+    }
+
+    const openLiveTracking = async () => {
+      showLiveTrackingModal.value = true
+      await startTracking()
+    }
+
+    const closeLiveTracking = () => {
+      showLiveTrackingModal.value = false
+      stopTracking()
+    }
+
     // Booking functions
     const loadUsers = async () => {
       try {
@@ -775,6 +922,10 @@ export default {
       loadBookings()
     })
 
+    onUnmounted(() => {
+      stopTracking() // Clean up tracking interval on component unmount
+    })
+
     return {
       ride,
       bookings,
@@ -817,7 +968,18 @@ export default {
       waitingListCount,
       openBookingModal,
       closeBookingModal,
-      submitBooking
+      submitBooking,
+      // Live tracking functionality
+      showLiveTrackingModal,
+      trackingLoading,
+      trackingError,
+      trackingActive,
+      rideProgress,
+      currentBusLocation,
+      lastUpdateTime,
+      openLiveTracking,
+      closeLiveTracking,
+      startTracking
     }
   }
 }
@@ -900,6 +1062,15 @@ export default {
 
 .book-button:hover {
   background-color: #5a36a0;
+}
+
+.tracking-button {
+  background-color: #fd7e14;
+  border-color: #fd7e14;
+}
+
+.tracking-button:hover {
+  background-color: #e8690b;
 }
 
 .status-badge {
@@ -1675,6 +1846,170 @@ export default {
   .cancel-button,
   .submit-button {
     width: 100%;
+  }
+}
+
+/* Live Tracking Modal Styles */
+.live-tracking-modal {
+  max-width: 1200px;
+  width: 95%;
+  max-height: 90vh;
+}
+
+.live-tracking-modal .modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 2px solid #f8f9fa;
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  color: white;
+  border-radius: 8px 8px 0 0;
+}
+
+.live-tracking-modal .modal-header h3 {
+  color: white;
+  margin: 0;
+}
+
+.tracking-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.status-indicator {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.status-indicator.active {
+  background-color: rgba(40, 167, 69, 0.9);
+  color: white;
+  animation: pulse 2s infinite;
+}
+
+.status-indicator.inactive {
+  background-color: rgba(220, 53, 69, 0.9);
+  color: white;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+.live-tracking-modal .close-button {
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+}
+
+.live-tracking-modal .close-button:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.tracking-body {
+  padding: 0;
+  max-height: calc(90vh - 100px);
+  overflow-y: auto;
+}
+
+.tracking-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.tracking-info {
+  display: flex;
+  justify-content: space-around;
+  padding: 20px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.tracking-info .info-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.tracking-info .info-label {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.tracking-info .info-value {
+  font-size: 1.1rem;
+  color: #333;
+  font-weight: bold;
+}
+
+.map-container {
+  flex: 1;
+  min-height: 500px;
+  position: relative;
+}
+
+.error-text {
+  text-align: center;
+  padding: 40px 20px;
+  color: #dc3545;
+}
+
+.error-text p {
+  margin-bottom: 15px;
+  font-size: 1.1rem;
+}
+
+.retry-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s;
+}
+
+.retry-button:hover {
+  background-color: #0056b3;
+}
+
+@media (max-width: 768px) {
+  .live-tracking-modal {
+    width: 98%;
+    max-height: 95vh;
+  }
+  
+  .live-tracking-modal .modal-header {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+  
+  .tracking-info {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .map-container {
+    min-height: 400px;
   }
 }
 </style>

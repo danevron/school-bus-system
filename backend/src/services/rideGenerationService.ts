@@ -51,7 +51,7 @@ export const generateRidesForLine = async (line: ILine): Promise<any[]> => {
       const newRide = new Ride({
         date: rideDate,
         route: {
-          name: line.route.name,
+          name: line.name,
           stops: line.route.stops.map(stop => ({
             stopId: stop.stopId,
             name: stop.name,
