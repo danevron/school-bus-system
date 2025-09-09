@@ -224,4 +224,23 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get locationPermissionRequired =>
       'Location permission is required for ride tracking';
+
+  @override
+  String get todayRides => 'Today\'s Rides';
+
+  @override
+  String get otherRides => 'Other Rides';
+
+  @override
+  String get showAll => 'Show All';
+
+  @override
+  String get filter => 'Filter';
+
+  @override
+  String get noActiveRidesFound => 'No active rides found';
+
+  @override
+  String get tapShowAllForCompleted =>
+      'Tap \"Show All\" to see completed and cancelled rides';
 }

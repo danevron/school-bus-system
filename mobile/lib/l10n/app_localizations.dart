@@ -511,6 +511,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Location permission is required for ride tracking'**
   String get locationPermissionRequired;
+
+  /// Section title for today's rides
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s Rides'**
+  String get todayRides;
+
+  /// Section title for other rides
+  ///
+  /// In en, this message translates to:
+  /// **'Other Rides'**
+  String get otherRides;
+
+  /// Button text to show all rides including completed/cancelled
+  ///
+  /// In en, this message translates to:
+  /// **'Show All'**
+  String get showAll;
+
+  /// Button text to filter rides (hide completed/cancelled)
+  ///
+  /// In en, this message translates to:
+  /// **'Filter'**
+  String get filter;
+
+  /// Message when no active rides are available
+  ///
+  /// In en, this message translates to:
+  /// **'No active rides found'**
+  String get noActiveRidesFound;
+
+  /// Helper text to guide users to show all rides
+  ///
+  /// In en, this message translates to:
+  /// **'Tap \"Show All\" to see completed and cancelled rides'**
+  String get tapShowAllForCompleted;
 }
 
 class _AppLocalizationsDelegate

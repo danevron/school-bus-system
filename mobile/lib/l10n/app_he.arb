@@ -287,5 +287,29 @@
   "locationPermissionRequired": "נדרשת הרשאת מיקום למעקב אחר הנסיעה",
   "@locationPermissionRequired": {
     "description": "Message when location permission is needed"
+  },
+  "todayRides": "נסיעות היום",
+  "@todayRides": {
+    "description": "Section title for today's rides"
+  },
+  "otherRides": "נסיעות אחרות",
+  "@otherRides": {
+    "description": "Section title for other rides"
+  },
+  "showAll": "הצג הכל",
+  "@showAll": {
+    "description": "Button text to show all rides including completed/cancelled"
+  },
+  "filter": "סנן",
+  "@filter": {
+    "description": "Button text to filter rides (hide completed/cancelled)"
+  },
+  "noActiveRidesFound": "לא נמצאו נסיעות פעילות",
+  "@noActiveRidesFound": {
+    "description": "Message when no active rides are available"
+  },
+  "tapShowAllForCompleted": "לחץ \"הצג הכל\" כדי לראות נסיעות שהושלמו ובוטלו",
+  "@tapShowAllForCompleted": {
+    "description": "Helper text to guide users to show all rides"
   }
 }

@@ -287,5 +287,29 @@
   "locationPermissionRequired": "Location permission is required for ride tracking",
   "@locationPermissionRequired": {
     "description": "Message when location permission is needed"
+  },
+  "todayRides": "Today's Rides",
+  "@todayRides": {
+    "description": "Section title for today's rides"
+  },
+  "otherRides": "Other Rides",
+  "@otherRides": {
+    "description": "Section title for other rides"
+  },
+  "showAll": "Show All",
+  "@showAll": {
+    "description": "Button text to show all rides including completed/cancelled"
+  },
+  "filter": "Filter",
+  "@filter": {
+    "description": "Button text to filter rides (hide completed/cancelled)"
+  },
+  "noActiveRidesFound": "No active rides found",
+  "@noActiveRidesFound": {
+    "description": "Message when no active rides are available"
+  },
+  "tapShowAllForCompleted": "Tap \"Show All\" to see completed and cancelled rides",
+  "@tapShowAllForCompleted": {
+    "description": "Helper text to guide users to show all rides"
   }
 }

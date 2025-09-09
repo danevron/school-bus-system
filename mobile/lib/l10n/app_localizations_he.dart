@@ -220,4 +220,23 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get locationPermissionRequired => 'נדרשת הרשאת מיקום למעקב אחר הנסיעה';
+
+  @override
+  String get todayRides => 'נסיעות היום';
+
+  @override
+  String get otherRides => 'נסיעות אחרות';
+
+  @override
+  String get showAll => 'הצג הכל';
+
+  @override
+  String get filter => 'סנן';
+
+  @override
+  String get noActiveRidesFound => 'לא נמצאו נסיעות פעילות';
+
+  @override
+  String get tapShowAllForCompleted =>
+      'לחץ \"הצג הכל\" כדי לראות נסיעות שהושלמו ובוטלו';
 }

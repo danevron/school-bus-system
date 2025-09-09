@@ -14,6 +14,7 @@ class MyRidesScreen extends StatefulWidget {
 class _MyRidesScreenState extends State<MyRidesScreen> {
   bool _isLoading = false;
   List<Map<String, dynamic>> _rides = [];
+  bool _showAllRides = false;
 
   @override
   void initState() {
@@ -96,6 +97,28 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
           ],
         ),
         automaticallyImplyLeading: false, // Remove back button since we use bottom nav
+        actions: [
+          TextButton.icon(
+            onPressed: () {
+              setState(() {
+                _showAllRides = !_showAllRides;
+              });
+            },
+            icon: Icon(
+              _showAllRides ? Icons.filter_list_off : Icons.filter_list,
+              size: 20,
+              color: colorScheme.primary,
+            ),
+            label: Text(
+              _showAllRides ? localizations.filter : localizations.showAll,
+              style: TextStyle(
+                color: colorScheme.primary,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
       ),
       body: SafeArea(
         child: _isLoading
@@ -104,16 +127,162 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
               )
             : _rides.isEmpty
                 ? _buildEmptyState(localizations, theme, colorScheme)
-                : Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: ListView.builder(
-                      itemCount: _rides.length,
-                      itemBuilder: (context, index) {
-                        final ride = _rides[index];
-                        return _buildRideCard(ride, theme, colorScheme, localizations);
-                      },
+                : _buildRidesList(localizations, theme, colorScheme),
+      ),
+    );
+  }
+
+  List<Map<String, dynamic>> _getFilteredRides() {
+    if (_showAllRides) {
+      return _rides;
+    }
+    
+    // Hide cancelled and completed rides by default
+    return _rides.where((ride) {
+      final status = ride['status']?.toString().toLowerCase() ?? '';
+      return status != 'cancelled' && status != 'completed';
+    }).toList();
+  }
+
+  List<Map<String, dynamic>> _getTodayRides() {
+    final today = DateTime.now();
+    final todayStr = '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+    
+    return _getFilteredRides().where((ride) {
+      final rideDate = ride['date']?.toString() ?? '';
+      return rideDate.startsWith(todayStr);
+    }).toList();
+  }
+
+  List<Map<String, dynamic>> _getOtherRides() {
+    final today = DateTime.now();
+    final todayStr = '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+    
+    return _getFilteredRides().where((ride) {
+      final rideDate = ride['date']?.toString() ?? '';
+      return !rideDate.startsWith(todayStr);
+    }).toList();
+  }
+
+  Widget _buildRidesList(AppLocalizations localizations, ThemeData theme, ColorScheme colorScheme) {
+    final todayRides = _getTodayRides();
+    final otherRides = _getOtherRides();
+    
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Today's Rides Section
+          if (todayRides.isNotEmpty) ...[
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    colorScheme.primary.withOpacity(0.1),
+                    colorScheme.primary.withOpacity(0.05),
+                  ],
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                ),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: colorScheme.primary.withOpacity(0.3),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.today,
+                    color: colorScheme.primary,
+                    size: 24,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    localizations.todayRides,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.primary,
                     ),
                   ),
+                  const Spacer(),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: colorScheme.primary,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '${todayRides.length}',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: colorScheme.onPrimary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            ...todayRides.map((ride) => _buildRideCard(ride, theme, colorScheme, localizations, isToday: true)),
+            if (otherRides.isNotEmpty) ...[
+              const SizedBox(height: 24),
+              Divider(color: colorScheme.outline.withOpacity(0.3)),
+              const SizedBox(height: 16),
+            ],
+          ],
+          
+          // Other Rides Section
+          if (otherRides.isNotEmpty) ...[
+            if (todayRides.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(left: 16, bottom: 16),
+                child: Text(
+                  localizations.otherRides,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            ...otherRides.map((ride) => _buildRideCard(ride, theme, colorScheme, localizations)),
+          ],
+          
+          // Show message when no rides match filter
+          if (todayRides.isEmpty && otherRides.isEmpty && !_showAllRides) ...[
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32.0),
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.filter_list_off,
+                      size: 48,
+                      color: colorScheme.onSurfaceVariant.withOpacity(0.5),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      localizations.noActiveRidesFound,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      localizations.tapShowAllForCompleted,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant.withOpacity(0.7),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }
@@ -176,7 +345,7 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
     );
   }
 
-  Widget _buildRideCard(Map<String, dynamic> ride, ThemeData theme, ColorScheme colorScheme, AppLocalizations localizations) {
+  Widget _buildRideCard(Map<String, dynamic> ride, ThemeData theme, ColorScheme colorScheme, AppLocalizations localizations, {bool isToday = false}) {
     final status = ride['status'] ?? 'unknown';
     final startTime = ride['startTime'] ?? '';
     final date = ride['date'] ?? '';
@@ -218,7 +387,27 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
+      elevation: isToday ? 4 : 1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: isToday ? BorderSide(
+          color: colorScheme.primary.withOpacity(0.3),
+          width: 1.5,
+        ) : BorderSide.none,
+      ),
+      child: Container(
+        decoration: isToday ? BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          gradient: LinearGradient(
+            colors: [
+              colorScheme.primary.withOpacity(0.02),
+              Colors.transparent,
+            ],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+        ) : null,
+        child: ListTile(
         leading: Icon(
           statusIcon,
           color: statusColor,
@@ -263,13 +452,14 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
           Icons.chevron_right,
           color: colorScheme.onSurfaceVariant,
         ),
-        onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => RideDetailScreen(ride: ride),
-            ),
-          );
-        },
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => RideDetailScreen(ride: ride),
+              ),
+            );
+          },
+        ),
       ),
     );
   }
