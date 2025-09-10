@@ -239,4 +239,17 @@ class AppLocalizationsHe extends AppLocalizations {
   @override
   String get tapShowAllForCompleted =>
       'לחץ \"הצג הכל\" כדי לראות נסיעות שהושלמו ובוטלו';
+
+  @override
+  String get bookingConfirmedSuccessfully => 'ההזמנה אושרה בהצלחה';
+
+  @override
+  String get bookingCancelledSuccessfully => 'ההזמנה בוטלה בהצלחה';
+
+  @override
+  String get confirmCancellation => 'אישור ביטול';
+
+  @override
+  String get confirmCancellationMessage =>
+      'האם אתה בטוח שברצונך לבטל את ההזמנה הזו?';
 }

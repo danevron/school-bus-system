@@ -311,5 +311,21 @@
   "tapShowAllForCompleted": "Tap \"Show All\" to see completed and cancelled rides",
   "@tapShowAllForCompleted": {
     "description": "Helper text to guide users to show all rides"
+  },
+  "bookingConfirmedSuccessfully": "Booking confirmed successfully",
+  "@bookingConfirmedSuccessfully": {
+    "description": "Success message when booking is confirmed"
+  },
+  "bookingCancelledSuccessfully": "Booking cancelled successfully",
+  "@bookingCancelledSuccessfully": {
+    "description": "Success message when booking is cancelled"
+  },
+  "confirmCancellation": "Confirm Cancellation",
+  "@confirmCancellation": {
+    "description": "Dialog title for confirming cancellation"
+  },
+  "confirmCancellationMessage": "Are you sure you want to cancel this booking?",
+  "@confirmCancellationMessage": {
+    "description": "Dialog message asking user to confirm cancellation"
   }
 }

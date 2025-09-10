@@ -243,4 +243,17 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get tapShowAllForCompleted =>
       'Tap \"Show All\" to see completed and cancelled rides';
+
+  @override
+  String get bookingConfirmedSuccessfully => 'Booking confirmed successfully';
+
+  @override
+  String get bookingCancelledSuccessfully => 'Booking cancelled successfully';
+
+  @override
+  String get confirmCancellation => 'Confirm Cancellation';
+
+  @override
+  String get confirmCancellationMessage =>
+      'Are you sure you want to cancel this booking?';
 }

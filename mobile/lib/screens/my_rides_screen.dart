@@ -43,9 +43,16 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
     });
 
     try {
+      // Get today's date for filtering from today onwards
+      final today = DateTime.now();
+      final todayStr = '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+      
       final response = await AuthService.authenticatedRequest(
         'GET',
         '/api/rides/user/my-rides',
+        queryParams: {
+          'fromDate': todayStr, // Only fetch today's and future rides
+        },
       );
       
       if (response.statusCode == 200) {

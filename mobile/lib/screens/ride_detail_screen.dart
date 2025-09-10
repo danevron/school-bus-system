@@ -25,6 +25,8 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
   List<Map<String, dynamic>> _bookings = [];
   late Map<String, dynamic> _currentRide;
   Timer? _locationTimer;
+  
+  bool get _isDriver => AuthService.user?['role'] == 'driver';
 
   @override
   void initState() {
@@ -67,6 +69,12 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
               'dropoffAddress': booking['dropoffStop']?['address'] ?? '',
               'notes': booking['notes'] ?? '',
               'bookingDate': booking['bookingDate'],
+              'actions': booking['actions'] ?? {
+                'canCancel': false,
+                'canConfirm': false,
+                'canCheckIn': false,
+                'canDropOff': false,
+              },
             } as Map<String, dynamic>;
           }).toList();
           _isLoading = false;
@@ -297,38 +305,44 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
     }
   }
 
-  Future<void> _updateBookingStatus(String bookingId, String newStatus) async {
+  Future<void> _updateBookingStatus(String bookingId, String action) async {
     try {
       String endpoint;
       String successMessage;
+      Map<String, dynamic>? body;
       
-      // Handle check-in and dropoff actions
-      switch (newStatus) {
-        case 'checked_in':
+      // Handle different booking actions
+      switch (action) {
+        case 'checkin':
           endpoint = '/api/bookings/$bookingId/checkin';
           successMessage = AppLocalizations.of(context)!.passengerCheckedInSuccessfully;
           break;
-        case 'completed':
+        case 'dropoff':
           endpoint = '/api/bookings/$bookingId/dropoff';
           successMessage = AppLocalizations.of(context)!.passengerDroppedOffSuccessfully;
           break;
+        case 'confirm':
+          endpoint = '/api/bookings/$bookingId/confirm';
+          successMessage = AppLocalizations.of(context)!.bookingConfirmedSuccessfully;
+          break;
+        case 'cancel':
+          endpoint = '/api/bookings/$bookingId/cancel';
+          successMessage = AppLocalizations.of(context)!.bookingCancelledSuccessfully;
+          body = {'reason': 'Cancelled by user'};
+          break;
         default:
-          throw Exception('Unsupported action: $newStatus');
+          throw Exception('Unsupported action: $action');
       }
 
       final response = await AuthService.authenticatedRequest(
         'POST',
         endpoint,
+        body: body,
       );
       
       if (response.statusCode == 200) {
-        // Update local state on successful API call
-        setState(() {
-          final bookingIndex = _bookings.indexWhere((b) => b['_id'] == bookingId);
-          if (bookingIndex >= 0) {
-            _bookings[bookingIndex]['status'] = newStatus;
-          }
-        });
+        // Refresh bookings list to get updated data and actions
+        await _loadBookings();
         
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -387,17 +401,20 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
             // Ride Status Header
             _buildRideHeader(theme, colorScheme, localizations),
             
-            // Start Ride Button (only for scheduled rides)
-            if (_currentRide['status'] == 'scheduled')
-              _buildStartRideButton(theme, colorScheme, localizations),
-            
-            // End Ride Button (only for in-progress rides)
-            if (_currentRide['status'] == 'in_progress')
-              _buildEndRideButton(theme, colorScheme, localizations),
-            
-            // Location Sharing Button (only for in-progress rides)
-            if (_currentRide['status'] == 'in_progress')
-              _buildLocationSharingButton(theme, colorScheme, localizations),
+            // Driver-only controls
+            if (_isDriver) ...[
+              // Start Ride Button (only for scheduled rides)
+              if (_currentRide['status'] == 'scheduled')
+                _buildStartRideButton(theme, colorScheme, localizations),
+              
+              // End Ride Button (only for in-progress rides)
+              if (_currentRide['status'] == 'in_progress')
+                _buildEndRideButton(theme, colorScheme, localizations),
+              
+              // Location Sharing Button (only for in-progress rides)
+              if (_currentRide['status'] == 'in_progress')
+                _buildLocationSharingButton(theme, colorScheme, localizations),
+            ],
             
             // Bookings List
             Expanded(
@@ -776,43 +793,139 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
               ],
             ],
             
-            // Action buttons based on ride status and booking status
-            if (_currentRide['status'] == 'in_progress') ...[
-              const SizedBox(height: 12),
-              if ((status == 'confirmed' || status == 'unconfirmed')) ...[
-                // Check-in button for confirmed/unconfirmed passengers
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: () => _updateBookingStatus(booking['_id'], 'checked_in'),
-                    icon: const Icon(Icons.login, size: 16),
-                    label: Text(localizations.checkIn),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.blue,
-                      side: const BorderSide(color: Colors.blue),
-                    ),
-                  ),
-                ),
-              ] else if (status == 'checked_in') ...[
-                // Dropoff button for checked-in passengers
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: () => _updateBookingStatus(booking['_id'], 'completed'),
-                    icon: const Icon(Icons.logout, size: 16),
-                    label: Text(localizations.dropOff),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.green,
-                      side: const BorderSide(color: Colors.green),
-                    ),
-                  ),
-                ),
-              ],
-            ],
+            // Dynamic action buttons based on API permissions
+            _buildActionButtons(booking, theme, colorScheme, localizations),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildActionButtons(Map<String, dynamic> booking, ThemeData theme, ColorScheme colorScheme, AppLocalizations localizations) {
+    final actions = booking['actions'] as Map<String, dynamic>? ?? {};
+    final List<Widget> actionButtons = [];
+
+    // Check if any actions are available
+    final hasActions = actions['canCancel'] == true ||
+        actions['canConfirm'] == true ||
+        actions['canCheckIn'] == true ||
+        actions['canDropOff'] == true;
+
+    if (!hasActions) {
+      return const SizedBox.shrink();
+    }
+
+    actionButtons.add(const SizedBox(height: 12));
+
+    // Cancel button
+    if (actions['canCancel'] == true) {
+      actionButtons.add(
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: () => _showCancelConfirmation(booking['_id']),
+            icon: const Icon(Icons.cancel, size: 16),
+            label: Text(localizations.cancel),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Colors.red,
+              side: const BorderSide(color: Colors.red),
+            ),
+          ),
+        ),
+      );
+      actionButtons.add(const SizedBox(height: 8));
+    }
+
+    // Confirm button
+    if (actions['canConfirm'] == true) {
+      actionButtons.add(
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: () => _updateBookingStatus(booking['_id'], 'confirm'),
+            icon: const Icon(Icons.check, size: 16),
+            label: Text(localizations.confirm),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Colors.green,
+              side: const BorderSide(color: Colors.green),
+            ),
+          ),
+        ),
+      );
+      actionButtons.add(const SizedBox(height: 8));
+    }
+
+    // Check-in button
+    if (actions['canCheckIn'] == true) {
+      actionButtons.add(
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: () => _updateBookingStatus(booking['_id'], 'checkin'),
+            icon: const Icon(Icons.login, size: 16),
+            label: Text(localizations.checkIn),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Colors.blue,
+              side: const BorderSide(color: Colors.blue),
+            ),
+          ),
+        ),
+      );
+      actionButtons.add(const SizedBox(height: 8));
+    }
+
+    // Drop-off button
+    if (actions['canDropOff'] == true) {
+      actionButtons.add(
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: () => _updateBookingStatus(booking['_id'], 'dropoff'),
+            icon: const Icon(Icons.logout, size: 16),
+            label: Text(localizations.dropOff),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Colors.green,
+              side: const BorderSide(color: Colors.green),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      children: actionButtons,
+    );
+  }
+
+  Future<void> _showCancelConfirmation(String bookingId) async {
+    final localizations = AppLocalizations.of(context)!;
+    
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(localizations.confirmCancellation),
+          content: Text(localizations.confirmCancellationMessage),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(localizations.cancel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.red,
+              ),
+              child: Text(localizations.confirmCancellation),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed == true) {
+      await _updateBookingStatus(bookingId, 'cancel');
+    }
   }
 
   String _formatDateTime(String timeString, {required String startDate}) {

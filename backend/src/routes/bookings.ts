@@ -9,20 +9,20 @@ router.use(requireAuth);
 
 // Admin-only routes
 router.get('/', requireAdmin, bookingController.getAllBookings);
-router.post('/:id/confirm', requireAdmin, bookingController.confirmBooking);
 router.post('/:id/admit', requireAdmin, bookingController.admitWaitingListBooking);
 
 // Routes accessible by multiple roles
 router.get('/:id', bookingController.getBookingById);
 router.post('/', bookingController.createBooking);
 router.post('/:id/cancel', bookingController.cancelBooking);
+router.post('/:id/confirm', bookingController.confirmBooking);
 
 // Driver-specific routes
 router.post('/:id/checkin', requireDriver, bookingController.checkInPassenger);
 router.post('/:id/dropoff', requireDriver, bookingController.dropOffPassenger);
-router.get('/ride/:rideId', bookingController.getRideBookings);
 
 // User-specific routes (any authenticated user can access their own bookings)
 router.get('/user/:userId', bookingController.getUserBookings);
+router.get('/ride/:rideId', bookingController.getRideBookings);
 
 export default router;

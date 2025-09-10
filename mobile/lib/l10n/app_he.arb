@@ -311,5 +311,21 @@
   "tapShowAllForCompleted": "לחץ \"הצג הכל\" כדי לראות נסיעות שהושלמו ובוטלו",
   "@tapShowAllForCompleted": {
     "description": "Helper text to guide users to show all rides"
+  },
+  "bookingConfirmedSuccessfully": "ההזמנה אושרה בהצלחה",
+  "@bookingConfirmedSuccessfully": {
+    "description": "Success message when booking is confirmed"
+  },
+  "bookingCancelledSuccessfully": "ההזמנה בוטלה בהצלחה",
+  "@bookingCancelledSuccessfully": {
+    "description": "Success message when booking is cancelled"
+  },
+  "confirmCancellation": "אישור ביטול",
+  "@confirmCancellation": {
+    "description": "Dialog title for confirming cancellation"
+  },
+  "confirmCancellationMessage": "האם אתה בטוח שברצונך לבטל את ההזמנה הזו?",
+  "@confirmCancellationMessage": {
+    "description": "Dialog message asking user to confirm cancellation"
   }
 }

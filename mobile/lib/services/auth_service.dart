@@ -100,8 +100,9 @@ class AuthService {
     String method,
     String endpoint, {
     Map<String, dynamic>? body,
+    Map<String, String>? queryParams,
   }) async {
-    final uri = Uri.parse('$_baseUrl$endpoint');
+    final uri = Uri.parse('$_baseUrl$endpoint').replace(queryParameters: queryParams);
     final headers = getAuthHeaders();
     
     switch (method.toUpperCase()) {

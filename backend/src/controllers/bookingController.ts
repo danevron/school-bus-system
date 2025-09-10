@@ -286,9 +286,25 @@ export const bookingController = {
         return res.status(404).json({ message: 'Booking not found' });
       }
 
-      // Authorization check
-      if (currentUserRole !== UserRole.ADMIN && booking.passenger._id.toString() !== currentUserId) {
-        return res.status(403).json({ message: 'You can only cancel your own bookings' });
+      // Authorization check: Admin, passenger themselves, or parent of the passenger
+      let canCancel = false;
+      
+      if (currentUserRole === UserRole.ADMIN) {
+        canCancel = true;
+      } else if (booking.passenger._id.toString() === currentUserId) {
+        canCancel = true;
+      } else if (currentUserRole === UserRole.PARENT) {
+        // Check if current user is a parent of the passenger
+        const currentUser = await User.findById(currentUserId);
+        if (currentUser?.children) {
+          canCancel = currentUser.children.some(childId => 
+            childId.toString() === booking.passenger._id.toString()
+          );
+        }
+      }
+      
+      if (!canCancel) {
+        return res.status(403).json({ message: 'You can only cancel your own bookings or your children\'s bookings' });
       }
 
       const canCancelResult = booking.canBeCancelled();
@@ -435,7 +451,6 @@ export const bookingController = {
     }
   },
 
-  // Get bookings for a ride (Driver and Admin)
   getRideBookings: async (req: Request, res: Response) => {
     try {
       const { rideId } = req.params;
@@ -453,13 +468,59 @@ export const bookingController = {
       const bookings = await Booking.find({ ride: rideId })
         .sort({ 'pickupStop.estimatedTime': 1 });
 
-      // Manually fetch passenger details from Users collection
+      // Get current user details to check parent-child relationships
+      const currentUser = await User.findById(currentUserId);
+      if (!currentUser) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      // Manually fetch passenger details from Users collection and add action permissions
       const bookingsWithPassengers = await Promise.all(
         bookings.map(async (booking) => {
           const passenger = await User.findById(booking.passenger, 'firstName lastName phone email role');
+          
+          // Calculate action permissions for this booking
+          const actions = {
+            canCancel: false,
+            canConfirm: false,
+            canCheckIn: false,
+            canDropOff: false
+          };
+
+          // Admin can perform all actions on all bookings
+          if (currentUserRole === UserRole.ADMIN) {
+            actions.canCancel = booking.canBeCancelled().canCancel;
+            actions.canConfirm = booking.status === BookingStatus.UNCONFIRMED || booking.status === BookingStatus.WAITING_LIST;
+            actions.canCheckIn = booking.status === BookingStatus.CONFIRMED || booking.status === BookingStatus.UNCONFIRMED;
+            actions.canDropOff = booking.status === BookingStatus.CHECKED_IN;
+          }
+          // Driver can check in and drop off all bookings on their ride
+          else if (currentUserRole === UserRole.DRIVER) {
+            actions.canCheckIn = booking.status === BookingStatus.CONFIRMED || booking.status === BookingStatus.UNCONFIRMED;
+            actions.canDropOff = booking.status === BookingStatus.CHECKED_IN;
+          }
+          // Student/Parent can cancel and confirm their own bookings or their children's bookings
+          else if (currentUserRole === UserRole.STUDENT || currentUserRole === UserRole.PARENT) {
+            const isOwnBooking = booking.passenger.toString() === currentUserId;
+            let isChildBooking = false;
+            
+            // Check if this is a parent's child's booking
+            if (currentUserRole === UserRole.PARENT && currentUser.children) {
+              isChildBooking = currentUser.children.some(childId => 
+                childId.toString() === booking.passenger.toString()
+              );
+            }
+            
+            if (isOwnBooking || isChildBooking) {
+              actions.canCancel = booking.canBeCancelled().canCancel;
+              actions.canConfirm = booking.status === BookingStatus.UNCONFIRMED;
+            }
+          }
+
           return {
             ...booking.toObject(),
-            passenger
+            passenger,
+            actions
           };
         })
       );

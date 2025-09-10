@@ -475,7 +475,7 @@ export const rideController = {
     try {
     
       const user = req.user;
-      const { status, date } = req.query;
+      const { status, date, fromDate } = req.query;
       const filter: any = {};
 
       if (user?.role === UserRole.DRIVER) {
@@ -508,6 +508,11 @@ export const rideController = {
         filter.date = {
           $gte: new Date(queryDate.setHours(0, 0, 0, 0)),
           $lt: new Date(queryDate.setHours(23, 59, 59, 999))
+        };
+      } else if (fromDate) {
+        const queryFromDate = new Date(fromDate as string);
+        filter.date = {
+          $gte: new Date(queryFromDate.setHours(0, 0, 0, 0))
         };
       }
 

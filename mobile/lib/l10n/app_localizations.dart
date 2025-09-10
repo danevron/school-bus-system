@@ -547,6 +547,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tap \"Show All\" to see completed and cancelled rides'**
   String get tapShowAllForCompleted;
+
+  /// Success message when booking is confirmed
+  ///
+  /// In en, this message translates to:
+  /// **'Booking confirmed successfully'**
+  String get bookingConfirmedSuccessfully;
+
+  /// Success message when booking is cancelled
+  ///
+  /// In en, this message translates to:
+  /// **'Booking cancelled successfully'**
+  String get bookingCancelledSuccessfully;
+
+  /// Dialog title for confirming cancellation
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Cancellation'**
+  String get confirmCancellation;
+
+  /// Dialog message asking user to confirm cancellation
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to cancel this booking?'**
+  String get confirmCancellationMessage;
 }
 
 class _AppLocalizationsDelegate
