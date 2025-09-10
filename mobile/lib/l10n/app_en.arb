@@ -206,6 +206,10 @@
   "@bookingStatusCompleted": {
     "description": "Booking status - completed"
   },
+  "bookingStatusWaitingList": "Waiting List",
+  "@bookingStatusWaitingList": {
+    "description": "Booking status - waiting list"
+  },
   "pickup": "Pickup",
   "@pickup": {
     "description": "Pickup location label"

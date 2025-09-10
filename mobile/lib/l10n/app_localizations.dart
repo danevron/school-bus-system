@@ -398,6 +398,12 @@ abstract class AppLocalizations {
   /// **'Completed'**
   String get bookingStatusCompleted;
 
+  /// Booking status - waiting list
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting List'**
+  String get bookingStatusWaitingList;
+
   /// Pickup location label
   ///
   /// In en, this message translates to:

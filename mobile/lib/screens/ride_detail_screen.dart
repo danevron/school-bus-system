@@ -726,6 +726,11 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
         statusIcon = Icons.check_circle_outline;
         statusText = localizations.bookingStatusCompleted;
         break;
+      case 'waiting_list':
+        statusColor = Colors.amber;
+        statusIcon = Icons.hourglass_empty;
+        statusText = localizations.bookingStatusWaitingList;
+        break;
     }
 
     return Card(

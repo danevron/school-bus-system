@@ -601,13 +601,13 @@ class _BookRideScreenState extends State<BookRideScreen> {
               SizedBox(
                 width: double.infinity,
                 child: FilledButton.icon(
-                  onPressed: availableSeats > 0 ? () => _bookRide(ride) : null,
+                  onPressed: () => _bookRide(ride),
                   icon: const Icon(Icons.book_online, size: 16),
                   label: Text(
                     availableSeats > 0 ? localizations.bookThisRide : localizations.fullyBooked,
                   ),
                   style: FilledButton.styleFrom(
-                    backgroundColor: availableSeats > 0 ? colorScheme.primary : colorScheme.onSurfaceVariant,
+                    backgroundColor: colorScheme.primary,
                   ),
                 ),
               ),

@@ -206,6 +206,10 @@
   "@bookingStatusCompleted": {
     "description": "Booking status - completed"
   },
+  "bookingStatusWaitingList": "רשימת המתנה",
+  "@bookingStatusWaitingList": {
+    "description": "Booking status - waiting list"
+  },
   "pickup": "עליה",
   "@pickup": {
     "description": "Pickup location label"

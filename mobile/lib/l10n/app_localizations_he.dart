@@ -163,6 +163,9 @@ class AppLocalizationsHe extends AppLocalizations {
   String get bookingStatusCompleted => 'הושלם';
 
   @override
+  String get bookingStatusWaitingList => 'רשימת המתנה';
+
+  @override
   String get pickup => 'עליה';
 
   @override
