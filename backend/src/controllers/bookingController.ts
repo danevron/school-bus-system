@@ -232,12 +232,6 @@ export const bookingController = {
         return res.status(400).json({ message: 'Only unconfirmed bookings can be confirmed' });
       }
 
-      // Check if ride still has available seats
-      const ride = await Ride.findById(booking.ride);
-      if (!ride || ride.availableSeats <= 0) {
-        return res.status(400).json({ message: 'No available seats on this ride' });
-      }
-
       await booking.confirm(new Types.ObjectId(currentUserId));
       
       const populatedBooking = await Booking.findById(id)
