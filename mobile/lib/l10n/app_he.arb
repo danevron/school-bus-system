@@ -437,5 +437,111 @@
   "pleaseSelectPickupStop": "אנא בחר תחנת איסוף",
   "@pleaseSelectPickupStop": {
     "description": "Error message when no pickup stop is selected"
+  },
+  "trackRide": "עקוב אחר נסיעה",
+  "@trackRide": {
+    "description": "Button text to track a ride"
+  },
+  "rideTracking": "מעקב נסיעה",
+  "@rideTracking": {
+    "description": "Screen title for ride tracking"
+  },
+  "trackingRide": "מעקב: {rideName}",
+  "@trackingRide": {
+    "description": "App bar title for ride tracking screen",
+    "placeholders": {
+      "rideName": {
+        "type": "String",
+        "description": "Name of the ride being tracked"
+      }
+    }
+  },
+  "centerOnBus": "מרכז על האוטובוס",
+  "@centerOnBus": {
+    "description": "Tooltip for center on bus button"
+  },
+  "locationUnavailable": "מיקום לא זמין",
+  "@locationUnavailable": {
+    "description": "Error state title when location is not available"
+  },
+  "noLocationData": "אין נתוני מיקום זמינים לנסיעה זו",
+  "@noLocationData": {
+    "description": "Error message when no location data is available"
+  },
+  "rideNotStarted": "נסיעה לא נמצאה או עדיין לא התחילה",
+  "@rideNotStarted": {
+    "description": "Error message when ride is not started"
+  },
+  "errorLoadingLocation": "שגיאה בטעינת מיקום הנסיעה",
+  "@errorLoadingLocation": {
+    "description": "Generic error message for location loading"
+  },
+  "retry": "נסה שוב",
+  "@retry": {
+    "description": "Retry button text"
+  },
+  "rideInProgress": "נסיעה בתהליך",
+  "@rideInProgress": {
+    "description": "Status text for active ride"
+  },
+  "driverLabel": "נהג: {firstName} {lastName}",
+  "@driverLabel": {
+    "description": "Driver information label",
+    "placeholders": {
+      "firstName": {
+        "type": "String",
+        "description": "Driver's first name"
+      },
+      "lastName": {
+        "type": "String",
+        "description": "Driver's last name"
+      }
+    }
+  },
+  "vehicleLabel": "רכב: {licensePlate} ({make} {model})",
+  "@vehicleLabel": {
+    "description": "Vehicle information label",
+    "placeholders": {
+      "licensePlate": {
+        "type": "String",
+        "description": "Vehicle license plate"
+      },
+      "make": {
+        "type": "String",
+        "description": "Vehicle make"
+      },
+      "model": {
+        "type": "String",
+        "description": "Vehicle model"
+      }
+    }
+  },
+  "justNow": "כרגע",
+  "@justNow": {
+    "description": "Time indicator for very recent updates"
+  },
+  "minutesAgo": "לפני {minutes} דקות",
+  "@minutesAgo": {
+    "description": "Time indicator for minutes ago",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "description": "Number of minutes ago"
+      }
+    }
+  },
+  "hoursAgo": "לפני {hours} שעות",
+  "@hoursAgo": {
+    "description": "Time indicator for hours ago",
+    "placeholders": {
+      "hours": {
+        "type": "int",
+        "description": "Number of hours ago"
+      }
+    }
+  },
+  "unknownTime": "לא ידוע",
+  "@unknownTime": {
+    "description": "Fallback for unknown time"
   }
 }

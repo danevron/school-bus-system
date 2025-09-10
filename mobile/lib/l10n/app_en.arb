@@ -437,5 +437,111 @@
   "pleaseSelectPickupStop": "Please select a pickup stop",
   "@pleaseSelectPickupStop": {
     "description": "Error message when no pickup stop is selected"
+  },
+  "trackRide": "Track Ride",
+  "@trackRide": {
+    "description": "Button text to track a ride"
+  },
+  "rideTracking": "Ride Tracking",
+  "@rideTracking": {
+    "description": "Screen title for ride tracking"
+  },
+  "trackingRide": "Tracking: {rideName}",
+  "@trackingRide": {
+    "description": "App bar title for ride tracking screen",
+    "placeholders": {
+      "rideName": {
+        "type": "String",
+        "description": "Name of the ride being tracked"
+      }
+    }
+  },
+  "centerOnBus": "Center on Bus",
+  "@centerOnBus": {
+    "description": "Tooltip for center on bus button"
+  },
+  "locationUnavailable": "Location Unavailable",
+  "@locationUnavailable": {
+    "description": "Error state title when location is not available"
+  },
+  "noLocationData": "No location data available for this ride",
+  "@noLocationData": {
+    "description": "Error message when no location data is available"
+  },
+  "rideNotStarted": "Ride not found or not started yet",
+  "@rideNotStarted": {
+    "description": "Error message when ride is not started"
+  },
+  "errorLoadingLocation": "Error loading ride location",
+  "@errorLoadingLocation": {
+    "description": "Generic error message for location loading"
+  },
+  "retry": "Retry",
+  "@retry": {
+    "description": "Retry button text"
+  },
+  "rideInProgress": "Ride In Progress",
+  "@rideInProgress": {
+    "description": "Status text for active ride"
+  },
+  "driverLabel": "Driver: {firstName} {lastName}",
+  "@driverLabel": {
+    "description": "Driver information label",
+    "placeholders": {
+      "firstName": {
+        "type": "String",
+        "description": "Driver's first name"
+      },
+      "lastName": {
+        "type": "String",
+        "description": "Driver's last name"
+      }
+    }
+  },
+  "vehicleLabel": "Vehicle: {licensePlate} ({make} {model})",
+  "@vehicleLabel": {
+    "description": "Vehicle information label",
+    "placeholders": {
+      "licensePlate": {
+        "type": "String",
+        "description": "Vehicle license plate"
+      },
+      "make": {
+        "type": "String",
+        "description": "Vehicle make"
+      },
+      "model": {
+        "type": "String",
+        "description": "Vehicle model"
+      }
+    }
+  },
+  "justNow": "Just now",
+  "@justNow": {
+    "description": "Time indicator for very recent updates"
+  },
+  "minutesAgo": "{minutes}m ago",
+  "@minutesAgo": {
+    "description": "Time indicator for minutes ago",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "description": "Number of minutes ago"
+      }
+    }
+  },
+  "hoursAgo": "{hours}h ago",
+  "@hoursAgo": {
+    "description": "Time indicator for hours ago",
+    "placeholders": {
+      "hours": {
+        "type": "int",
+        "description": "Number of hours ago"
+      }
+    }
+  },
+  "unknownTime": "Unknown",
+  "@unknownTime": {
+    "description": "Fallback for unknown time"
   }
 }

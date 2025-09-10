@@ -325,4 +325,62 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get pleaseSelectPickupStop => 'אנא בחר תחנת איסוף';
+
+  @override
+  String get trackRide => 'עקוב אחר נסיעה';
+
+  @override
+  String get rideTracking => 'מעקב נסיעה';
+
+  @override
+  String trackingRide(String rideName) {
+    return 'מעקב: $rideName';
+  }
+
+  @override
+  String get centerOnBus => 'מרכז על האוטובוס';
+
+  @override
+  String get locationUnavailable => 'מיקום לא זמין';
+
+  @override
+  String get noLocationData => 'אין נתוני מיקום זמינים לנסיעה זו';
+
+  @override
+  String get rideNotStarted => 'נסיעה לא נמצאה או עדיין לא התחילה';
+
+  @override
+  String get errorLoadingLocation => 'שגיאה בטעינת מיקום הנסיעה';
+
+  @override
+  String get retry => 'נסה שוב';
+
+  @override
+  String get rideInProgress => 'נסיעה בתהליך';
+
+  @override
+  String driverLabel(String firstName, String lastName) {
+    return 'נהג: $firstName $lastName';
+  }
+
+  @override
+  String vehicleLabel(String licensePlate, String make, String model) {
+    return 'רכב: $licensePlate ($make $model)';
+  }
+
+  @override
+  String get justNow => 'כרגע';
+
+  @override
+  String minutesAgo(int minutes) {
+    return 'לפני $minutes דקות';
+  }
+
+  @override
+  String hoursAgo(int hours) {
+    return 'לפני $hours שעות';
+  }
+
+  @override
+  String get unknownTime => 'לא ידוע';
 }

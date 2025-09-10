@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import '../l10n/app_localizations.dart';
 import '../services/auth_service.dart';
+import 'ride_tracking_screen.dart';
 
 class RideDetailScreen extends StatefulWidget {
   final Map<String, dynamic> ride;
@@ -416,6 +417,10 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
                 _buildLocationSharingButton(theme, colorScheme, localizations),
             ],
             
+            // Track Ride Button (for in-progress rides - all users)
+            if (_currentRide['status'] == 'in_progress')
+              _buildTrackRideButton(theme, colorScheme, localizations),
+            
             // Bookings List
             Expanded(
               child: _isLoading
@@ -599,6 +604,31 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
             color: _isSharingLocation ? Colors.red : Colors.blue,
             width: 2,
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTrackRideButton(ThemeData theme, ColorScheme colorScheme, AppLocalizations localizations) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: FilledButton.icon(
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => RideTrackingScreen(
+                rideId: _currentRide['_id'],
+                rideName: _currentRide['route']?['name'] ?? 'Ride',
+              ),
+            ),
+          );
+        },
+        icon: const Icon(Icons.map, size: 20),
+        label: Text(localizations.trackRide),
+        style: FilledButton.styleFrom(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          backgroundColor: colorScheme.primary,
         ),
       ),
     );

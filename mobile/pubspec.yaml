@@ -48,6 +48,10 @@ dependencies:
   
   # Location services for GPS tracking
   geolocator: ^12.0.0
+  
+  # Map widget for displaying live tracking
+  flutter_map: ^7.0.2
+  latlong2: ^0.9.1
 
 dev_dependencies:
   flutter_test:

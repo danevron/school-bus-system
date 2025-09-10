@@ -159,13 +159,13 @@ export class RideProgressService {
       throw new Error('Ride progress not found');
     }
 
-    const user = await User.findById(userId);
-    if (!user) {
+    const userWithChildren = await User.findById(userId).populate('children', '_id');
+    if (!userWithChildren) {
       throw new Error('User not found');
     }
 
     // Check access permissions
-    const hasAccess = await this.checkProgressAccess(ride, userId, user);
+    const hasAccess = await this.checkProgressAccess(ride, userId, userWithChildren);
     if (!hasAccess) {
       throw new Error('Access denied to ride progress');
     }
@@ -256,9 +256,9 @@ export class RideProgressService {
   /**
    * Check if user has access to ride progress data
    */
-  private static async checkProgressAccess(ride: any, userId: string, user: any): Promise<boolean> {
+  private static async checkProgressAccess(ride: any, userId: string, userWithChildren: any): Promise<boolean> {
     // Admin can access any ride
-    if (user.role === 'admin') {
+    if (userWithChildren.role === 'admin') {
       return true;
     }
 
@@ -267,41 +267,18 @@ export class RideProgressService {
       return true;
     }
 
+    const childIds = userWithChildren.children.map((child: any) => child._id);
     // Check if user has booking for this ride
     const booking = await Booking.findOne({
       ride: ride._id,
-      user: userId,
-      status: { $in: ['confirmed', 'checked_in'] }
+      passenger: {
+        $in: [userId, ...childIds]
+      },
+      status: { $in: ['confirmed', 'unconfirmed', 'checked_in'] }
     });
 
     if (booking) {
       return true;
-    }
-
-    // Check if user is parent of student with booking
-    if (user.role === 'parent') {
-      // Find all bookings for this ride
-      const bookings = await Booking.find({
-        ride: ride._id,
-        status: { $in: ['confirmed', 'checked_in'] }
-      });
-
-      // Get passenger IDs from bookings
-      const passengerIds = bookings.map(booking => booking.passenger);
-
-      // Query users collection to get passenger data
-      const passengers = await User.find({
-        _id: { $in: passengerIds },
-        role: 'student'
-      }, 'parents');
-
-      // Check if any student passenger belongs to this parent
-      for (const passenger of passengers) {
-        if (passenger.parents && 
-            passenger.parents.some((parentId: any) => parentId.toString() === userId)) {
-          return true;
-        }
-      }
     }
 
     return false;

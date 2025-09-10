@@ -329,4 +329,62 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pleaseSelectPickupStop => 'Please select a pickup stop';
+
+  @override
+  String get trackRide => 'Track Ride';
+
+  @override
+  String get rideTracking => 'Ride Tracking';
+
+  @override
+  String trackingRide(String rideName) {
+    return 'Tracking: $rideName';
+  }
+
+  @override
+  String get centerOnBus => 'Center on Bus';
+
+  @override
+  String get locationUnavailable => 'Location Unavailable';
+
+  @override
+  String get noLocationData => 'No location data available for this ride';
+
+  @override
+  String get rideNotStarted => 'Ride not found or not started yet';
+
+  @override
+  String get errorLoadingLocation => 'Error loading ride location';
+
+  @override
+  String get retry => 'Retry';
+
+  @override
+  String get rideInProgress => 'Ride In Progress';
+
+  @override
+  String driverLabel(String firstName, String lastName) {
+    return 'Driver: $firstName $lastName';
+  }
+
+  @override
+  String vehicleLabel(String licensePlate, String make, String model) {
+    return 'Vehicle: $licensePlate ($make $model)';
+  }
+
+  @override
+  String get justNow => 'Just now';
+
+  @override
+  String minutesAgo(int minutes) {
+    return '${minutes}m ago';
+  }
+
+  @override
+  String hoursAgo(int hours) {
+    return '${hours}h ago';
+  }
+
+  @override
+  String get unknownTime => 'Unknown';
 }

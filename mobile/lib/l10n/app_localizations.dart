@@ -703,6 +703,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please select a pickup stop'**
   String get pleaseSelectPickupStop;
+
+  /// Button text to track a ride
+  ///
+  /// In en, this message translates to:
+  /// **'Track Ride'**
+  String get trackRide;
+
+  /// Screen title for ride tracking
+  ///
+  /// In en, this message translates to:
+  /// **'Ride Tracking'**
+  String get rideTracking;
+
+  /// App bar title for ride tracking screen
+  ///
+  /// In en, this message translates to:
+  /// **'Tracking: {rideName}'**
+  String trackingRide(String rideName);
+
+  /// Tooltip for center on bus button
+  ///
+  /// In en, this message translates to:
+  /// **'Center on Bus'**
+  String get centerOnBus;
+
+  /// Error state title when location is not available
+  ///
+  /// In en, this message translates to:
+  /// **'Location Unavailable'**
+  String get locationUnavailable;
+
+  /// Error message when no location data is available
+  ///
+  /// In en, this message translates to:
+  /// **'No location data available for this ride'**
+  String get noLocationData;
+
+  /// Error message when ride is not started
+  ///
+  /// In en, this message translates to:
+  /// **'Ride not found or not started yet'**
+  String get rideNotStarted;
+
+  /// Generic error message for location loading
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading ride location'**
+  String get errorLoadingLocation;
+
+  /// Retry button text
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
+
+  /// Status text for active ride
+  ///
+  /// In en, this message translates to:
+  /// **'Ride In Progress'**
+  String get rideInProgress;
+
+  /// Driver information label
+  ///
+  /// In en, this message translates to:
+  /// **'Driver: {firstName} {lastName}'**
+  String driverLabel(String firstName, String lastName);
+
+  /// Vehicle information label
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle: {licensePlate} ({make} {model})'**
+  String vehicleLabel(String licensePlate, String make, String model);
+
+  /// Time indicator for very recent updates
+  ///
+  /// In en, this message translates to:
+  /// **'Just now'**
+  String get justNow;
+
+  /// Time indicator for minutes ago
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes}m ago'**
+  String minutesAgo(int minutes);
+
+  /// Time indicator for hours ago
+  ///
+  /// In en, this message translates to:
+  /// **'{hours}h ago'**
+  String hoursAgo(int hours);
+
+  /// Fallback for unknown time
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get unknownTime;
 }
 
 class _AppLocalizationsDelegate
