@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 import '../services/auth_service.dart';
 import 'ride_detail_screen.dart';
+import 'book_ride_screen.dart';
 
 class MyRidesScreen extends StatefulWidget {
   const MyRidesScreen({super.key});
@@ -90,6 +91,14 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
     }
   }
 
+  void _navigateToBookRide() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const BookRideScreen(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
@@ -127,6 +136,14 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
               color: colorScheme.primary,
             ),
             tooltip: localizations.refresh,
+          ),
+          IconButton(
+            onPressed: _navigateToBookRide,
+            icon: Icon(
+              Icons.add_circle_outline,
+              color: colorScheme.primary,
+            ),
+            tooltip: localizations.bookNewRide,
           ),
           TextButton.icon(
             onPressed: () {

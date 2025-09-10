@@ -327,5 +327,115 @@
   "confirmCancellationMessage": "האם אתה בטוח שברצונך לבטל את ההזמנה הזו?",
   "@confirmCancellationMessage": {
     "description": "Dialog message asking user to confirm cancellation"
+  },
+  "bookNewRide": "הזמן נסיעה חדשה",
+  "@bookNewRide": {
+    "description": "Button text and screen title for booking new ride"
+  },
+  "bookRideFor": "הזמן נסיעה עבור:",
+  "@bookRideFor": {
+    "description": "Label for passenger selection in booking flow"
+  },
+  "mePassenger": "אני ({firstName})",
+  "@mePassenger": {
+    "description": "Self-selection option for parents in booking",
+    "placeholders": {
+      "firstName": {
+        "type": "String",
+        "description": "The parent's first name"
+      }
+    }
+  },
+  "availableRidesCount": "נסיעות זמינות ({count})",
+  "@availableRidesCount": {
+    "description": "Section title showing number of available rides",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Number of available rides"
+      }
+    }
+  },
+  "seatsAvailable": "{available}/{total} מקומות",
+  "@seatsAvailable": {
+    "description": "Shows available seats out of total capacity",
+    "placeholders": {
+      "available": {
+        "type": "int",
+        "description": "Available seats"
+      },
+      "total": {
+        "type": "int",
+        "description": "Total capacity"
+      }
+    }
+  },
+  "bookThisRide": "הזמן נסיעה זו",
+  "@bookThisRide": {
+    "description": "Button text to book a specific ride"
+  },
+  "fullyBooked": "תפוס במלואו",
+  "@fullyBooked": {
+    "description": "Status when no seats are available"
+  },
+  "confirmBooking": "אשר הזמנה",
+  "@confirmBooking": {
+    "description": "Dialog title for booking confirmation"
+  },
+  "ride": "נסיעה",
+  "@ride": {
+    "description": "Label for ride information"
+  },
+  "passenger": "נוסע",
+  "@passenger": {
+    "description": "Label for passenger information"
+  },
+  "date": "תאריך",
+  "@date": {
+    "description": "Label for date information"
+  },
+  "time": "שעה",
+  "@time": {
+    "description": "Label for time information"
+  },
+  "rideBookedSuccessfully": "הנסיעה הוזמנה בהצלחה!",
+  "@rideBookedSuccessfully": {
+    "description": "Success message when ride is booked"
+  },
+  "failedToBookRide": "הזמנת הנסיעה נכשלה",
+  "@failedToBookRide": {
+    "description": "Error message when booking fails"
+  },
+  "noAvailableRides": "אין נסיעות זמינות",
+  "@noAvailableRides": {
+    "description": "Message when no rides are available"
+  },
+  "checkBackLaterRides": "בדוק שוב מאוחר יותר עבור הזדמנויות נסיעה חדשות.",
+  "@checkBackLaterRides": {
+    "description": "Description for empty rides state"
+  },
+  "selectStops": "בחר תחנות:",
+  "@selectStops": {
+    "description": "Header for stop selection section"
+  },
+  "dropoffOptional": "הורדה (אופציונלי):",
+  "@dropoffOptional": {
+    "description": "Label for optional dropoff stop selection"
+  },
+  "choosePickupStop": "בחר תחנת איסוף",
+  "@choosePickupStop": {
+    "description": "Hint text for pickup stop dropdown"
+  },
+  "chooseDropoffStop": "בחר תחנת הורדה (אופציונלי)",
+  "@chooseDropoffStop": {
+    "description": "Hint text for dropoff stop dropdown"
+  },
+  "noneEndOfRoute": "אין (סוף המסלול)",
+  "@noneEndOfRoute": {
+    "description": "Option for no dropoff stop"
+  },
+  "pleaseSelectPickupStop": "אנא בחר תחנת איסוף",
+  "@pleaseSelectPickupStop": {
+    "description": "Error message when no pickup stop is selected"
   }
 }

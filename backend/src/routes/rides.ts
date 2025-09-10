@@ -8,7 +8,6 @@ const router = express.Router();
 router.use(requireAuth);
 
 // Admin-only routes
-router.get('/', requireAdmin, rideController.getAllRides);
 router.post('/', requireAdmin, rideController.createRide);
 router.put('/:id', requireAdmin, rideController.updateRide);
 router.delete('/:id', requireAdmin, rideController.deleteRide);
@@ -23,6 +22,8 @@ router.post('/:id/location', requireDriverOrAdmin, rideController.updateLocation
 
 // User-specific route to get their rides (drivers, parents with children on ride, passengers)
 router.get('/user/my-rides', rideController.getUserRides);
+// General route to get all rides
+router.get('/', rideController.getAllRides);
 
 // Progress data route - accessible by drivers, parents with children on ride, and passengers
 router.get('/:id/progress', rideController.getRideProgress);

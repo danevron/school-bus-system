@@ -256,4 +256,77 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get confirmCancellationMessage =>
       'Are you sure you want to cancel this booking?';
+
+  @override
+  String get bookNewRide => 'Book New Ride';
+
+  @override
+  String get bookRideFor => 'Book ride for:';
+
+  @override
+  String mePassenger(String firstName) {
+    return 'Me ($firstName)';
+  }
+
+  @override
+  String availableRidesCount(int count) {
+    return 'Available Rides ($count)';
+  }
+
+  @override
+  String seatsAvailable(int available, int total) {
+    return '$available/$total seats';
+  }
+
+  @override
+  String get bookThisRide => 'Book This Ride';
+
+  @override
+  String get fullyBooked => 'Fully Booked';
+
+  @override
+  String get confirmBooking => 'Confirm Booking';
+
+  @override
+  String get ride => 'Ride';
+
+  @override
+  String get passenger => 'Passenger';
+
+  @override
+  String get date => 'Date';
+
+  @override
+  String get time => 'Time';
+
+  @override
+  String get rideBookedSuccessfully => 'Ride booked successfully!';
+
+  @override
+  String get failedToBookRide => 'Failed to book ride';
+
+  @override
+  String get noAvailableRides => 'No available rides';
+
+  @override
+  String get checkBackLaterRides =>
+      'Check back later for new ride opportunities.';
+
+  @override
+  String get selectStops => 'Select Stops:';
+
+  @override
+  String get dropoffOptional => 'Dropoff (optional):';
+
+  @override
+  String get choosePickupStop => 'Choose pickup stop';
+
+  @override
+  String get chooseDropoffStop => 'Choose dropoff stop (optional)';
+
+  @override
+  String get noneEndOfRoute => 'None (end of route)';
+
+  @override
+  String get pleaseSelectPickupStop => 'Please select a pickup stop';
 }

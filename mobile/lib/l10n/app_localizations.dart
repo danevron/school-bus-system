@@ -571,6 +571,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Are you sure you want to cancel this booking?'**
   String get confirmCancellationMessage;
+
+  /// Button text and screen title for booking new ride
+  ///
+  /// In en, this message translates to:
+  /// **'Book New Ride'**
+  String get bookNewRide;
+
+  /// Label for passenger selection in booking flow
+  ///
+  /// In en, this message translates to:
+  /// **'Book ride for:'**
+  String get bookRideFor;
+
+  /// Self-selection option for parents in booking
+  ///
+  /// In en, this message translates to:
+  /// **'Me ({firstName})'**
+  String mePassenger(String firstName);
+
+  /// Section title showing number of available rides
+  ///
+  /// In en, this message translates to:
+  /// **'Available Rides ({count})'**
+  String availableRidesCount(int count);
+
+  /// Shows available seats out of total capacity
+  ///
+  /// In en, this message translates to:
+  /// **'{available}/{total} seats'**
+  String seatsAvailable(int available, int total);
+
+  /// Button text to book a specific ride
+  ///
+  /// In en, this message translates to:
+  /// **'Book This Ride'**
+  String get bookThisRide;
+
+  /// Status when no seats are available
+  ///
+  /// In en, this message translates to:
+  /// **'Fully Booked'**
+  String get fullyBooked;
+
+  /// Dialog title for booking confirmation
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Booking'**
+  String get confirmBooking;
+
+  /// Label for ride information
+  ///
+  /// In en, this message translates to:
+  /// **'Ride'**
+  String get ride;
+
+  /// Label for passenger information
+  ///
+  /// In en, this message translates to:
+  /// **'Passenger'**
+  String get passenger;
+
+  /// Label for date information
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get date;
+
+  /// Label for time information
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get time;
+
+  /// Success message when ride is booked
+  ///
+  /// In en, this message translates to:
+  /// **'Ride booked successfully!'**
+  String get rideBookedSuccessfully;
+
+  /// Error message when booking fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to book ride'**
+  String get failedToBookRide;
+
+  /// Message when no rides are available
+  ///
+  /// In en, this message translates to:
+  /// **'No available rides'**
+  String get noAvailableRides;
+
+  /// Description for empty rides state
+  ///
+  /// In en, this message translates to:
+  /// **'Check back later for new ride opportunities.'**
+  String get checkBackLaterRides;
+
+  /// Header for stop selection section
+  ///
+  /// In en, this message translates to:
+  /// **'Select Stops:'**
+  String get selectStops;
+
+  /// Label for optional dropoff stop selection
+  ///
+  /// In en, this message translates to:
+  /// **'Dropoff (optional):'**
+  String get dropoffOptional;
+
+  /// Hint text for pickup stop dropdown
+  ///
+  /// In en, this message translates to:
+  /// **'Choose pickup stop'**
+  String get choosePickupStop;
+
+  /// Hint text for dropoff stop dropdown
+  ///
+  /// In en, this message translates to:
+  /// **'Choose dropoff stop (optional)'**
+  String get chooseDropoffStop;
+
+  /// Option for no dropoff stop
+  ///
+  /// In en, this message translates to:
+  /// **'None (end of route)'**
+  String get noneEndOfRoute;
+
+  /// Error message when no pickup stop is selected
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a pickup stop'**
+  String get pleaseSelectPickupStop;
 }
 
 class _AppLocalizationsDelegate

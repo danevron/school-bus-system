@@ -327,5 +327,115 @@
   "confirmCancellationMessage": "Are you sure you want to cancel this booking?",
   "@confirmCancellationMessage": {
     "description": "Dialog message asking user to confirm cancellation"
+  },
+  "bookNewRide": "Book New Ride",
+  "@bookNewRide": {
+    "description": "Button text and screen title for booking new ride"
+  },
+  "bookRideFor": "Book ride for:",
+  "@bookRideFor": {
+    "description": "Label for passenger selection in booking flow"
+  },
+  "mePassenger": "Me ({firstName})",
+  "@mePassenger": {
+    "description": "Self-selection option for parents in booking",
+    "placeholders": {
+      "firstName": {
+        "type": "String",
+        "description": "The parent's first name"
+      }
+    }
+  },
+  "availableRidesCount": "Available Rides ({count})",
+  "@availableRidesCount": {
+    "description": "Section title showing number of available rides",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Number of available rides"
+      }
+    }
+  },
+  "seatsAvailable": "{available}/{total} seats",
+  "@seatsAvailable": {
+    "description": "Shows available seats out of total capacity",
+    "placeholders": {
+      "available": {
+        "type": "int",
+        "description": "Available seats"
+      },
+      "total": {
+        "type": "int",
+        "description": "Total capacity"
+      }
+    }
+  },
+  "bookThisRide": "Book This Ride",
+  "@bookThisRide": {
+    "description": "Button text to book a specific ride"
+  },
+  "fullyBooked": "Fully Booked",
+  "@fullyBooked": {
+    "description": "Status when no seats are available"
+  },
+  "confirmBooking": "Confirm Booking",
+  "@confirmBooking": {
+    "description": "Dialog title for booking confirmation"
+  },
+  "ride": "Ride",
+  "@ride": {
+    "description": "Label for ride information"
+  },
+  "passenger": "Passenger",
+  "@passenger": {
+    "description": "Label for passenger information"
+  },
+  "date": "Date",
+  "@date": {
+    "description": "Label for date information"
+  },
+  "time": "Time",
+  "@time": {
+    "description": "Label for time information"
+  },
+  "rideBookedSuccessfully": "Ride booked successfully!",
+  "@rideBookedSuccessfully": {
+    "description": "Success message when ride is booked"
+  },
+  "failedToBookRide": "Failed to book ride",
+  "@failedToBookRide": {
+    "description": "Error message when booking fails"
+  },
+  "noAvailableRides": "No available rides",
+  "@noAvailableRides": {
+    "description": "Message when no rides are available"
+  },
+  "checkBackLaterRides": "Check back later for new ride opportunities.",
+  "@checkBackLaterRides": {
+    "description": "Description for empty rides state"
+  },
+  "selectStops": "Select Stops:",
+  "@selectStops": {
+    "description": "Header for stop selection section"
+  },
+  "dropoffOptional": "Dropoff (optional):",
+  "@dropoffOptional": {
+    "description": "Label for optional dropoff stop selection"
+  },
+  "choosePickupStop": "Choose pickup stop",
+  "@choosePickupStop": {
+    "description": "Hint text for pickup stop dropdown"
+  },
+  "chooseDropoffStop": "Choose dropoff stop (optional)",
+  "@chooseDropoffStop": {
+    "description": "Hint text for dropoff stop dropdown"
+  },
+  "noneEndOfRoute": "None (end of route)",
+  "@noneEndOfRoute": {
+    "description": "Option for no dropoff stop"
+  },
+  "pleaseSelectPickupStop": "Please select a pickup stop",
+  "@pleaseSelectPickupStop": {
+    "description": "Error message when no pickup stop is selected"
   }
 }

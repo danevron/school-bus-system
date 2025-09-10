@@ -252,4 +252,77 @@ class AppLocalizationsHe extends AppLocalizations {
   @override
   String get confirmCancellationMessage =>
       'האם אתה בטוח שברצונך לבטל את ההזמנה הזו?';
+
+  @override
+  String get bookNewRide => 'הזמן נסיעה חדשה';
+
+  @override
+  String get bookRideFor => 'הזמן נסיעה עבור:';
+
+  @override
+  String mePassenger(String firstName) {
+    return 'אני ($firstName)';
+  }
+
+  @override
+  String availableRidesCount(int count) {
+    return 'נסיעות זמינות ($count)';
+  }
+
+  @override
+  String seatsAvailable(int available, int total) {
+    return '$available/$total מקומות';
+  }
+
+  @override
+  String get bookThisRide => 'הזמן נסיעה זו';
+
+  @override
+  String get fullyBooked => 'תפוס במלואו';
+
+  @override
+  String get confirmBooking => 'אשר הזמנה';
+
+  @override
+  String get ride => 'נסיעה';
+
+  @override
+  String get passenger => 'נוסע';
+
+  @override
+  String get date => 'תאריך';
+
+  @override
+  String get time => 'שעה';
+
+  @override
+  String get rideBookedSuccessfully => 'הנסיעה הוזמנה בהצלחה!';
+
+  @override
+  String get failedToBookRide => 'הזמנת הנסיעה נכשלה';
+
+  @override
+  String get noAvailableRides => 'אין נסיעות זמינות';
+
+  @override
+  String get checkBackLaterRides =>
+      'בדוק שוב מאוחר יותר עבור הזדמנויות נסיעה חדשות.';
+
+  @override
+  String get selectStops => 'בחר תחנות:';
+
+  @override
+  String get dropoffOptional => 'הורדה (אופציונלי):';
+
+  @override
+  String get choosePickupStop => 'בחר תחנת איסוף';
+
+  @override
+  String get chooseDropoffStop => 'בחר תחנת הורדה (אופציונלי)';
+
+  @override
+  String get noneEndOfRoute => 'אין (סוף המסלול)';
+
+  @override
+  String get pleaseSelectPickupStop => 'אנא בחר תחנת איסוף';
 }

@@ -10,8 +10,8 @@ export const rideController = {
   // Get all rides (Admin only)
   getAllRides: async (req: Request, res: Response) => {
     try {
-      const { status, date, driverId } = req.query;
-      
+      const { status, date, driverId, fromDate, toDate } = req.query;
+
       const filter: any = {};
       
       if (status) {
@@ -24,12 +24,24 @@ export const rideController = {
           $gte: new Date(queryDate.setHours(0, 0, 0, 0)),
           $lt: new Date(queryDate.setHours(23, 59, 59, 999))
         };
+      } else if (fromDate || toDate) {
+        filter.date = {};
+
+        if (fromDate) {
+          const queryFromDate = new Date(fromDate as string);
+          filter.date.$gte = new Date(queryFromDate.setHours(0, 0, 0, 0));
+        }
+        if (toDate) {
+          const queryToDate = new Date(toDate as string);
+          filter.date.$lt = new Date(queryToDate.setHours(23, 59, 59, 999));
+        }
       }
       
       if (driverId) {
         filter.driver = driverId;
       }
       
+      console.log('Ride filter:', filter);
       const rides = await Ride.find(filter)
         .populate('driver', 'firstName lastName phone email')
         .populate('vehicle', 'licensePlate make vehicleModel capacity')
