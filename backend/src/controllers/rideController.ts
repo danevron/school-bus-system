@@ -41,7 +41,6 @@ export const rideController = {
         filter.driver = driverId;
       }
       
-      console.log('Ride filter:', filter);
       const rides = await Ride.find(filter)
         .populate('driver', 'firstName lastName phone email')
         .populate('vehicle', 'licensePlate make vehicleModel capacity')

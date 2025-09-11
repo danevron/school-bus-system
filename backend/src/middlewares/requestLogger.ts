@@ -167,18 +167,20 @@ class RequestLogger {
         requestBody = this.redactData(requestBody, redactionRule.request.paths, redactionRule.request.replaceWith);
       }
 
-      this.logger.info('HTTP Request', {
-        requestId,
-        method: req.method,
-        url: req.originalUrl,
-        path: req.path,
-        query: req.query,
-        ip: this.getClientIp(req),
-        userAgent: req.headers['user-agent'],
-        headers: this.filterHeaders(req.headers),
-        body: requestBody,
-        timestamp: new Date().toISOString()
-      });
+      if (req.path !== '/health') { // Skip logging for health checks
+        this.logger.info('HTTP Request', {
+          requestId,
+          method: req.method,
+          url: req.originalUrl,
+          path: req.path,
+          query: req.query,
+          ip: this.getClientIp(req),
+          userAgent: req.headers['user-agent'],
+          headers: this.filterHeaders(req.headers),
+          body: requestBody,
+          timestamp: new Date().toISOString()
+        });
+      }
 
       // Log response when request finishes
       res.on('finish', () => {
@@ -189,18 +191,20 @@ class RequestLogger {
           logResponseBody = this.redactData(logResponseBody, redactionRule.response.paths, redactionRule.response.replaceWith);
         }
 
-        this.logger.info('HTTP Response', {
-          requestId,
-          method: req.method,
-          url: req.originalUrl,
-          path: req.path,
-          statusCode: res.statusCode,
-          statusMessage: res.statusMessage,
-          duration,
-          contentLength: res.get('content-length'),
-          responseBody: logResponseBody,
-          timestamp: new Date().toISOString()
-        });
+        if (req.path !== '/health') { // Skip logging for health checks
+          this.logger.info('HTTP Response', {
+            requestId,
+            method: req.method,
+            url: req.originalUrl,
+            path: req.path,
+            statusCode: res.statusCode,
+            statusMessage: res.statusMessage,
+            duration,
+            contentLength: res.get('content-length'),
+            responseBody: logResponseBody,
+            timestamp: new Date().toISOString()
+          });
+        }
       });
 
       next();
