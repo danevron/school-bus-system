@@ -3,11 +3,16 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'screens/main_navigation_screen.dart';
 import 'l10n/app_localizations.dart';
 import 'services/auth_service.dart';
+import 'services/location_foreground_service.dart';
 import 'screens/login_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize services
   await AuthService.init();
+  LocationForegroundService.initializeService();
+  
   runApp(const SchoolBusApp());
 }
 

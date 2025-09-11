@@ -52,6 +52,12 @@ dependencies:
   # Map widget for displaying live tracking
   flutter_map: ^7.0.2
   latlong2: ^0.9.1
+  
+  # Background services and notifications
+  flutter_foreground_task: ^8.0.0
+  
+  # State management
+  provider: ^6.1.2
 
 dev_dependencies:
   flutter_test:

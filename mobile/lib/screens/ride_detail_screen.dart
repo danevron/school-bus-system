@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import '../l10n/app_localizations.dart';
 import '../services/auth_service.dart';
+import '../services/location_service.dart';
 import 'ride_tracking_screen.dart';
 
 class RideDetailScreen extends StatefulWidget {
@@ -22,24 +22,37 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
   bool _isLoading = false;
   bool _isStartingRide = false;
   bool _isEndingRide = false;
-  bool _isSharingLocation = false;
   List<Map<String, dynamic>> _bookings = [];
   late Map<String, dynamic> _currentRide;
-  Timer? _locationTimer;
+  late LocationService _locationService;
   
   bool get _isDriver => AuthService.user?['role'] == 'driver';
+  
+  bool get _isCurrentRideSharing => 
+      _locationService.isSharingLocation && 
+      _locationService.currentRideId == _currentRide['_id'];
 
   @override
   void initState() {
     super.initState();
     _currentRide = Map<String, dynamic>.from(widget.ride);
+    _locationService = LocationService();
+    _locationService.addListener(_onLocationServiceChange);
     _loadBookings();
   }
 
   @override
   void dispose() {
-    _locationTimer?.cancel();
+    _locationService.removeListener(_onLocationServiceChange);
     super.dispose();
+  }
+
+  void _onLocationServiceChange() {
+    if (mounted) {
+      setState(() {
+        // Trigger UI rebuild when location service state changes
+      });
+    }
   }
 
   Future<void> _loadBookings() async {
@@ -170,7 +183,7 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
         });
         
         // Stop location sharing when ride ends
-        _stopLocationSharing();
+        await _locationService.stopLocationSharing();
         
         if (mounted) {
           final localizations = AppLocalizations.of(context)!;
@@ -203,108 +216,26 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
   }
 
   Future<void> _toggleLocationSharing() async {
-    if (_isSharingLocation) {
-      _stopLocationSharing();
+    final rideId = _currentRide['_id'] as String;
+    final rideName = _currentRide['route']?['name'] as String? ?? 'Unknown Ride';
+    
+    if (_locationService.isSharingLocation && _locationService.currentRideId == rideId) {
+      await _locationService.stopLocationSharing();
     } else {
-      await _startLocationSharing();
-    }
-  }
-
-  Future<void> _startLocationSharing() async {
-    try {
-      // Check location permission
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          if (mounted) {
-            final localizations = AppLocalizations.of(context)!;
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(localizations.locationPermissionRequired),
-                backgroundColor: Theme.of(context).colorScheme.error,
-              ),
-            );
-          }
-          return;
-        }
-      }
-
-      if (permission == LocationPermission.deniedForever) {
-        if (mounted) {
-          final localizations = AppLocalizations.of(context)!;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(localizations.locationPermissionRequired),
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
-          );
-        }
-        return;
-      }
-
-      setState(() {
-        _isSharingLocation = true;
-      });
-
-      // Send location every 10 seconds
-      _locationTimer = Timer.periodic(const Duration(seconds: 10), (_) async {
-        await _sendCurrentLocation();
-      });
-
-      // Send initial location
-      await _sendCurrentLocation();
-
-    } catch (e) {
-      setState(() {
-        _isSharingLocation = false;
-      });
-    }
-  }
-
-  void _stopLocationSharing() {
-    setState(() {
-      _isSharingLocation = false;
-    });
-    _locationTimer?.cancel();
-    _locationTimer = null;
-  }
-
-  Future<void> _sendCurrentLocation() async {
-    try {
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
-
-      final locationData = <String, dynamic>{
-        'latitude': position.latitude,
-        'longitude': position.longitude,
-      };
-
-      // Only include optional fields if they have valid values
-      if (position.speed >= 0) {
-        locationData['speed'] = position.speed;
-      }
+      final success = await _locationService.startLocationSharing(rideId, rideName: rideName);
       
-      if (position.heading >= 0 && position.heading <= 360) {
-        locationData['heading'] = position.heading;
+      if (!success && mounted) {
+        final localizations = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(localizations.locationPermissionRequired),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
       }
-      
-      if (position.accuracy > 0) {
-        locationData['accuracy'] = position.accuracy;
-      }
-
-      await AuthService.authenticatedRequest(
-        'POST',
-        '/api/rides/${_currentRide['_id']}/location',
-        body: locationData,
-      );
-
-    } catch (e) {
-      print('Error sending location: $e');
-      // Don't show error to user for individual location updates to avoid spam
     }
   }
+
 
   Future<void> _updateBookingStatus(String bookingId, String action) async {
     try {
@@ -589,19 +520,19 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: OutlinedButton.icon(
         onPressed: _toggleLocationSharing,
-        icon: _isSharingLocation 
+        icon: _isCurrentRideSharing
             ? const Icon(Icons.location_off, size: 20)
             : const Icon(Icons.location_on, size: 20),
         label: Text(
-          _isSharingLocation 
+          _isCurrentRideSharing
               ? localizations.stopLocationSharing 
               : localizations.startLocationSharing
         ),
         style: OutlinedButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 16),
-          foregroundColor: _isSharingLocation ? Colors.red : Colors.blue,
+          foregroundColor: _isCurrentRideSharing ? Colors.red : Colors.blue,
           side: BorderSide(
-            color: _isSharingLocation ? Colors.red : Colors.blue,
+            color: _isCurrentRideSharing ? Colors.red : Colors.blue,
             width: 2,
           ),
         ),

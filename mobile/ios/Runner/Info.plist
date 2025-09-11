@@ -30,6 +30,25 @@
 	<string>This app needs location access to share your location during school bus rides for safety and tracking purposes.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>This app needs location access to share your location during school bus rides for safety and tracking purposes.</string>
+	<key>NSLocationUsageDescription</key>
+	<string>This app needs location access to share your location during school bus rides for safety and tracking purposes.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>This app needs continuous location access to track school bus rides even when the app is in the background for safety purposes.</string>
+	
+	<!-- Background modes for location sharing -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+		<string>background-processing</string>
+		<string>background-fetch</string>
+	</array>
+	
+	<!-- Background task for location service -->
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>com.school-bus-app.location-sharing</string>
+	</array>
+	
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
