@@ -1,0 +1,29 @@
+name: Scheduled Jobs
+
+on:
+  schedule:
+    # Runs every 10 minutes
+    - cron: '*/10 * * * *'
+  
+  # Allow manual triggering from GitHub UI
+  workflow_dispatch:
+
+jobs:
+  test-job:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Log test message
+        run: |
+          echo "🚌 Hello GitHub Actions!"
+          echo "Current time: $(date)"
+          echo "Job triggered successfully at $(date -u)"
+          
+      - name: Show system info
+        run: |
+          echo "Runner OS: ${{ runner.os }}"
+          echo "GitHub event: ${{ github.event_name }}"
+          echo "Repository: ${{ github.repository }}"
