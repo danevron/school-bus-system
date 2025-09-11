@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
+import path from 'path';
 import { RequestLogger } from './middlewares/requestLogger';
 import requestLoggerConfig, { isRequestLoggingEnabled } from './config/requestLogger';
 import { log } from './utils/logger';
@@ -62,26 +63,21 @@ app.use('/api/invitations', invitationRoutes);
 app.use('/api/rides', rideRoutes);
 app.use('/api/bookings', bookingRoutes);
 
-// Root endpoint
-app.get('/', (req, res) => {
-  res.json({
-    message: 'School Bus System API is running',
-    version: '1.0.0',
-    endpoints: {
-      auth: '/api/auth',
-      lines: '/api/lines',
-      vehicles: '/api/vehicles',
-      invitations: '/api/invitations',
-      rides: '/api/rides',
-      bookings: '/api/bookings'
-    }
-  });
+// Serve static files from the frontend build
+const publicPath = path.join(__dirname, 'public');
+app.use(express.static(publicPath));
+
+// Catch-all handler: send back React's index.html file for any non-API routes
+app.get('*', (req, res) => {
+  // Skip API routes
+  if (req.path.startsWith('/api/') || req.path === '/health') {
+    return res.status(404).json({ message: 'API endpoint not found' });
+  }
+  
+  // Serve the frontend for all other routes (SPA routing)
+  res.sendFile(path.join(publicPath, 'index.html'));
 });
 
-// 404 handler
-// app.use(':wildcard(*)', (req, res) => {
-//   res.status(404).json({ message: 'Endpoint not found' });
-// });
 
 
 // Error handling middleware

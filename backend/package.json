@@ -4,7 +4,8 @@
   "description": "School Bus Ride Management System",
   "main": "index.js",
   "scripts": {
-    "start": "ts-node src/server.ts",
+    "start": "node dist/server.js",
+    "start:dev": "ts-node src/server.ts",
     "dev": "nodemon src/server.ts",
     "build": "tsc",
     "test": "jest",
