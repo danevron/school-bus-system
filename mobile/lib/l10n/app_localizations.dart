@@ -695,7 +695,7 @@ abstract class AppLocalizations {
   /// Hint text for dropoff stop dropdown
   ///
   /// In en, this message translates to:
-  /// **'Choose dropoff stop (optional)'**
+  /// **'Choose dropoff stop'**
   String get chooseDropoffStop;
 
   /// Option for no dropoff stop
@@ -709,6 +709,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please select a pickup stop'**
   String get pleaseSelectPickupStop;
+
+  /// Error message when no dropoff stop is selected
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a dropoff stop'**
+  String get pleaseSelectDropoffStop;
 
   /// Button text to track a ride
   ///
@@ -805,6 +811,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unknown'**
   String get unknownTime;
+
+  /// Button text to hide booking options
+  ///
+  /// In en, this message translates to:
+  /// **'Hide Booking Options'**
+  String get hideBookingOptions;
+
+  /// Button text to show booking options
+  ///
+  /// In en, this message translates to:
+  /// **'Show Booking Options'**
+  String get showBookingOptions;
+
+  /// Hint text for pickup location selection modal
+  ///
+  /// In en, this message translates to:
+  /// **'Choose where you want to be picked up'**
+  String get choosePickupLocationHint;
+
+  /// Hint text for dropoff location selection modal
+  ///
+  /// In en, this message translates to:
+  /// **'Choose where you want to be dropped off'**
+  String get chooseDropoffLocationHint;
+
+  /// Label showing number of available stops
+  ///
+  /// In en, this message translates to:
+  /// **'Available stops ({count})'**
+  String availableStopsCount(int count);
+
+  /// Button text to confirm stop selection
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Selection'**
+  String get confirmSelection;
+
+  /// Estimated time of arrival label
+  ///
+  /// In en, this message translates to:
+  /// **'ETA: {time}'**
+  String eta(String time);
+
+  /// Fallback text for unknown route name
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown Route'**
+  String get unknownRoute;
+
+  /// Fallback text for unknown stop name
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown Stop'**
+  String get unknownStop;
+
+  /// To be determined - placeholder for missing date/time
+  ///
+  /// In en, this message translates to:
+  /// **'TBD'**
+  String get tbd;
 }
 
 class _AppLocalizationsDelegate

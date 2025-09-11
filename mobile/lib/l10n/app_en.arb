@@ -430,7 +430,7 @@
   "@choosePickupStop": {
     "description": "Hint text for pickup stop dropdown"
   },
-  "chooseDropoffStop": "Choose dropoff stop (optional)",
+  "chooseDropoffStop": "Choose dropoff stop",
   "@chooseDropoffStop": {
     "description": "Hint text for dropoff stop dropdown"
   },
@@ -441,6 +441,10 @@
   "pleaseSelectPickupStop": "Please select a pickup stop",
   "@pleaseSelectPickupStop": {
     "description": "Error message when no pickup stop is selected"
+  },
+  "pleaseSelectDropoffStop": "Please select a dropoff stop",
+  "@pleaseSelectDropoffStop": {
+    "description": "Error message when no dropoff stop is selected"
   },
   "trackRide": "Track Ride",
   "@trackRide": {
@@ -547,5 +551,57 @@
   "unknownTime": "Unknown",
   "@unknownTime": {
     "description": "Fallback for unknown time"
+  },
+  "hideBookingOptions": "Hide Booking Options",
+  "@hideBookingOptions": {
+    "description": "Button text to hide booking options"
+  },
+  "showBookingOptions": "Show Booking Options",
+  "@showBookingOptions": {
+    "description": "Button text to show booking options"
+  },
+  "choosePickupLocationHint": "Choose where you want to be picked up",
+  "@choosePickupLocationHint": {
+    "description": "Hint text for pickup location selection modal"
+  },
+  "chooseDropoffLocationHint": "Choose where you want to be dropped off",
+  "@chooseDropoffLocationHint": {
+    "description": "Hint text for dropoff location selection modal"
+  },
+  "availableStopsCount": "Available stops ({count})",
+  "@availableStopsCount": {
+    "description": "Label showing number of available stops",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Number of available stops"
+      }
+    }
+  },
+  "confirmSelection": "Confirm Selection",
+  "@confirmSelection": {
+    "description": "Button text to confirm stop selection"
+  },
+  "eta": "ETA: {time}",
+  "@eta": {
+    "description": "Estimated time of arrival label",
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "description": "Estimated arrival time"
+      }
+    }
+  },
+  "unknownRoute": "Unknown Route",
+  "@unknownRoute": {
+    "description": "Fallback text for unknown route name"
+  },
+  "unknownStop": "Unknown Stop",
+  "@unknownStop": {
+    "description": "Fallback text for unknown stop name"
+  },
+  "tbd": "TBD",
+  "@tbd": {
+    "description": "To be determined - placeholder for missing date/time"
   }
 }

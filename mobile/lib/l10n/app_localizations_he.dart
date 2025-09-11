@@ -321,13 +321,16 @@ class AppLocalizationsHe extends AppLocalizations {
   String get choosePickupStop => 'בחר תחנת איסוף';
 
   @override
-  String get chooseDropoffStop => 'בחר תחנת הורדה (אופציונלי)';
+  String get chooseDropoffStop => 'בחר תחנת הורדה';
 
   @override
   String get noneEndOfRoute => 'אין (סוף המסלול)';
 
   @override
   String get pleaseSelectPickupStop => 'אנא בחר תחנת איסוף';
+
+  @override
+  String get pleaseSelectDropoffStop => 'אנא בחר תחנת הורדה';
 
   @override
   String get trackRide => 'עקוב אחר נסיעה';
@@ -386,4 +389,38 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get unknownTime => 'לא ידוע';
+
+  @override
+  String get hideBookingOptions => 'הסתר אפשרויות הזמנה';
+
+  @override
+  String get showBookingOptions => 'הצג אפשרויות הזמנה';
+
+  @override
+  String get choosePickupLocationHint => 'בחר איפה אתה רוצה להיאסף';
+
+  @override
+  String get chooseDropoffLocationHint => 'בחר איפה אתה רוצה להתיר';
+
+  @override
+  String availableStopsCount(int count) {
+    return 'תחנות זמינות ($count)';
+  }
+
+  @override
+  String get confirmSelection => 'אשר בחירה';
+
+  @override
+  String eta(String time) {
+    return 'זמן הגעה משוער: $time';
+  }
+
+  @override
+  String get unknownRoute => 'מסלול לא ידוע';
+
+  @override
+  String get unknownStop => 'תחנה לא ידועה';
+
+  @override
+  String get tbd => 'יקבע בהמשך';
 }

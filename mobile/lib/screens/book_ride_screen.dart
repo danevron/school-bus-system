@@ -132,6 +132,7 @@ class _BookRideScreenState extends State<BookRideScreen> {
                 'stopId': stopMap['_id'] ?? stopMap['stopId'],
                 'name': stopMap['name'] ?? 'Unknown Stop',
                 'address': stopMap['address'] ?? '',
+                'type': stopMap['type'], // Preserve the type property
                 'estimatedTime': _formatEstimatedTime(stopMap['estimatedArrivalTime']),
               };
             }).toList(),
@@ -180,6 +181,16 @@ class _BookRideScreenState extends State<BookRideScreen> {
       );
       return;
     }
+
+    if (dropoffStopId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(localizations.pleaseSelectDropoffStop),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
     
     // Show booking confirmation dialog
     final confirmed = await showDialog<bool>(
@@ -193,11 +204,9 @@ class _BookRideScreenState extends State<BookRideScreen> {
           (stop) => stop['stopId'] == pickupStopId,
         );
         
-        final dropoffStop = dropoffStopId != null 
-            ? (ride['stops'] as List).firstWhere(
-                (stop) => stop['stopId'] == dropoffStopId,
-              )
-            : null;
+        final dropoffStop = (ride['stops'] as List).firstWhere(
+          (stop) => stop['stopId'] == dropoffStopId,
+        );
         
         return AlertDialog(
           title: Text(localizations.confirmBooking),
@@ -214,10 +223,8 @@ class _BookRideScreenState extends State<BookRideScreen> {
               Text('${localizations.time}: ${_formatTime(ride['startTime'] ?? '')}'),
               const SizedBox(height: 12),
               Text('${localizations.pickup}: ${pickupStop['name']}'),
-              if (dropoffStop != null) ...[
-                const SizedBox(height: 4),
-                Text('${localizations.dropoff}: ${dropoffStop['name']}'),
-              ],
+              const SizedBox(height: 4),
+              Text('${localizations.dropoff}: ${dropoffStop['name']}'),
             ],
           ),
           actions: [
@@ -282,24 +289,26 @@ class _BookRideScreenState extends State<BookRideScreen> {
   }
 
   String _formatDate(String dateString) {
-    if (dateString.isEmpty) return 'TBD';
+    final localizations = AppLocalizations.of(context)!;
+    if (dateString.isEmpty) return localizations.tbd;
     
     try {
       final date = DateTime.parse(dateString);
       return '${date.day}/${date.month}/${date.year}';
     } catch (e) {
-      return dateString.isNotEmpty ? dateString : 'TBD';
+      return dateString.isNotEmpty ? dateString : localizations.tbd;
     }
   }
 
   String _formatTime(String timeString) {
-    if (timeString.isEmpty) return 'TBD';
+    final localizations = AppLocalizations.of(context)!;
+    if (timeString.isEmpty) return localizations.tbd;
     
     try {
       final time = DateTime.parse(timeString);
       return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
     } catch (e) {
-      return timeString.isNotEmpty ? timeString : 'TBD';
+      return timeString.isNotEmpty ? timeString : localizations.tbd;
     }
   }
   
@@ -487,7 +496,7 @@ class _BookRideScreenState extends State<BookRideScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        route['name'] ?? 'Unknown Route',
+                        route['name'] ?? localizations.unknownRoute,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -581,7 +590,7 @@ class _BookRideScreenState extends State<BookRideScreen> {
                   size: 18,
                 ),
                 label: Text(
-                  _expandedRides.contains(ride['_id']) ? 'Hide Booking Options' : 'Show Booking Options',
+                  _expandedRides.contains(ride['_id']) ? localizations.hideBookingOptions : localizations.showBookingOptions,
                   style: theme.textTheme.bodyMedium,
                 ),
                 style: OutlinedButton.styleFrom(
@@ -685,15 +694,14 @@ class _BookRideScreenState extends State<BookRideScreen> {
           _buildStopSelectionTile(
             icon: Icons.location_off,
             iconColor: Colors.red,
-            label: localizations.dropoffOptional,
+            label: localizations.dropoff,
             selectedStop: dropoffStop,
             hint: localizations.chooseDropoffStop,
             onTap: () => _showStopSelectionModal(ride, 'dropoff'),
             theme: theme,
             colorScheme: colorScheme,
             localizations: localizations,
-            isRequired: false,
-            showEndOfRoute: dropoffStopId == null,
+            isRequired: true,
           ),
         ],
       ),
@@ -711,9 +719,8 @@ class _BookRideScreenState extends State<BookRideScreen> {
     required ColorScheme colorScheme,
     required AppLocalizations localizations,
     required bool isRequired,
-    bool showEndOfRoute = false,
   }) {
-    final hasSelection = selectedStop != null || showEndOfRoute;
+    final hasSelection = selectedStop != null;
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -763,31 +770,11 @@ class _BookRideScreenState extends State<BookRideScreen> {
               children: [
                 Expanded(
                   child: hasSelection
-                      ? (showEndOfRoute
-                          ? Column(
+                      ? Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  localizations.noneEndOfRoute,
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    fontWeight: FontWeight.w500,
-                                    color: colorScheme.primary,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  'Stay until final destination',
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                              ],
-                            )
-                          : Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  selectedStop!['name'] ?? 'Unknown Stop',
+                                  selectedStop!['name'] ?? localizations.unknownStop,
                                   style: theme.textTheme.bodyMedium?.copyWith(
                                     fontWeight: FontWeight.w500,
                                     color: colorScheme.primary,
@@ -811,7 +798,7 @@ class _BookRideScreenState extends State<BookRideScreen> {
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: Text(
-                                      'ETA: ${selectedStop['estimatedTime']}',
+                                      localizations.eta(selectedStop['estimatedTime']),
                                       style: theme.textTheme.labelSmall?.copyWith(
                                         color: colorScheme.primary,
                                         fontWeight: FontWeight.w600,
@@ -820,7 +807,7 @@ class _BookRideScreenState extends State<BookRideScreen> {
                                   ),
                                 ],
                               ],
-                            ))
+                            )
                       : Text(
                           hint,
                           style: theme.textTheme.bodyMedium?.copyWith(
@@ -844,6 +831,7 @@ class _BookRideScreenState extends State<BookRideScreen> {
   }
 
   Future<void> _showStopSelectionModal(Map<String, dynamic> ride, String selectionType) async {
+    final localizations = AppLocalizations.of(context)!;
     final rideId = ride['_id'];
     final stops = ride['stops'] as List? ?? [];
     final currentSelection = selectionType == 'pickup' 
@@ -865,12 +853,12 @@ class _BookRideScreenState extends State<BookRideScreen> {
         selectionType: selectionType,
         currentSelection: currentSelection,
         excludeStopId: excludeStopId,
-        rideRoute: ride['route']?['name'] ?? 'Unknown Route',
+        rideRoute: ride['route']?['name'] ?? localizations.unknownRoute,
         isDropoff: isDropoff,
       ),
     );
 
-    if (selectedStopId != null || (selectionType == 'dropoff' && selectedStopId == null)) {
+    if (selectedStopId != null) {
       setState(() {
         if (selectionType == 'pickup') {
           _selectedPickupStops[rideId] = selectedStopId;
@@ -958,6 +946,16 @@ class _StopSelectionModalState extends State<_StopSelectionModal> {
       if (widget.excludeStopId != null && stop['stopId'] == widget.excludeStopId) {
         return false;
       }
+      
+      // Filter by stop type: only show pickup stops for pickup selection and dropoff stops for dropoff selection
+      final stopType = stop['type'] as String?;
+      if (widget.selectionType == 'pickup') {
+        return stopType == 'pickup';
+      } else if (widget.selectionType == 'dropoff') {
+        return stopType == 'dropoff';
+      }
+      
+      // If no specific type requirement, show all stops (fallback)
       return true;
     }).toList();
   }
@@ -1051,8 +1049,8 @@ class _StopSelectionModalState extends State<_StopSelectionModal> {
                     const SizedBox(width: 8),
                     Text(
                       widget.isDropoff 
-                        ? 'Choose where you want to be dropped off'
-                        : 'Choose where you want to be picked up',
+                        ? localizations.chooseDropoffLocationHint
+                        : localizations.choosePickupLocationHint,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: colorScheme.onSurfaceVariant,
                       ),
@@ -1068,56 +1066,16 @@ class _StopSelectionModalState extends State<_StopSelectionModal> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Optional "None" option for dropoff
-                if (widget.isDropoff) ...[
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: Text(
-                      'Or choose no specific dropoff:',
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
-                      ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Text(
+                    localizations.availableStopsCount(_filteredStops.length),
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: _buildStopTile(
-                      null,
-                      localizations.noneEndOfRoute,
-                      'Stay on bus until the final stop',
-                      null,
-                      theme,
-                      colorScheme,
-                      isNoneOption: true,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: Divider(color: colorScheme.outline.withOpacity(0.3)),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: Text(
-                      'Available stops (${_filteredStops.length}):',
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ] else ...[
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: Text(
-                      'Available stops (${_filteredStops.length}):',
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
+                ),
 
                 Expanded(
                   child: ListView.builder(
@@ -1127,7 +1085,7 @@ class _StopSelectionModalState extends State<_StopSelectionModal> {
                       final stop = _filteredStops[index];
                       return _buildStopTile(
                         stop['stopId'],
-                        stop['name'] ?? 'Unknown Stop',
+                        stop['name'] ?? localizations.unknownStop,
                         stop['address'] ?? '',
                         stop['estimatedTime'],
                         theme,
@@ -1145,15 +1103,11 @@ class _StopSelectionModalState extends State<_StopSelectionModal> {
             width: double.infinity,
             padding: const EdgeInsets.all(16),
             child: FilledButton.icon(
-              onPressed: _selectedStopId != null || (widget.isDropoff && _selectedStopId == null)
+              onPressed: _selectedStopId != null
                   ? _confirmSelection
                   : null,
               icon: const Icon(Icons.check, size: 20),
-              label: Text(
-                _selectedStopId == null && widget.isDropoff
-                    ? 'Continue with End of Route'
-                    : 'Confirm Selection',
-              ),
+              label: Text(localizations.confirmSelection),
               style: FilledButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 backgroundColor: colorScheme.primary,
@@ -1171,9 +1125,9 @@ class _StopSelectionModalState extends State<_StopSelectionModal> {
     String address,
     String? estimatedTime,
     ThemeData theme,
-    ColorScheme colorScheme, {
-    bool isNoneOption = false,
-  }) {
+    ColorScheme colorScheme,
+  ) {
+    final localizations = AppLocalizations.of(context)!;
     final isSelected = _selectedStopId == stopId;
     
     return Card(
@@ -1210,11 +1164,9 @@ class _StopSelectionModalState extends State<_StopSelectionModal> {
               shape: BoxShape.circle,
             ),
             child: Icon(
-              isNoneOption 
-                ? Icons.route 
-                : widget.isDropoff 
-                  ? Icons.location_off 
-                  : Icons.location_on,
+              widget.isDropoff 
+                ? Icons.location_off 
+                : Icons.location_on,
               color: isSelected 
                 ? colorScheme.onPrimary 
                 : widget.isDropoff 
@@ -1251,7 +1203,7 @@ class _StopSelectionModalState extends State<_StopSelectionModal> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    'ETA: $estimatedTime',
+                    localizations.eta(estimatedTime ?? ''),
                     style: theme.textTheme.labelSmall?.copyWith(
                       color: colorScheme.primary,
                       fontWeight: FontWeight.w600,

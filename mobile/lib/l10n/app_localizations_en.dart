@@ -325,13 +325,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get choosePickupStop => 'Choose pickup stop';
 
   @override
-  String get chooseDropoffStop => 'Choose dropoff stop (optional)';
+  String get chooseDropoffStop => 'Choose dropoff stop';
 
   @override
   String get noneEndOfRoute => 'None (end of route)';
 
   @override
   String get pleaseSelectPickupStop => 'Please select a pickup stop';
+
+  @override
+  String get pleaseSelectDropoffStop => 'Please select a dropoff stop';
 
   @override
   String get trackRide => 'Track Ride';
@@ -390,4 +393,40 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get unknownTime => 'Unknown';
+
+  @override
+  String get hideBookingOptions => 'Hide Booking Options';
+
+  @override
+  String get showBookingOptions => 'Show Booking Options';
+
+  @override
+  String get choosePickupLocationHint =>
+      'Choose where you want to be picked up';
+
+  @override
+  String get chooseDropoffLocationHint =>
+      'Choose where you want to be dropped off';
+
+  @override
+  String availableStopsCount(int count) {
+    return 'Available stops ($count)';
+  }
+
+  @override
+  String get confirmSelection => 'Confirm Selection';
+
+  @override
+  String eta(String time) {
+    return 'ETA: $time';
+  }
+
+  @override
+  String get unknownRoute => 'Unknown Route';
+
+  @override
+  String get unknownStop => 'Unknown Stop';
+
+  @override
+  String get tbd => 'TBD';
 }

@@ -430,7 +430,7 @@
   "@choosePickupStop": {
     "description": "Hint text for pickup stop dropdown"
   },
-  "chooseDropoffStop": "בחר תחנת הורדה (אופציונלי)",
+  "chooseDropoffStop": "בחר תחנת הורדה",
   "@chooseDropoffStop": {
     "description": "Hint text for dropoff stop dropdown"
   },
@@ -441,6 +441,10 @@
   "pleaseSelectPickupStop": "אנא בחר תחנת איסוף",
   "@pleaseSelectPickupStop": {
     "description": "Error message when no pickup stop is selected"
+  },
+  "pleaseSelectDropoffStop": "אנא בחר תחנת הורדה",
+  "@pleaseSelectDropoffStop": {
+    "description": "Error message when no dropoff stop is selected"
   },
   "trackRide": "עקוב אחר נסיעה",
   "@trackRide": {
@@ -547,5 +551,57 @@
   "unknownTime": "לא ידוע",
   "@unknownTime": {
     "description": "Fallback for unknown time"
+  },
+  "hideBookingOptions": "הסתר אפשרויות הזמנה",
+  "@hideBookingOptions": {
+    "description": "Button text to hide booking options"
+  },
+  "showBookingOptions": "הצג אפשרויות הזמנה",
+  "@showBookingOptions": {
+    "description": "Button text to show booking options"
+  },
+  "choosePickupLocationHint": "בחר איפה אתה רוצה להיאסף",
+  "@choosePickupLocationHint": {
+    "description": "Hint text for pickup location selection modal"
+  },
+  "chooseDropoffLocationHint": "בחר איפה אתה רוצה להתיר",
+  "@chooseDropoffLocationHint": {
+    "description": "Hint text for dropoff location selection modal"
+  },
+  "availableStopsCount": "תחנות זמינות ({count})",
+  "@availableStopsCount": {
+    "description": "Label showing number of available stops",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Number of available stops"
+      }
+    }
+  },
+  "confirmSelection": "אשר בחירה",
+  "@confirmSelection": {
+    "description": "Button text to confirm stop selection"
+  },
+  "eta": "זמן הגעה משוער: {time}",
+  "@eta": {
+    "description": "Estimated time of arrival label",
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "description": "Estimated arrival time"
+      }
+    }
+  },
+  "unknownRoute": "מסלול לא ידוע",
+  "@unknownRoute": {
+    "description": "Fallback text for unknown route name"
+  },
+  "unknownStop": "תחנה לא ידועה",
+  "@unknownStop": {
+    "description": "Fallback text for unknown stop name"
+  },
+  "tbd": "יקבע בהמשך",
+  "@tbd": {
+    "description": "To be determined - placeholder for missing date/time"
   }
 }

@@ -412,15 +412,16 @@
               </select>
             </div>
 
-            <!-- Dropoff Stop Selection (Optional) -->
+            <!-- Dropoff Stop Selection -->
             <div class="form-group">
-              <label for="dropoffStop">Dropoff Stop (Optional):</label>
+              <label for="dropoffStop">Dropoff Stop:</label>
               <select 
                 id="dropoffStop" 
                 v-model="bookingForm.dropoffStopId" 
+                required
                 class="form-control"
               >
-                <option value="">Choose dropoff stop (optional)...</option>
+                <option value="">Choose dropoff stop...</option>
                 <option 
                   v-for="stop in dropoffStops" 
                   :key="stop.stopId" 
@@ -583,7 +584,7 @@ export default {
     })
 
     const isBookingFormValid = computed(() => {
-      return bookingForm.value.passengerId && bookingForm.value.pickupStopId
+      return bookingForm.value.passengerId && bookingForm.value.pickupStopId && bookingForm.value.dropoffStopId
     })
 
     const waitingListCount = computed(() => {
@@ -880,11 +881,11 @@ export default {
             name: selectedPickupStop.name,
             address: selectedPickupStop.address
           },
-          dropoffStop: selectedDropoffStop ? {
+          dropoffStop: {
             stopId: selectedDropoffStop.stopId,
             name: selectedDropoffStop.name,
             address: selectedDropoffStop.address
-          } : undefined,
+          },
           notes: bookingForm.value.notes || undefined
         }
 
