@@ -8,6 +8,7 @@
     "frontend"
   ],
   "scripts": {
+    "install:web": "cd frontend && npm install && cd ../backend && npm install && cd ..",
     "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install && cd ../mobile && flutter pub get",
     "clean:all": "rm -rf node_modules backend/node_modules frontend/node_modules backend/dist mobile/build",
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
