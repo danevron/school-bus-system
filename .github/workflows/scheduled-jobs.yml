@@ -19,7 +19,7 @@ jobs:
           echo "Current time: $(date -u)"
           
           # Health check (replace with your actual Render URL)
-          curl -f -X GET "https://school-bus-system-vw07.onrender.com/api/jobs/health" \
+          curl -f -X GET "${{ secrets.API_BASE_URL }}/api/jobs/health" \
             -H "Accept: application/json" \
             || echo "Health check failed - service might be sleeping"
 
@@ -31,8 +31,8 @@ jobs:
       - name: Trigger Scheduled Job
         run: |
           echo "🚌 Triggering test job via API..."
-          
-          response=$(curl -s -X POST "https://school-bus-system-vw07.onrender.com/api/jobs/test" \
+
+          response=$(curl -s -X POST "${{ secrets.API_BASE_URL }}/api/jobs/test" \
             -H "Content-Type: application/json" \
             -H "Accept: application/json")
           
