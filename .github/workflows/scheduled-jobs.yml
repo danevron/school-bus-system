@@ -9,21 +9,39 @@ on:
   workflow_dispatch:
 
 jobs:
-  test-job:
+  health-check:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      
-      - name: Log test message
+      - name: Check Jobs API Health
         run: |
-          echo "🚌 Hello GitHub Actions!"
-          echo "Current time: $(date)"
-          echo "Job triggered successfully at $(date -u)"
+          echo "🚌 Checking School Bus Jobs API..."
+          echo "Current time: $(date -u)"
           
-      - name: Show system info
+          # Health check (replace with your actual Render URL)
+          curl -f -X GET "https://school-bus-system-vw07.onrender.com/api/jobs/health" \
+            -H "Accept: application/json" \
+            || echo "Health check failed - service might be sleeping"
+
+  trigger-scheduled-job:
+    runs-on: ubuntu-latest
+    needs: health-check
+    
+    steps:
+      - name: Trigger Scheduled Job
         run: |
-          echo "Runner OS: ${{ runner.os }}"
-          echo "GitHub event: ${{ github.event_name }}"
-          echo "Repository: ${{ github.repository }}"
+          echo "🚌 Triggering test job via API..."
+          
+          response=$(curl -s -X POST "https://school-bus-system-vw07.onrender.com/api/jobs/test" \
+            -H "Content-Type: application/json" \
+            -H "Accept: application/json")
+          
+          echo "API Response: $response"
+          
+          # Check if the response indicates success
+          if echo "$response" | grep -q "Test job completed successfully"; then
+            echo "✅ Test job completed successfully!"
+          else
+            echo "❌ Test job failed!"
+            exit 1
+          fi
