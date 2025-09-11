@@ -67,8 +67,8 @@ app.use('/api/bookings', bookingRoutes);
 const publicPath = path.join(__dirname, 'public');
 app.use(express.static(publicPath));
 
-// Catch-all handler: send back React's index.html file for any non-API routes
-app.get('*', (req, res) => {
+// Catch-all handler: send back Vue's index.html file for any non-API routes
+app.use((req, res, next) => {
   // Skip API routes
   if (req.path.startsWith('/api/') || req.path === '/health') {
     return res.status(404).json({ message: 'API endpoint not found' });
