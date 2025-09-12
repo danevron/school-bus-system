@@ -64,7 +64,7 @@ export const lineValidation = {
             latitude: Joi.number().min(-90).max(90).required(),
             longitude: Joi.number().min(-180).max(180).required()
           }).required(),
-          estimatedTime: Joi.number().min(0).required(),
+          estimatedTime: Joi.number().min(0).optional().default(0),
           type: Joi.string().valid('pickup', 'dropoff').required()
         })
       ).min(0).required(),
@@ -73,6 +73,7 @@ export const lineValidation = {
     }),
     driver: Joi.string().hex().length(24).required(),
     vehicle: Joi.string().hex().length(24).required(),
+    rideStartTime: Joi.string().pattern(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/).required(),
     schedule: Joi.object({
       type: Joi.string().valid('daily', 'weekdays', 'weekends', 'custom').required(),
       daysOfWeek: Joi.array().items(Joi.number().min(0).max(6)),
@@ -93,7 +94,7 @@ export const lineValidation = {
           latitude: Joi.number().min(-90).max(90).required(),
           longitude: Joi.number().min(-180).max(180).required()
         }).required(),
-        estimatedTime: Joi.number().min(0).required(),
+        estimatedTime: Joi.number().min(0).optional().default(0),
         type: Joi.string().valid('pickup', 'dropoff').required()
       })
     ).min(0).required(),
@@ -129,7 +130,7 @@ export const lineValidation = {
           latitude: Joi.number().min(-90).max(90).required(),
           longitude: Joi.number().min(-180).max(180).required()
         }).required(),
-        estimatedTime: Joi.number().min(0).required(),
+        estimatedTime: Joi.number().min(0).optional().default(0),
         type: Joi.string().valid('pickup', 'dropoff').required()
       })
     ).required()

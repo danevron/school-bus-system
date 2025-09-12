@@ -189,6 +189,24 @@
               </div>
             </div>
 
+            <div class="form-group">
+              <label for="rideStartTime" class="form-label">Ride Start Time *</label>
+              <p class="field-description">Set the daily departure time for this line</p>
+              <input
+                id="rideStartTime"
+                v-model="formData.rideStartTime"
+                type="time"
+                class="form-input time-input"
+                :class="{ 'error': errors.rideStartTime }"
+                @blur="validateField('rideStartTime')"
+                @input="clearFieldError('rideStartTime')"
+              />
+              <div v-if="errors.rideStartTime" class="error-message">{{ errors.rideStartTime }}</div>
+              <div class="field-hint">
+                The time when the bus will start its route each operating day
+              </div>
+            </div>
+
           </div>
 
           <!-- After Creation Info -->
@@ -235,7 +253,8 @@ export default {
       vehicleId: '',
       startDate: '',
       endDate: '',
-      scheduleDays: []
+      scheduleDays: [],
+      rideStartTime: ''
     })
     
     const errors = ref({})
@@ -316,6 +335,11 @@ export default {
             errors.value.scheduleDays = 'Please select at least one day'
           }
           break
+        case 'rideStartTime':
+          if (!formData.value.rideStartTime) {
+            errors.value.rideStartTime = 'Ride start time is required'
+          }
+          break
       }
     }
     
@@ -333,6 +357,7 @@ export default {
       validateField('startDate')
       validateField('endDate')
       validateField('scheduleDays')
+      validateField('rideStartTime')
       return Object.keys(errors.value).length === 0
     }
     
@@ -343,6 +368,7 @@ export default {
              formData.value.startDate &&
              formData.value.endDate &&
              formData.value.scheduleDays.length > 0 &&
+             formData.value.rideStartTime &&
              Object.keys(errors.value).length === 0
     })
     
@@ -371,6 +397,7 @@ export default {
           name: formData.value.name,
           driver: formData.value.driverId,
           vehicle: formData.value.vehicleId,
+          rideStartTime: formData.value.rideStartTime,
           schedule: {
             type: 'custom',
             daysOfWeek: daysOfWeek,
@@ -731,6 +758,25 @@ export default {
 }
 
 .date-input.error {
+  border-color: #dc3545;
+}
+
+.time-input {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+  max-width: 200px;
+}
+
+.time-input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.time-input.error {
   border-color: #dc3545;
 }
 

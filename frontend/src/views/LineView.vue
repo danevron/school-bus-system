@@ -131,6 +131,10 @@
           <h2>Schedule</h2>
           <div class="schedule-details">
             <div class="schedule-item">
+              <label>Ride Start Time</label>
+              <span class="start-time">{{ formatTime(line.rideStartTime) }}</span>
+            </div>
+            <div class="schedule-item">
               <label>Duration</label>
               <span>{{ formatScheduleDuration(line.schedule) }}</span>
             </div>
@@ -435,10 +439,20 @@ export default {
       return typeMap[type] || type || 'Not specified'
     }
     
-    const formatTime = (minutes) => {
-      if (!minutes && minutes !== 0) return 'N/A'
-      const hours = Math.floor(minutes / 60)
-      const mins = minutes % 60
+    const formatTime = (timeInput) => {
+      if (!timeInput && timeInput !== 0) return 'N/A'
+      
+      // If it's a string (HH:MM format like "07:30"), convert to 12-hour format
+      if (typeof timeInput === 'string' && timeInput.includes(':')) {
+        const [hours, minutes] = timeInput.split(':')
+        const hour12 = hours % 12 || 12
+        const ampm = hours < 12 ? 'AM' : 'PM'
+        return `${hour12}:${minutes} ${ampm}`
+      }
+      
+      // If it's a number (minutes from start), convert to HH:MM format
+      const hours = Math.floor(timeInput / 60)
+      const mins = timeInput % 60
       return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`
     }
     
@@ -930,6 +944,12 @@ export default {
   font-weight: 600;
   color: #666;
   font-size: 0.9rem;
+}
+
+.start-time {
+  color: #28a745;
+  font-weight: 500;
+  font-size: 1.1rem;
 }
 
 .operating-days {

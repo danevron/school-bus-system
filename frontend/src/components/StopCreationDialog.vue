@@ -95,16 +95,6 @@
             </select>
           </div>
           
-          <div class="form-group">
-            <label for="estimated-time">Estimated Time (minutes)</label>
-            <input 
-              id="estimated-time"
-              v-model.number="stopForm.estimatedTime" 
-              type="number" 
-              min="0"
-              placeholder="0"
-            />
-          </div>
         </div>
       </div>
       
@@ -148,8 +138,7 @@ export default {
     const stopForm = ref({
       name: '',
       address: '',
-      type: '',
-      estimatedTime: 0
+      type: ''
     })
     
     const canSave = computed(() => {
@@ -358,7 +347,7 @@ export default {
           longitude: selectedCoordinates.value.lng
         },
         type: stopForm.value.type,
-        estimatedTime: stopForm.value.estimatedTime
+        estimatedTime: 0
       }
       
       emit('save', newStop)
@@ -369,8 +358,7 @@ export default {
       stopForm.value = {
         name: '',
         address: '',
-        type: '',
-        estimatedTime: 0
+        type: ''
       }
       selectedCoordinates.value = null
       addressLoading.value = false

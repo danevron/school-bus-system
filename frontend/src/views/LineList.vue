@@ -58,6 +58,10 @@
 
                 <div class="line-details">
                   <div class="detail-item">
+                    <strong>Start Time:</strong>
+                    <span class="start-time">{{ formatTime(line.rideStartTime) }}</span>
+                  </div>
+                  <div class="detail-item">
                     <strong>Duration:</strong>
                     <span class="schedule-duration">{{ formatScheduleDuration(line.schedule) }}</span>
                   </div>
@@ -129,6 +133,16 @@ export default {
     
     const formatDate = (dateString) => {
       return new Date(dateString).toLocaleDateString()
+    }
+    
+    const formatTime = (timeString) => {
+      if (!timeString) return 'Not set'
+      
+      // Handle HH:MM format
+      const [hours, minutes] = timeString.split(':')
+      const hour12 = hours % 12 || 12
+      const ampm = hours < 12 ? 'AM' : 'PM'
+      return `${hour12}:${minutes} ${ampm}`
     }
     
     const formatScheduleType = (scheduleType) => {
@@ -225,6 +239,7 @@ export default {
       formatScheduleType,
       formatScheduleDuration,
       formatScheduleDays,
+      formatTime,
       getDriverName,
       goBack
     }
@@ -440,6 +455,12 @@ export default {
 
 .schedule-type {
   color: #007bff;
+  font-weight: 500;
+  margin-left: 8px;
+}
+
+.start-time {
+  color: #28a745;
   font-weight: 500;
   margin-left: 8px;
 }

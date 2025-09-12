@@ -48,8 +48,11 @@ export const generateRidesForLine = async (line: ILine): Promise<any[]> => {
       }
 
       // Create the ride
+      const rideStartTime = calculateRideStartTime(rideDate, line.rideStartTime);
+      
       const newRide = new Ride({
         date: rideDate,
+        startTime: rideStartTime,
         route: {
           name: line.name,
           stops: line.route.stops.map(stop => ({
@@ -57,7 +60,6 @@ export const generateRidesForLine = async (line: ILine): Promise<any[]> => {
             name: stop.name,
             address: stop.address,
             coordinates: stop.coordinates,
-            estimatedArrivalTime: calculateEstimatedArrivalTime(rideDate, stop.estimatedTime),
             type: stop.type
           })),
           estimatedDuration: line.route.estimatedDuration,
@@ -164,8 +166,7 @@ async function createBookingsForStudents(ride: any, studentAssignments: any[], l
           pickupStopData = {
             stopId: pickupStop.stopId,
             name: pickupStop.name,
-            address: pickupStop.address,
-            estimatedTime: calculateEstimatedArrivalTime(ride.date, pickupStop.estimatedTime)
+            address: pickupStop.address
           };
         }
       }
@@ -178,8 +179,7 @@ async function createBookingsForStudents(ride: any, studentAssignments: any[], l
           dropoffStopData = {
             stopId: dropoffStop.stopId,
             name: dropoffStop.name,
-            address: dropoffStop.address,
-            estimatedTime: calculateEstimatedArrivalTime(ride.date, dropoffStop.estimatedTime)
+            address: dropoffStop.address
           };
         }
       }
@@ -206,16 +206,11 @@ async function createBookingsForStudents(ride: any, studentAssignments: any[], l
 }
 
 /**
- * Calculate estimated arrival time for a stop based on ride date and estimated time offset
+ * Calculate ride start time by combining ride date with line's start time
  */
-function calculateEstimatedArrivalTime(rideDate: Date, estimatedTimeOffset: number): Date {
-  const arrivalTime = new Date(rideDate);
-  
-  // Assume rides start at 7:00 AM by default
-  arrivalTime.setHours(7, 0, 0, 0);
-  
-  // Add the estimated time offset in minutes
-  arrivalTime.setMinutes(arrivalTime.getMinutes() + estimatedTimeOffset);
-  
-  return arrivalTime;
+function calculateRideStartTime(rideDate: Date, rideStartTime: string): Date {
+  const [hours, minutes] = rideStartTime.split(':').map(Number);
+  const startTime = new Date(rideDate);
+  startTime.setHours(hours, minutes, 0, 0);
+  return startTime;
 }

@@ -42,6 +42,7 @@ export interface ILine extends Document {
   driver: Types.ObjectId;
   vehicle: Types.ObjectId;
   schedule: ISchedule;
+  rideStartTime: string; // HH:MM format (e.g., "07:30")
   isActive: boolean;
   maxCapacity: number;
   currentCapacity: number;
@@ -110,8 +111,9 @@ const stopSchema = new Schema<IStop>({
   },
   estimatedTime: {
     type: Number,
-    required: true,
-    min: 0
+    required: false,
+    min: 0,
+    default: 0
   },
   type: {
     type: String,
@@ -167,6 +169,12 @@ const lineSchema = new Schema<ILine>({
   schedule: {
     type: scheduleSchema,
     required: true
+  },
+  rideStartTime: {
+    type: String,
+    required: true,
+    match: /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/,  // HH:MM format validation
+    trim: true
   },
   isActive: {
     type: Boolean,
