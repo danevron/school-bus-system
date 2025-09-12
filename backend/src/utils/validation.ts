@@ -8,7 +8,7 @@ export const userValidation = {
     firstName: Joi.string().min(2).max(50).required(),
     lastName: Joi.string().min(2).max(50).required(),
     phone: Joi.string().pattern(/^\+?[\d\s\-\(\)]+$/).required(),
-    role: Joi.string().valid(...Object.values(UserRole)).required()
+    role: Joi.string().valid(...Object.values(UserRole)).optional()
   }),
 
   createStudent: Joi.object({

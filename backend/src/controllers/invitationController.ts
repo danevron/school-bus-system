@@ -16,7 +16,6 @@ export const inviteUser = async (req: Request, res: Response): Promise<void> => 
 
     const { email, phone, role } = req.body;
     const inviterId = req.user!.userId;
-    log.debug('Processing user invitation', { email, role, inviterId });
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });

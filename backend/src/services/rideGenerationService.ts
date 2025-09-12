@@ -2,7 +2,6 @@ import Ride from '../models/Ride';
 import Booking, { BookingStatus } from '../models/Booking';
 import StudentAssignment from '../models/StudentAssignment';
 import { ILine, ScheduleType } from '../models/Line';
-import { Types } from 'mongoose';
 
 /**
  * Generate rides for an activated line based on its schedule

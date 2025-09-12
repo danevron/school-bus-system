@@ -13,7 +13,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const { email, password, firstName, lastName, phone, role } = req.body;
+    const { email, password, firstName, lastName, phone } = req.body;
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });
@@ -22,14 +22,14 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // Create new user
+    // Create new user - always as parent for public registration
     const user = new User({
       email,
       password,
       firstName,
       lastName,
       phone,
-      role
+      role: UserRole.PARENT
     });
 
     await user.save();

@@ -102,24 +102,6 @@
             </div>
           </div>
         </div>
-
-        <div class="system-info">
-          <h3>System Information</h3>
-          <div class="info-grid">
-            <div class="info-item">
-              <strong>User ID:</strong> {{ authStore.user?.id }}
-            </div>
-            <div class="info-item">
-              <strong>Email:</strong> {{ authStore.user?.email }}
-            </div>
-            <div class="info-item">
-              <strong>Phone:</strong> {{ authStore.user?.phone }}
-            </div>
-            <div class="info-item">
-              <strong>Active:</strong> {{ authStore.user?.isActive ? 'Yes' : 'No' }}
-            </div>
-          </div>
-        </div>
       </div>
     </main>
   </div>
@@ -315,32 +297,5 @@ export default {
 .action-button:disabled {
   background-color: #ccc;
   cursor: not-allowed;
-}
-
-.system-info {
-  border-top: 1px solid #eee;
-  padding-top: 20px;
-}
-
-.system-info h3 {
-  color: #333;
-  margin-bottom: 15px;
-}
-
-.info-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
-}
-
-.info-item {
-  background: #f8f9fa;
-  padding: 10px;
-  border-radius: 4px;
-  border-left: 3px solid #007bff;
-}
-
-.info-item strong {
-  color: #333;
 }
 </style>
