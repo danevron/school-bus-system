@@ -1,89 +1,115 @@
 <template>
-  <div class="ride-view-container">
-    <header class="header">
-      <div class="header-content">
-        <div class="header-info">
-          <h1 v-if="ride">{{ ride.route?.name || 'Ride Details' }}</h1>
-          <h1 v-else>Ride Details</h1>
-          <div class="status-badge" v-if="ride" :class="getStatusClass(ride.status)">
-            {{ getStatusLabel(ride.status) }}
+  <AppLayout 
+    :page-title="ride?.route?.name || 'Ride Details'"
+    :breadcrumbs="breadcrumbs"
+  >
+    <template #actions>
+      <Button 
+        @click="goBack" 
+        icon="pi pi-arrow-left"
+        label="Back to Rides"
+        severity="secondary"
+        outlined
+      />
+      <Button 
+        v-if="canBookRide" 
+        @click="openBookingModal" 
+        icon="pi pi-calendar-plus"
+        label="Book Ride"
+        severity="success"
+      />
+      <Button 
+        v-if="ride && ride.status === 'scheduled'" 
+        @click="startRide" 
+        icon="pi pi-play"
+        label="Start Ride"
+        severity="success"
+      />
+      <Button 
+        v-if="ride && ride.status === 'in_progress'" 
+        @click="openLiveTracking" 
+        icon="pi pi-map-marker"
+        label="Track on Map"
+        severity="warning"
+      />
+      <Button 
+        v-if="ride && ride.status === 'in_progress'" 
+        @click="endRide" 
+        icon="pi pi-stop"
+        label="End Ride"
+        severity="info"
+      />
+    </template>
+    
+    <div v-if="loading" class="loading-container">
+      <Card>
+        <template #content>
+          <div class="loading-content">
+            <i class="pi pi-spin pi-spinner loading-icon"></i>
+            <h3>Loading ride details...</h3>
+            <p>Please wait while we fetch the ride information.</p>
           </div>
-        </div>
-        <div class="header-actions">
-          <button @click="goBack" class="back-button">← Back to Rides</button>
-          <button 
-            v-if="canBookRide" 
-            @click="openBookingModal" 
-            class="action-button book-button"
-          >
-            Book Ride
-          </button>
-          <button 
-            v-if="ride && ride.status === 'scheduled'" 
-            @click="startRide" 
-            class="action-button start-button"
-          >
-            Start Ride
-          </button>
-          <button 
-            v-if="ride && ride.status === 'in_progress'" 
-            @click="openLiveTracking" 
-            class="action-button tracking-button"
-          >
-            📍 Track on Map
-          </button>
-          <button 
-            v-if="ride && ride.status === 'in_progress'" 
-            @click="endRide" 
-            class="action-button end-button"
-          >
-            End Ride
-          </button>
-        </div>
-      </div>
-    </header>
+        </template>
+      </Card>
+    </div>
 
-    <main class="main-content">
-      <div v-if="loading" class="loading-container">
-        <div class="loading">Loading ride details...</div>
-      </div>
+    <div v-else-if="error" class="error-container">
+        <Card>
+          <template #content>
+            <div class="error-content">
+              <i class="pi pi-exclamation-triangle error-icon"></i>
+              <h3>Error Loading Ride</h3>
+              <p>{{ error }}</p>
+              <Button 
+                @click="fetchRide" 
+                icon="pi pi-refresh"
+                label="Try Again"
+                severity="info"
+              />
+            </div>
+          </template>
+        </Card>
+    </div>
 
-      <div v-else-if="error" class="error-container">
-        <div class="error-message">
-          <h3>Error Loading Ride</h3>
-          <p>{{ error }}</p>
-          <button @click="fetchRide" class="retry-button">Try Again</button>
-        </div>
-      </div>
+    <!-- Success Message -->
+    <div v-if="successMessage" class="success-message-container">
+      <Card class="success-message-card">
+        <template #content>
+          <div class="success-message">
+            <i class="pi pi-check-circle success-icon"></i>
+            <span>{{ successMessage }}</span>
+          </div>
+        </template>
+      </Card>
+    </div>
 
-      <!-- Success Message -->
-      <div v-if="successMessage" class="success-message-container">
-        <div class="success-message">
-          <div class="success-icon">✓</div>
-          <span>{{ successMessage }}</span>
-        </div>
-      </div>
-
-      <div v-else-if="ride" class="content-grid">
+    <div v-else-if="ride" class="content-grid">
         <!-- Status Notice Section -->
         <div v-if="ride.status === 'in_progress'" class="notice-section">
-          <div class="notice in-progress-notice">
-            <div class="notice-icon">🚌</div>
-            <div class="notice-content">
-              <h3>Ride In Progress</h3>
-              <p>
-                This ride is currently <strong>in progress</strong>. 
-                The driver has started the route and may be picking up or dropping off passengers.
-              </p>
-            </div>
-          </div>
+          <Card class="in-progress-notice-card">
+            <template #content>
+              <div class="notice-content">
+                <div class="notice-header">
+                  <i class="pi pi-car notice-icon"></i>
+                  <h3>Ride In Progress</h3>
+                </div>
+                <p>
+                  This ride is currently <strong>in progress</strong>. 
+                  The driver has started the route and may be picking up or dropping off passengers.
+                </p>
+              </div>
+            </template>
+          </Card>
         </div>
 
         <!-- Basic Information Section -->
-        <div class="info-section">
-          <div class="section-header">
-            <h2>Ride Information</h2>
-          </div>
+        <Card class="info-section">
+          <template #header>
+            <div class="section-header-card">
+              <h2><i class="pi pi-info-circle"></i>Ride Information</h2>
+            </div>
+          </template>
+          <template #content>
           <div class="info-grid">
             <div class="info-group">
               <h4>Basic Details</h4>
@@ -106,9 +132,7 @@
               <div class="info-item">
                 <span class="info-label">Status:</span>
                 <span class="info-value">
-                  <span class="status-badge" :class="getStatusClass(ride.status)">
-                    {{ getStatusLabel(ride.status) }}
-                  </span>
+                  <Tag :value="getStatusLabel(ride.status)" :severity="getStatusTagSeverity(ride.status)" />
                 </span>
               </div>
             </div>
@@ -157,35 +181,39 @@
             </div>
           </div>
 
-          <div v-if="ride.notes" class="notes-section">
-            <h4>Notes</h4>
-            <div class="notes-content">{{ ride.notes }}</div>
-          </div>
-        </div>
+            <div v-if="ride.notes" class="notes-section">
+              <h4><i class="pi pi-file-edit"></i>Notes</h4>
+              <div class="notes-content">{{ ride.notes }}</div>
+            </div>
+          </template>
+        </Card>
 
         <!-- Route Section -->
-        <div class="route-section">
-          <div class="section-header">
-            <h2>Route Details</h2>
-          </div>
+        <Card class="route-section">
+          <template #header>
+            <div class="section-header-card">
+              <h2><i class="pi pi-map"></i>Route Details</h2>
+            </div>
+          </template>
+          <template #content>
           <div v-if="ride.route && ride.route.stops && ride.route.stops.length > 0" class="route-content">
             <div class="route-stats">
               <div class="stat">
-                <span class="stat-icon">📍</span>
+                <i class="pi pi-map-marker stat-icon"></i>
                 <div class="stat-info">
                   <span class="stat-value">{{ ride.route.stops.length }}</span>
                   <span class="stat-label">Stops</span>
                 </div>
               </div>
               <div class="stat">
-                <span class="stat-icon">📏</span>
+                <i class="pi pi-globe stat-icon"></i>
                 <div class="stat-info">
                   <span class="stat-value">{{ ride.route.totalDistance || 0 }}km</span>
                   <span class="stat-label">Distance</span>
                 </div>
               </div>
               <div class="stat">
-                <span class="stat-icon">⏱️</span>
+                <i class="pi pi-clock stat-icon"></i>
                 <div class="stat-info">
                   <span class="stat-value">{{ ride.route.estimatedDuration || 0 }}min</span>
                   <span class="stat-label">Duration</span>
@@ -217,146 +245,222 @@
             </div>
           </div>
           <div v-else class="empty-route">
-            <div class="empty-icon">🗺️</div>
+            <i class="pi pi-map empty-icon"></i>
             <h3>No Route Defined</h3>
             <p>This ride doesn't have a route with stops defined yet.</p>
           </div>
-        </div>
+          </template>
+        </Card>
 
         <!-- Bookings Section -->
-        <div class="bookings-section">
-          <div class="section-header">
-            <h2>Passenger Bookings</h2>
-            <div class="header-controls">
-              <label class="show-cancelled-toggle">
-                <input 
-                  type="checkbox" 
-                  v-model="showCancelled"
-                  class="toggle-checkbox"
+        <Card class="bookings-section">
+          <template #header>
+            <div class="section-header-card">
+              <h2><i class="pi pi-users"></i>Passenger Bookings</h2>
+              <div class="header-controls">
+                <div class="show-cancelled-toggle">
+                  <Checkbox 
+                    v-model="showCancelled"
+                    inputId="show-cancelled"
+                    binary
+                  />
+                  <label for="show-cancelled" class="toggle-text">Show Cancelled</label>
+                </div>
+                <Button 
+                  @click="loadBookings" 
+                  icon="pi pi-refresh"
+                  label="Refresh"
+                  severity="secondary"
+                  size="small"
+                  outlined
                 />
-                <span class="toggle-text">Show Cancelled</span>
-              </label>
-              <button @click="loadBookings" class="refresh-button">🔄 Refresh</button>
+              </div>
             </div>
-          </div>
+          </template>
+          <template #content>
           
-          <div v-if="bookingsLoading" class="bookings-loading">
-            Loading bookings...
-          </div>
-          
-          <div v-else-if="filteredBookings.length === 0" class="empty-bookings">
-            <div class="empty-icon">📋</div>
-            <h3>No Bookings</h3>
-            <p v-if="!showCancelled && bookings.length > 0">All bookings are cancelled. Toggle "Show Cancelled" to view them.</p>
-            <p v-else>No passengers have booked this ride yet.</p>
-          </div>
+            <div v-if="bookingsLoading" class="bookings-loading">
+              <i class="pi pi-spin pi-spinner"></i>
+              <span>Loading bookings...</span>
+            </div>
+            
+            <div v-else-if="filteredBookings.length === 0" class="empty-bookings">
+              <i class="pi pi-calendar-times empty-icon"></i>
+              <h3>No Bookings</h3>
+              <p v-if="!showCancelled && bookings.length > 0">All bookings are cancelled. Toggle "Show Cancelled" to view them.</p>
+              <p v-else>No passengers have booked this ride yet.</p>
+            </div>
           
           <div v-else class="bookings-list">
-            <div v-for="booking in filteredBookings" :key="booking._id" class="booking-item">
+            <div v-for="booking in filteredBookings" :key="booking._id" class="booking-card">
               <div class="booking-header">
-                <span class="passenger-name">{{ getPassengerName(booking.passenger) }}</span>
-                <span class="booking-status-badge" :class="getBookingStatusClass(booking.status)">
-                  {{ getBookingStatusLabel(booking.status) }}
-                </span>
-              </div>
-              <div class="booking-details">
-                <div class="booking-info">
-                  <div class="stop-info">
-                    <strong>Pickup:</strong> {{ booking.pickupStop.name }}
+                <div class="passenger-avatar">
+                  <Avatar 
+                    :label="`${getPassengerName(booking.passenger).split(' ').map(n => n[0]).join('')}`"
+                    size="large"
+                    shape="circle"
+                  />
+                </div>
+                <div class="passenger-info">
+                  <div class="passenger-name">
+                    <i class="pi pi-user"></i>
+                    {{ getPassengerName(booking.passenger) }}
                   </div>
-                  <div v-if="booking.dropoffStop" class="stop-info">
-                    <strong>Dropoff:</strong> {{ booking.dropoffStop.name }}
+                  <div class="booking-status-container">
+                    <span class="booking-status-badge" :class="getBookingStatusClass(booking.status)">
+                      <i :class="getBookingStatusIcon(booking.status)"></i>
+                      {{ getBookingStatusLabel(booking.status) }}
+                    </span>
                   </div>
                 </div>
                 <div class="booking-actions">
                   <!-- Admit/Cancel buttons for waiting list bookings -->
                   <template v-if="booking.status === 'waiting_list'">
-                    <button 
+                    <Button 
                       @click="admitWaitingListBooking(booking._id)"
-                      class="booking-action-btn admit-btn"
-                    >
-                      Admit
-                    </button>
-                    <button 
+                      icon="pi pi-check"
+                      label="Admit"
+                      severity="success"
+                      size="small"
+                    />
+                    <Button 
                       @click="cancelBooking(booking._id)"
-                      class="booking-action-btn cancel-btn"
-                    >
-                      Cancel
-                    </button>
+                      icon="pi pi-times"
+                      label="Cancel"
+                      severity="danger"
+                      size="small"
+                      outlined
+                    />
                   </template>
 
                   <!-- Confirm/Cancel buttons for unconfirmed bookings -->
                   <template v-if="booking.status === 'unconfirmed'">
-                    <button 
+                    <Button 
                       @click="confirmBooking(booking._id)"
-                      class="booking-action-btn confirm-btn"
-                    >
-                      Confirm
-                    </button>
-                    <button 
+                      icon="pi pi-check"
+                      label="Confirm"
+                      severity="info"
+                      size="small"
+                    />
+                    <Button 
                       @click="cancelBooking(booking._id)"
-                      class="booking-action-btn cancel-btn"
-                    >
-                      Cancel
-                    </button>
+                      icon="pi pi-times"
+                      label="Cancel"
+                      severity="danger"
+                      size="small"
+                      outlined
+                    />
                   </template>
 
                   <!-- Cancel button for confirmed bookings (that haven't started yet) -->
                   <template v-if="booking.status === 'confirmed' && ride.status === 'scheduled'">
-                    <button 
+                    <Button 
                       @click="cancelBooking(booking._id)"
-                      class="booking-action-btn cancel-btn"
-                    >
-                      Cancel
-                    </button>
+                      icon="pi pi-times"
+                      label="Cancel"
+                      severity="danger"
+                      size="small"
+                      outlined
+                    />
                   </template>
 
                   <!-- Check In button for confirmed bookings during ride -->
                   <template v-if="booking.status === 'confirmed' && ride.status === 'in_progress'">
-                    <button 
+                    <Button 
                       @click="checkInPassenger(booking._id)"
-                      class="booking-action-btn checkin-btn"
-                    >
-                      Check In
-                    </button>
+                      icon="pi pi-sign-in"
+                      label="Check In"
+                      severity="info"
+                      size="small"
+                    />
                   </template>
 
                   <!-- Drop Off button for checked-in passengers -->
                   <template v-if="booking.status === 'checked_in' && ride.status === 'in_progress'">
-                    <button 
+                    <Button 
                       @click="dropOffPassenger(booking._id)"
-                      class="booking-action-btn dropoff-btn"
-                    >
-                      Drop Off
-                    </button>
+                      icon="pi pi-sign-out"
+                      label="Drop Off"
+                      severity="success"
+                      size="small"
+                    />
                   </template>
+                </div>
+              </div>
+
+              <div class="booking-details">
+                <div class="stops-row">
+                  <div class="stop-assignment pickup">
+                    <div class="stop-header">
+                      <i class="pi pi-sign-in stop-icon pickup-icon"></i>
+                      <span class="stop-label">Pickup</span>
+                    </div>
+                    <div class="stop-content">
+                      <div class="stop-name">{{ booking.pickupStop.name }}</div>
+                    </div>
+                  </div>
+
+                  <div class="route-connector">
+                    <div class="connector-line"></div>
+                    <i class="pi pi-arrow-right connector-arrow"></i>
+                  </div>
+
+                  <div class="stop-assignment dropoff">
+                    <div class="stop-header">
+                      <i class="pi pi-sign-out stop-icon dropoff-icon"></i>
+                      <span class="stop-label">Dropoff</span>
+                    </div>
+                    <div v-if="booking.dropoffStop" class="stop-content">
+                      <div class="stop-name">{{ booking.dropoffStop.name }}</div>
+                    </div>
+                    <div v-else class="no-stop-assigned">
+                      <span class="not-assigned">Not specified</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+          </template>
+        </Card>
 
         <!-- Route Map Section -->
-        <div v-if="ride.route && ride.route.stops && ride.route.stops.length > 0" class="map-section">
-          <RouteMap
-            :stops="ride.route.stops"
-            :studentAssignments="[]"
-            :showDrivingInstructions="false"
-            :showDrivingRoute="true"
-            mapHeight="600px"
-            mapId="ride-route-map"
-          />
-        </div>
+        <Card v-if="ride.route && ride.route.stops && ride.route.stops.length > 0" class="map-section">
+          <template #header>
+            <div class="section-header-card">
+              <h2><i class="pi pi-map"></i>Interactive Route Map</h2>
+            </div>
+          </template>
+          <template #content>
+            <RouteMap
+              :stops="ride.route.stops"
+              :studentAssignments="[]"
+              :showDrivingInstructions="false"
+              :showDrivingRoute="true"
+              mapHeight="600px"
+              mapId="ride-route-map"
+            />
+          </template>
+        </Card>
       </div>
       
       <div v-else class="not-found-container">
-        <div class="not-found-message">
-          <h2>Ride Not Found</h2>
-          <p>The ride you're looking for doesn't exist or may have been deleted.</p>
-          <button @click="goBack" class="back-to-rides-button">← Back to Rides</button>
-        </div>
+        <Card>
+          <template #content>
+            <div class="not-found-message">
+              <i class="pi pi-exclamation-triangle not-found-icon"></i>
+              <h2>Ride Not Found</h2>
+              <p>The ride you're looking for doesn't exist or may have been deleted.</p>
+              <Button 
+                @click="goBack" 
+                icon="pi pi-arrow-left"
+                label="Back to Rides"
+                severity="secondary"
+              />
+            </div>
+          </template>
+        </Card>
       </div>
-    </main>
 
     <!-- Booking Modal -->
     <div v-if="showBookingModal" class="modal-overlay" @click="closeBookingModal">
@@ -518,19 +622,21 @@
         </div>
       </div>
     </div>
-  </div>
+  </AppLayout>
 </template>
 
 <script>
 import { ref, onMounted, computed, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import apiService from '../services/api.js'
+import AppLayout from '../components/AppLayout.vue'
 import RouteMap from '../components/RouteMap.vue'
 import LiveTrackingMap from '../components/LiveTrackingMap.vue'
 
 export default {
   name: 'RideView',
   components: {
+    AppLayout,
     RouteMap,
     LiveTrackingMap
   },
@@ -538,6 +644,12 @@ export default {
     const router = useRouter()
     const route = useRoute()
     const rideId = route.params.id
+
+    const breadcrumbs = ref([
+      { label: 'Dashboard', path: '/home' },
+      { label: 'Ride Management', path: '/rides' },
+      { label: 'Ride Details' }
+    ])
 
     const ride = ref(null)
     const bookings = ref([])
@@ -642,8 +754,14 @@ export default {
       return new Date(timeString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
 
-    const getStatusClass = (status) => {
-      return `status-${status?.toLowerCase().replace('_', '-')}`
+    const getStatusTagSeverity = (status) => {
+      const severities = {
+        'scheduled': 'info',
+        'in_progress': 'warn',
+        'completed': 'success',
+        'cancelled': 'danger'
+      }
+      return severities[status] || 'secondary'
     }
 
     const getStatusLabel = (status) => {
@@ -670,6 +788,18 @@ export default {
         'waiting_list': 'Waiting List'
       }
       return labels[status] || status
+    }
+
+    const getBookingStatusIcon = (status) => {
+      const icons = {
+        'unconfirmed': 'pi pi-clock',
+        'confirmed': 'pi pi-check',
+        'cancelled': 'pi pi-times',
+        'checked_in': 'pi pi-sign-in',
+        'completed': 'pi pi-check-circle',
+        'waiting_list': 'pi pi-hourglass'
+      }
+      return icons[status] || 'pi pi-info-circle'
     }
 
     const getDriverName = (driver) => {
@@ -932,6 +1062,7 @@ export default {
       bookings,
       loading,
       bookingsLoading,
+      breadcrumbs,
       error,
       successMessage,
       showCancelled,
@@ -940,10 +1071,11 @@ export default {
       loadBookings,
       formatDate,
       formatTime,
-      getStatusClass,
+      getStatusTagSeverity,
       getStatusLabel,
       getBookingStatusClass,
       getBookingStatusLabel,
+      getBookingStatusIcon,
       getDriverName,
       getVehicleName,
       getPassengerName,
@@ -987,111 +1119,344 @@ export default {
 </script>
 
 <style scoped>
-.ride-view-container {
-  min-height: 100vh;
-  background-color: #f8f9fa;
-}
-
-.header {
-  background-color: #007bff;
-  color: white;
-  padding: 1rem 0;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.header-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
+/* Modern Component Styles */
+.section-header-card {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 1.25rem 1.25rem 0 1.25rem;
 }
 
-.header-info {
+.section-header-card h2 {
+  margin: 0;
+  color: var(--p-text-color);
+  font-size: 1.25rem;
+  font-weight: 600;
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 0.5rem;
 }
 
-.header h1 {
-  margin: 0;
-  font-size: 1.8rem;
+.section-header-card h2 i {
+  color: var(--p-primary-color);
 }
 
-.header-actions {
+.header-controls {
   display: flex;
-  gap: 15px;
+  align-items: center;
+  gap: 1rem;
 }
 
-.back-button, .action-button {
-  background-color: rgba(255, 255, 255, 0.2);
+.show-cancelled-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.toggle-text {
+  font-size: 0.875rem;
+  color: var(--p-text-color);
+}
+
+.loading-content, .error-content, .not-found-message {
+  text-align: center;
+  padding: 2rem;
+}
+
+.loading-icon, .error-icon, .not-found-icon {
+  font-size: 3rem;
+  color: var(--p-primary-color);
+  margin-bottom: 1rem;
+}
+
+.error-icon {
+  color: var(--p-red-500);
+}
+
+.loading-content h3, .error-content h3 {
+  color: var(--p-text-color);
+  margin: 0 0 0.5rem 0;
+}
+
+.loading-content p, .error-content p {
+  color: var(--p-text-muted-color);
+  margin-bottom: 1.5rem;
+}
+
+.success-message-card {
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+  border: 1px solid var(--p-green-200);
+}
+
+.success-message {
+  background: linear-gradient(135deg, var(--p-green-500) 0%, var(--p-green-600) 100%);
   color: white;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s;
+  padding: 1rem;
+  border-radius: var(--p-border-radius);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 500;
 }
 
-.back-button:hover, .action-button:hover {
-  background-color: rgba(255, 255, 255, 0.3);
+.success-icon {
+  font-size: 1.25rem;
 }
 
-.start-button {
-  background-color: #28a745;
-  border-color: #28a745;
+.in-progress-notice-card {
+  background: linear-gradient(135deg, var(--p-yellow-50) 0%, var(--p-yellow-100) 100%);
+  border-left: 4px solid var(--p-yellow-500);
 }
 
-.start-button:hover {
-  background-color: #218838;
+.notice-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
 }
 
-.end-button {
-  background-color: #17a2b8;
-  border-color: #17a2b8;
+.notice-icon {
+  font-size: 2rem;
+  color: var(--p-yellow-600);
 }
 
-.end-button:hover {
-  background-color: #138496;
+.notice-content h3 {
+  margin: 0;
+  color: var(--p-text-color);
 }
 
-.book-button {
-  background-color: #6f42c1;
-  border-color: #6f42c1;
+.notice-content p {
+  margin: 0;
+  color: var(--p-text-muted-color);
+  line-height: 1.5;
 }
 
-.book-button:hover {
-  background-color: #5a36a0;
+.stat-icon {
+  color: var(--p-primary-color);
 }
 
-.tracking-button {
-  background-color: #fd7e14;
-  border-color: #fd7e14;
+.empty-icon {
+  font-size: 4rem;
+  color: var(--p-text-muted-color);
+  margin-bottom: 1rem;
 }
 
-.tracking-button:hover {
-  background-color: #e8690b;
+.bookings-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 2rem;
+  color: var(--p-text-muted-color);
 }
 
-.status-badge {
-  padding: 4px 12px;
-  border-radius: 20px;
+.bookings-loading i {
+  font-size: 1.5rem;
+  color: var(--p-primary-color);
+}
+
+/* Modern Booking Card Styles */
+.booking-card {
+  border: 1px solid var(--p-surface-border);
+  border-radius: var(--p-border-radius);
+  padding: 0;
+  background-color: var(--p-surface-0);
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1rem;
+}
+
+.booking-card:hover {
+  box-shadow: var(--p-card-shadow);
+  transform: translateY(-2px);
+}
+
+.booking-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem;
+  border-bottom: 1px solid var(--p-surface-border);
+}
+
+.passenger-avatar {
+  flex-shrink: 0;
+}
+
+.passenger-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.passenger-name {
+  font-weight: 600;
+  color: var(--p-text-color);
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.passenger-name i {
+  color: var(--p-primary-color);
+  font-size: 0.9rem;
+}
+
+.booking-status-container {
+  display: flex;
+  align-items: center;
+}
+
+.booking-status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--p-border-radius);
   font-size: 0.75rem;
-  font-weight: bold;
+  font-weight: 600;
   text-transform: uppercase;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
-.status-scheduled { background-color: #17a2b8; color: white; }
-.status-in-progress { background-color: #ffc107; color: #000; }
-.status-completed { background-color: #28a745; color: white; }
-.status-cancelled { background-color: #dc3545; color: white; }
+.booking-status-unconfirmed { 
+  background-color: var(--p-yellow-500); 
+  color: var(--p-yellow-950); 
+}
+.booking-status-confirmed { 
+  background-color: var(--p-green-500); 
+  color: white; 
+}
+.booking-status-cancelled { 
+  background-color: var(--p-red-500); 
+  color: white; 
+}
+.booking-status-checked-in { 
+  background-color: var(--p-cyan-500); 
+  color: white; 
+}
+.booking-status-completed { 
+  background-color: var(--p-surface-600); 
+  color: white; 
+}
+.booking-status-waiting-list { 
+  background-color: var(--p-orange-500); 
+  color: white; 
+}
 
-.main-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 30px 20px;
+.booking-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.booking-details {
+  padding: 1.25rem;
+}
+
+.stops-row {
+  display: flex;
+  align-items: stretch;
+  gap: 1rem;
+  min-height: 80px;
+}
+
+.stop-assignment {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.stop-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  flex-shrink: 0;
+}
+
+.stop-icon {
+  font-size: 1rem;
+  padding: 0.25rem;
+  border-radius: 50%;
+}
+
+.pickup-icon {
+  color: var(--p-green-600);
+  background-color: var(--p-green-50);
+}
+
+.dropoff-icon {
+  color: var(--p-orange-600);
+  background-color: var(--p-orange-50);
+}
+
+.stop-label {
+  font-weight: 500;
+  color: var(--p-text-color);
+  font-size: 0.875rem;
+}
+
+.stop-content {
+  background-color: var(--p-surface-50);
+  border-radius: var(--p-border-radius);
+  padding: 0.75rem;
+  border: 1px solid var(--p-surface-border);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.stop-content .stop-name {
+  font-weight: 500;
+  color: var(--p-text-color);
+}
+
+.no-stop-assigned {
+  padding: 0.75rem;
+  text-align: center;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.not-assigned {
+  color: var(--p-text-muted-color);
+  font-style: italic;
+  font-size: 0.875rem;
+}
+
+.route-connector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-width: 2rem;
+  align-self: center;
+  margin-top: 2rem;
+}
+
+.connector-line {
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  background-color: var(--p-surface-300);
+  z-index: 1;
+}
+
+.connector-arrow {
+  background-color: var(--p-surface-0);
+  color: var(--p-primary-color);
+  font-size: 1rem;
+  padding: 0.25rem;
+  border-radius: 50%;
+  z-index: 2;
+  position: relative;
 }
 
 .loading-container, .error-container, .not-found-container {

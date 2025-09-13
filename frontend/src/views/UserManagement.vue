@@ -1,267 +1,408 @@
 <template>
-  <div class="user-management-container">
-    <header class="header">
-      <div class="header-content">
-        <h1>User Management</h1>
-        <div class="header-actions">
-          <button @click="goBack" class="back-button">← Back to Dashboard</button>
-        </div>
-      </div>
-    </header>
-
-    <main class="main-content">
-      <div class="content-wrapper">
+  <AppLayout 
+    page-title="User Management"
+    :breadcrumbs="breadcrumbs"
+  >
+    <template #actions>
+      <Button 
+        @click="goBack" 
+        icon="pi pi-arrow-left"
+        label="Back to Dashboard"
+        severity="secondary"
+        outlined
+      />
+    </template>
+    
+    <div class="content-wrapper">
         <!-- Create Student Section -->
-        <div class="student-section">
-          <h2>Create Student</h2>
-          <form @submit.prevent="handleCreateStudent" class="student-form">
-            <div class="form-row">
-              <div class="form-group">
-                <label for="studentFirstName">First Name:</label>
-                <input 
-                  id="studentFirstName"
-                  type="text" 
-                  v-model="studentForm.firstName" 
-                  required 
-                  :disabled="loading"
-                />
-              </div>
-              
-              <div class="form-group">
-                <label for="studentLastName">Last Name:</label>
-                <input 
-                  id="studentLastName"
-                  type="text" 
-                  v-model="studentForm.lastName" 
-                  required 
-                  :disabled="loading"
-                />
-              </div>
-              
-              <div class="form-group">
-                <label for="studentPhone">Phone:</label>
-                <input 
-                  id="studentPhone"
-                  type="tel" 
-                  v-model="studentForm.phone" 
-                  required 
-                  :disabled="loading"
-                />
-              </div>
+        <Card class="student-section">
+          <template #header>
+            <div class="section-header-card">
+              <h2><i class="pi pi-user-plus"></i>Create Student</h2>
             </div>
+          </template>
+          <template #content>
+            <form @submit.prevent="handleCreateStudent" class="student-form">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="studentFirstName">First Name</label>
+                  <IconField>
+                    <InputIcon class="pi pi-user" />
+                    <InputText 
+                      id="studentFirstName"
+                      v-model="studentForm.firstName" 
+                      placeholder="Enter first name"
+                      required 
+                      :disabled="loading"
+                    />
+                  </IconField>
+                </div>
+                
+                <div class="form-group">
+                  <label for="studentLastName">Last Name</label>
+                  <IconField>
+                    <InputIcon class="pi pi-user" />
+                    <InputText 
+                      id="studentLastName"
+                      v-model="studentForm.lastName" 
+                      placeholder="Enter last name"
+                      required 
+                      :disabled="loading"
+                    />
+                  </IconField>
+                </div>
+                
+                <div class="form-group">
+                  <label for="studentPhone">Phone</label>
+                  <IconField>
+                    <InputIcon class="pi pi-phone" />
+                    <InputMask 
+                      id="studentPhone"
+                      v-model="studentForm.phone" 
+                      mask="(999) 999-9999"
+                      placeholder="(555) 123-4567"
+                      required 
+                      :disabled="loading"
+                    />
+                  </IconField>
+                </div>
+              </div>
+              
+              <Button 
+                type="submit" 
+                :loading="loading"
+                loadingIcon="pi pi-spin pi-spinner"
+                :label="loading ? 'Creating...' : 'Create Student'"
+                icon="pi pi-plus"
+                severity="info"
+                :disabled="loading"
+              />
+            </form>
             
-            <button 
-              type="submit" 
-              class="create-student-button"
-              :disabled="loading"
-            >
-              {{ loading ? 'Creating...' : 'Create Student' }}
-            </button>
-          </form>
-          
-          <div v-if="studentMessage" class="message" :class="studentMessageType">
-            {{ studentMessage }}
-          </div>
-        </div>
+            <div v-if="studentMessage" class="message-container">
+              <Card :class="`message-card ${studentMessageType}`">
+                <template #content>
+                  <div class="message-content">
+                    <i :class="studentMessageType === 'success' ? 'pi pi-check-circle' : 'pi pi-exclamation-triangle'"></i>
+                    <span>{{ studentMessage }}</span>
+                  </div>
+                </template>
+              </Card>
+            </div>
+          </template>
+        </Card>
 
         <!-- Connect Student to Parents Section -->
-        <div class="parent-student-section">
-          <h2>Connect Student to Parents</h2>
-          <form @submit.prevent="handleConnectStudentToParents" class="parent-student-form">
-            <div class="form-row">
-              <div class="form-group">
-                <label for="studentSelect">Student:</label>
-                <select 
-                  id="studentSelect"
-                  v-model="parentStudentForm.studentId" 
-                  required 
-                  :disabled="loading || loadingStudents"
-                >
-                  <option value="">Select student...</option>
-                  <option 
-                    v-for="student in availableStudents" 
-                    :key="student._id" 
-                    :value="student._id"
-                  >
-                    {{ student.firstName }} {{ student.lastName }} 
-                    ({{ student.parents?.length || 0 }}/2 parents)
-                  </option>
-                </select>
-              </div>
-              
-              <div class="form-group">
-                <label for="parentSelect1">Parent 1:</label>
-                <select 
-                  id="parentSelect1"
-                  v-model="parentStudentForm.parentId1" 
-                  required 
-                  :disabled="loading || loadingParents"
-                >
-                  <option value="">Select parent...</option>
-                  <option 
-                    v-for="parent in availableParents" 
-                    :key="parent._id" 
-                    :value="parent._id"
-                  >
-                    {{ parent.firstName }} {{ parent.lastName }} ({{ parent.email }})
-                  </option>
-                </select>
-              </div>
-              
-              <div class="form-group">
-                <label for="parentSelect2">Parent 2 (Optional):</label>
-                <select 
-                  id="parentSelect2"
-                  v-model="parentStudentForm.parentId2" 
-                  :disabled="loading || loadingParents"
-                >
-                  <option value="">Select parent...</option>
-                  <option 
-                    v-for="parent in availableParents" 
-                    :key="parent._id" 
-                    :value="parent._id"
-                    :disabled="parent._id === parentStudentForm.parentId1"
-                  >
-                    {{ parent.firstName }} {{ parent.lastName }} ({{ parent.email }})
-                  </option>
-                </select>
-              </div>
+        <Card class="parent-student-section">
+          <template #header>
+            <div class="section-header-card">
+              <h2><i class="pi pi-link"></i>Connect Student to Parents</h2>
             </div>
+          </template>
+          <template #content>
+            <form @submit.prevent="handleConnectStudentToParents" class="parent-student-form">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="studentSelect">Student</label>
+                  <Select 
+                    id="studentSelect"
+                    v-model="parentStudentForm.studentId"
+                    :options="availableStudents"
+                    optionLabel="displayName"
+                    optionValue="_id"
+                    placeholder="Select a student..."
+                    :loading="loadingStudents"
+                    :disabled="loading || loadingStudents"
+                    showClear
+                  />
+                </div>
+                
+                <div class="form-group">
+                  <label for="parentSelect1">Parent 1</label>
+                  <Select 
+                    id="parentSelect1"
+                    v-model="parentStudentForm.parentId1"
+                    :options="availableParents"
+                    optionLabel="displayName"
+                    optionValue="_id"
+                    placeholder="Select primary parent..."
+                    :loading="loadingParents"
+                    :disabled="loading || loadingParents"
+                    showClear
+                  />
+                </div>
+                
+                <div class="form-group">
+                  <label for="parentSelect2">Parent 2 (Optional)</label>
+                  <Select 
+                    id="parentSelect2"
+                    v-model="parentStudentForm.parentId2"
+                    :options="filteredSecondaryParents"
+                    optionLabel="displayName"
+                    optionValue="_id"
+                    placeholder="Select secondary parent..."
+                    :loading="loadingParents"
+                    :disabled="loading || loadingParents"
+                    showClear
+                  />
+                </div>
+              </div>
+              
+              <Button 
+                type="submit" 
+                :loading="loading"
+                loadingIcon="pi pi-spin pi-spinner"
+                :label="loading ? 'Connecting...' : 'Connect Student to Parents'"
+                icon="pi pi-link"
+                severity="warning"
+                :disabled="loading || !parentStudentForm.studentId || !parentStudentForm.parentId1"
+              />
+            </form>
             
-            <button 
-              type="submit" 
-              class="connect-button"
-              :disabled="loading || !parentStudentForm.studentId || !parentStudentForm.parentId1"
-            >
-              {{ loading ? 'Connecting...' : 'Connect Student to Parents' }}
-            </button>
-          </form>
-          
-          <div v-if="parentStudentMessage" class="message" :class="parentStudentMessageType">
-            {{ parentStudentMessage }}
-          </div>
-        </div>
+            <div v-if="parentStudentMessage" class="message-container">
+              <Card :class="`message-card ${parentStudentMessageType}`">
+                <template #content>
+                  <div class="message-content">
+                    <i :class="parentStudentMessageType === 'success' ? 'pi pi-check-circle' : 'pi pi-exclamation-triangle'"></i>
+                    <span>{{ parentStudentMessage }}</span>
+                  </div>
+                </template>
+              </Card>
+            </div>
+          </template>
+        </Card>
 
         <!-- Invite User Section -->
-        <div class="invite-section">
-          <h2>Invite New User</h2>
-          <form @submit.prevent="handleInvite" class="invite-form">
-            <div class="form-row">
-              <div class="form-group">
-                <label for="email">Email:</label>
-                <input 
-                  id="email"
-                  type="email" 
-                  v-model="inviteForm.email" 
-                  required 
-                  :disabled="loading"
-                />
+        <Card class="invite-section">
+          <template #header>
+            <div class="section-header-card">
+              <h2><i class="pi pi-send"></i>Invite New User</h2>
+            </div>
+          </template>
+          <template #content>
+            <form @submit.prevent="handleInvite" class="invite-form">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="email">Email</label>
+                  <IconField>
+                    <InputIcon class="pi pi-envelope" />
+                    <InputText 
+                      id="email"
+                      type="email"
+                      v-model="inviteForm.email" 
+                      placeholder="Enter email address"
+                      required 
+                      :disabled="loading"
+                    />
+                  </IconField>
+                </div>
+                
+                <div class="form-group">
+                  <label for="phone">Phone</label>
+                  <IconField>
+                    <InputIcon class="pi pi-phone" />
+                    <InputMask 
+                      id="phone"
+                      v-model="inviteForm.phone" 
+                      mask="(999) 999-9999"
+                      placeholder="(555) 123-4567"
+                      required 
+                      :disabled="loading"
+                    />
+                  </IconField>
+                </div>
+                
+                <div class="form-group">
+                  <label for="role">Role</label>
+                  <Select 
+                    id="role"
+                    v-model="inviteForm.role" 
+                    :options="roleFilterOptions"
+                    optionLabel="label"
+                    optionValue="value"
+                    placeholder="Select role..."
+                    required 
+                    :disabled="loading"
+                  />
+                </div>
               </div>
               
-              <div class="form-group">
-                <label for="phone">Phone:</label>
-                <input 
-                  id="phone"
-                  type="tel" 
-                  v-model="inviteForm.phone" 
-                  required 
-                  :disabled="loading"
-                />
-              </div>
-              
-              <div class="form-group">
-                <label for="role">Role:</label>
-                <select 
-                  id="role"
-                  v-model="inviteForm.role" 
-                  required 
-                  :disabled="loading"
-                >
-                  <option value="">Select role...</option>
-                  <option value="driver">Driver</option>
-                  <option value="parent">Parent</option>
-                </select>
+              <Button 
+                type="submit" 
+                :loading="loading"
+                loadingIcon="pi pi-spin pi-spinner"
+                :label="loading ? 'Sending...' : 'Send Invitation'"
+                icon="pi pi-send"
+                severity="success"
+                :disabled="loading"
+              />
+            </form>
+            
+            <div v-if="message" class="message-container">
+              <Card :class="`message-card ${messageType}`">
+                <template #content>
+                  <div class="message-content">
+                    <i :class="messageType === 'success' ? 'pi pi-check-circle' : 'pi pi-exclamation-triangle'"></i>
+                    <span>{{ message }}</span>
+                  </div>
+                </template>
+              </Card>
+            </div>
+          </template>
+        </Card>
+
+        <!-- Users List Section -->
+        <Card class="users-section">
+          <template #header>
+            <div class="section-header-card">
+              <h2><i class="pi pi-users"></i>All Users</h2>
+            </div>
+          </template>
+          <template #content>
+            <div class="table-filters">
+              <div class="filter-row">
+                <div class="filter-group">
+                  <label for="searchUsers">Search</label>
+                  <IconField>
+                    <InputIcon class="pi pi-search" />
+                    <InputText 
+                      id="searchUsers"
+                      v-model="userSearchFilter" 
+                      placeholder="Search users..."
+                    />
+                  </IconField>
+                </div>
+                <div class="filter-group">
+                  <label for="roleFilter">Role</label>
+                  <Select 
+                    id="roleFilter"
+                    v-model="userFilter.role" 
+                    :options="roleFilterOptions"
+                    optionLabel="label"
+                    optionValue="value"
+                    placeholder="All Roles"
+                    showClear
+                    @change="fetchUsers"
+                  />
+                </div>
+                <div class="filter-group">
+                  <label for="statusFilter">Status</label>
+                  <Select 
+                    id="statusFilter"
+                    v-model="userFilter.isActive" 
+                    :options="statusFilterOptions"
+                    optionLabel="label"
+                    optionValue="value"
+                    placeholder="All Status"
+                    showClear
+                    @change="fetchUsers"
+                  />
+                </div>
               </div>
             </div>
             
-            <button 
-              type="submit" 
-              class="invite-button"
-              :disabled="loading"
+            <DataTable 
+              :value="filteredUsers" 
+              :loading="loadingUsers"
+              paginator 
+              :rows="10" 
+              :rowsPerPageOptions="[5, 10, 20, 50]"
+              paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+              currentPageReportTemplate="{first} to {last} of {totalRecords} users"
+              stripedRows
+              removableSort
+              sortMode="multiple"
+              class="users-table"
             >
-              {{ loading ? 'Sending...' : 'Send Invitation' }}
-            </button>
-          </form>
-          
-          <div v-if="message" class="message" :class="messageType">
-            {{ message }}
-          </div>
-        </div>
-
-        <!-- Users List Section -->
-        <div class="users-section">
-          <div class="section-header">
-            <h2>All Users</h2>
-            <div class="filters">
-              <select v-model="userFilter.role" @change="fetchUsers">
-                <option value="">All Roles</option>
-                <option value="admin">Admin</option>
-                <option value="driver">Driver</option>
-                <option value="parent">Parent</option>
-                <option value="student">Student</option>
-              </select>
-              <select v-model="userFilter.isActive" @change="fetchUsers">
-                <option value="">All Status</option>
-                <option value="true">Active</option>
-                <option value="false">Inactive</option>
-              </select>
-            </div>
-          </div>
-
-          <div v-if="loadingUsers" class="loading">Loading users...</div>
-          
-          <div v-else-if="users.length === 0" class="no-users">
-            No users found.
-          </div>
-
-          <div v-else class="users-grid">
-            <div 
-              v-for="user in users" 
-              :key="user.id" 
-              class="user-card"
-              :class="{ inactive: !user.isActive }"
-            >
-              <div class="user-info">
-                <div class="user-name">{{ user.firstName }} {{ user.lastName }}</div>
-                <div class="user-email">{{ user.email }}</div>
-                <div class="user-phone">{{ user.phone }}</div>
-                <div class="user-meta">
-                  <span class="role-badge" :class="`role-${user.role}`">
-                    {{ user.role }}
-                  </span>
-                  <span class="status-badge" :class="user.isActive ? 'active' : 'inactive'">
-                    {{ user.isActive ? 'Active' : 'Inactive' }}
-                  </span>
+              <template #empty>
+                <div class="empty-state">
+                  <i class="pi pi-users" style="font-size: 3rem; color: var(--p-text-muted-color);"></i>
+                  <p>No users found.</p>
                 </div>
-                <div v-if="user.role === 'student' && user.parents && user.parents.length > 0" class="user-relationships">
-                  <strong>Parents:</strong>
-                  <div v-for="parent in user.parents" :key="parent._id" class="relationship-item">
-                    {{ parent.firstName }} {{ parent.lastName }}
+              </template>
+              
+              <Column field="user" header="User" sortable>
+                <template #body="slotProps">
+                  <div class="user-info-cell">
+                    <Avatar 
+                      :label="getUserInitials(slotProps.data)"
+                      size="medium"
+                      shape="circle"
+                    />
+                    <div class="user-details">
+                      <div class="user-name">{{ slotProps.data.firstName }} {{ slotProps.data.lastName }}</div>
+                      <div class="user-contact">
+                        <i class="pi pi-envelope"></i>
+                        {{ slotProps.data.email }}
+                      </div>
+                      <div class="user-contact">
+                        <i class="pi pi-phone"></i>
+                        {{ slotProps.data.phone }}
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <div v-if="user.role === 'parent' && user.children && user.children.length > 0" class="user-relationships">
-                  <strong>Children:</strong>
-                  <div v-for="child in user.children" :key="child._id" class="relationship-item">
-                    {{ child.firstName }} {{ child.lastName }}
+                </template>
+              </Column>
+              
+              <Column field="role" header="Role" sortable>
+                <template #body="slotProps">
+                  <div class="role-cell">
+                    <i :class="getRoleIcon(slotProps.data.role)"></i>
+                    <span class="role-badge" :class="`role-${slotProps.data.role}`">
+                      {{ slotProps.data.role }}
+                    </span>
                   </div>
-                </div>
-                <div class="user-dates">
-                  Created: {{ formatDate(user.createdAt) }}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+                </template>
+              </Column>
+              
+              <Column field="isActive" header="Status" sortable>
+                <template #body="slotProps">
+                  <div class="status-cell">
+                    <i :class="slotProps.data.isActive ? 'pi pi-check-circle' : 'pi pi-times-circle'"></i>
+                    <span class="status-badge" :class="slotProps.data.isActive ? 'active' : 'inactive'">
+                      {{ slotProps.data.isActive ? 'Active' : 'Inactive' }}
+                    </span>
+                  </div>
+                </template>
+              </Column>
+              
+              <Column field="relationships" header="Relationships">
+                <template #body="slotProps">
+                  <div class="relationships-cell">
+                    <div v-if="slotProps.data.role === 'student' && slotProps.data.parents && slotProps.data.parents.length > 0">
+                      <div class="relationship-header">
+                        <i class="pi pi-users"></i>
+                        Parents
+                      </div>
+                      <div v-for="parent in slotProps.data.parents" :key="parent._id" class="relationship-item">
+                        {{ parent.firstName }} {{ parent.lastName }}
+                      </div>
+                    </div>
+                    <div v-else-if="slotProps.data.role === 'parent' && slotProps.data.children && slotProps.data.children.length > 0">
+                      <div class="relationship-header">
+                        <i class="pi pi-user"></i>
+                        Children
+                      </div>
+                      <div v-for="child in slotProps.data.children" :key="child._id" class="relationship-item">
+                        {{ child.firstName }} {{ child.lastName }}
+                      </div>
+                    </div>
+                    <span v-else class="no-relationships">—</span>
+                  </div>
+                </template>
+              </Column>
+              
+              <Column field="createdAt" header="Created" sortable>
+                <template #body="slotProps">
+                  <div class="date-cell">
+                    <i class="pi pi-calendar"></i>
+                    {{ formatDate(slotProps.data.createdAt) }}
+                  </div>
+                </template>
+              </Column>
+            </DataTable>
+          </template>
+        </Card>
 
         <!-- Invitations Section -->
         <div class="invitations-section">
@@ -304,20 +445,28 @@
           </div>
         </div>
       </div>
-    </main>
-  </div>
+    </AppLayout>
 </template>
 
 <script>
-import { ref, inject, onMounted } from 'vue'
+import { ref, inject, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import apiService from '../services/api'
+import AppLayout from '../components/AppLayout.vue'
 
 export default {
   name: 'UserManagement',
+  components: {
+    AppLayout
+  },
   setup() {
     const authStore = inject('authStore')
     const router = useRouter()
+    
+    const breadcrumbs = ref([
+      { label: 'Dashboard', path: '/home' },
+      { label: 'User Management' }
+    ])
     
     const loading = ref(false)
     const loadingUsers = ref(false)
@@ -358,6 +507,20 @@ export default {
       role: '',
       isActive: ''
     })
+    
+    const userSearchFilter = ref('')
+    
+    const roleFilterOptions = [
+      { label: 'Admin', value: 'admin' },
+      { label: 'Driver', value: 'driver' },
+      { label: 'Parent', value: 'parent' },
+      { label: 'Student', value: 'student' }
+    ]
+    
+    const statusFilterOptions = [
+      { label: 'Active', value: 'true' },
+      { label: 'Inactive', value: 'false' }
+    ]
     
     const handleCreateStudent = async () => {
       try {
@@ -472,7 +635,11 @@ export default {
       try {
         loadingStudents.value = true
         const response = await apiService.get('/auth/students/with-parents?maxParents=1')
-        availableStudents.value = response.students
+        // Add displayName property for Select
+        availableStudents.value = response.students.map(student => ({
+          ...student,
+          displayName: `${student.firstName} ${student.lastName}`
+        }))
       } catch (error) {
         console.error('Failed to fetch available students:', error)
       } finally {
@@ -484,7 +651,11 @@ export default {
       try {
         loadingParents.value = true
         const response = await apiService.get('/auth/users?role=parent&isActive=true')
-        availableParents.value = response.users
+        // Add displayName property for Select
+        availableParents.value = response.users.map(parent => ({
+          ...parent,
+          displayName: `${parent.firstName} ${parent.lastName}`
+        }))
       } catch (error) {
         console.error('Failed to fetch available parents:', error)
       } finally {
@@ -523,9 +694,48 @@ export default {
       return new Date(dateString).toLocaleDateString()
     }
     
+    const getUserInitials = (user) => {
+      return `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase()
+    }
+    
+    const getRoleIcon = (role) => {
+      const icons = {
+        admin: 'pi pi-crown',
+        driver: 'pi pi-car',
+        parent: 'pi pi-users',
+        student: 'pi pi-user'
+      }
+      return icons[role] || 'pi pi-user'
+    }
+    
     const goBack = () => {
       router.push('/home')
     }
+    
+    const filteredUsers = computed(() => {
+      if (!userSearchFilter.value) {
+        return users.value
+      }
+      const search = userSearchFilter.value.toLowerCase()
+      return users.value.filter(user => {
+        return (
+          user.firstName?.toLowerCase().includes(search) ||
+          user.lastName?.toLowerCase().includes(search) ||
+          user.email?.toLowerCase().includes(search) ||
+          user.phone?.toLowerCase().includes(search) ||
+          user.role?.toLowerCase().includes(search)
+        )
+      })
+    })
+    
+    const filteredSecondaryParents = computed(() => {
+      if (!parentStudentForm.value.parentId1) {
+        return availableParents.value
+      }
+      return availableParents.value.filter(parent => 
+        (parent._id || parent.id) !== parentStudentForm.value.parentId1
+      )
+    })
     
     onMounted(async () => {
       await Promise.all([
@@ -537,6 +747,7 @@ export default {
     })
     
     return {
+      breadcrumbs,
       loading,
       loadingUsers,
       loadingInvitations,
@@ -562,57 +773,21 @@ export default {
       fetchUsers,
       deleteInvitation,
       formatDate,
-      goBack
+      getUserInitials,
+      getRoleIcon,
+      goBack,
+      userSearchFilter,
+      roleFilterOptions,
+      statusFilterOptions,
+      filteredUsers,
+      filteredSecondaryParents
     }
   }
 }
 </script>
 
 <style scoped>
-.user-management-container {
-  min-height: 100vh;
-  background-color: #f8f9fa;
-}
-
-.header {
-  background-color: #007bff;
-  color: white;
-  padding: 1rem 0;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.header-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.header h1 {
-  margin: 0;
-}
-
-.back-button {
-  background-color: #6c757d;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.back-button:hover {
-  background-color: #545b62;
-}
-
-.main-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 30px 20px;
-}
+/* User Management specific styles */
 
 .content-wrapper > div {
   background: white;
@@ -731,15 +906,105 @@ export default {
   margin-bottom: 20px;
 }
 
-.filters {
-  display: flex;
-  gap: 10px;
+.table-filters {
+  margin-bottom: 20px;
 }
 
-.filters select {
-  padding: 6px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+.filter-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 20px;
+  align-items: end;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.filter-group label {
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: var(--p-text-color);
+}
+
+.users-table {
+  margin-top: 20px;
+}
+
+.user-info-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.user-name {
+  font-weight: bold;
+  color: var(--p-text-color);
+  font-size: 0.95rem;
+}
+
+.user-contact {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--p-text-muted-color);
+}
+
+.role-cell,
+.status-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.relationships-cell {
+  font-size: 0.85rem;
+}
+
+.relationship-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: bold;
+  color: var(--p-text-color);
+  margin-bottom: 4px;
+}
+
+.relationship-item {
+  color: var(--p-text-muted-color);
+  margin-left: 16px;
+  font-size: 0.8rem;
+}
+
+.no-relationships {
+  color: var(--p-text-muted-color);
+}
+
+.date-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--p-text-muted-color);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: var(--p-text-muted-color);
+}
+
+.empty-state p {
+  margin-top: 16px;
+  font-size: 1.1rem;
 }
 
 .loading {
@@ -748,7 +1013,6 @@ export default {
   padding: 40px;
 }
 
-.no-users,
 .no-invitations {
   text-align: center;
   color: #666;
@@ -756,14 +1020,12 @@ export default {
   font-style: italic;
 }
 
-.users-grid,
 .invitations-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 20px;
 }
 
-.user-card,
 .invitation-card {
   border: 1px solid #ddd;
   border-radius: 8px;
@@ -771,17 +1033,10 @@ export default {
   transition: box-shadow 0.2s;
 }
 
-.user-card:hover,
 .invitation-card:hover {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.user-card.inactive {
-  opacity: 0.6;
-  background-color: #f8f9fa;
-}
-
-.user-name,
 .invitation-email {
   font-weight: bold;
   font-size: 1.1rem;
@@ -789,15 +1044,12 @@ export default {
   color: #333;
 }
 
-.user-email,
-.user-phone,
 .invitation-phone {
   color: #666;
   margin-bottom: 5px;
   font-size: 0.9rem;
 }
 
-.user-meta,
 .invitation-meta {
   display: flex;
   gap: 10px;
@@ -812,10 +1064,10 @@ export default {
   text-transform: uppercase;
 }
 
-.role-admin { background-color: #dc3545; color: white; }
-.role-driver { background-color: #28a745; color: white; }
-.role-parent { background-color: #ffc107; color: #000; }
-.role-student { background-color: #17a2b8; color: white; }
+.role-admin { color: #dc3545; }
+.role-driver { color: #28a745; }
+.role-parent { color: #ffc107; }
+.role-student { color: #17a2b8; }
 
 .status-badge {
   padding: 2px 8px;
@@ -887,12 +1139,85 @@ export default {
   cursor: not-allowed;
 }
 
+/* Section header icon spacing */
+.section-header-card h2 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  color: var(--p-primary-700);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.section-header-card {
+  padding: 15px 20px;
+  background: var(--p-primary-50);
+  border-radius: var(--p-border-radius) var(--p-border-radius) 0 0;
+  border-bottom: 1px solid var(--p-surface-border);
+}
+
+/* Fix input icon overlap with placeholders */
+.form-group :deep(.p-inputtext),
+.form-group :deep(.p-inputmask),
+.filter-group :deep(.p-inputtext) {
+  padding-left: 2.5rem;
+}
+
+.form-group :deep(.p-icon-field .p-input-icon),
+.filter-group :deep(.p-icon-field .p-input-icon) {
+  left: 0.75rem;
+  color: var(--p-text-muted-color);
+}
+
+/* Message container styling */
+.message-container {
+  margin-top: 15px;
+}
+
+.message-card {
+  border-radius: 6px;
+}
+
+.message-card.success {
+  border-left: 4px solid var(--p-green-500);
+  background: var(--p-green-50);
+}
+
+.message-card.error {
+  border-left: 4px solid var(--p-red-500);
+  background: var(--p-red-50);
+}
+
+.message-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+}
+
+.message-content i {
+  font-size: 1.25rem;
+}
+
+.message-card.success .message-content i {
+  color: var(--p-green-500);
+}
+
+.message-card.error .message-content i {
+  color: var(--p-red-500);
+}
+
 @media (max-width: 768px) {
   .form-row {
     grid-template-columns: 1fr;
   }
   
-  .users-grid,
+  .filter-row {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
   .invitations-grid {
     grid-template-columns: 1fr;
   }
@@ -900,10 +1225,6 @@ export default {
   .section-header {
     flex-direction: column;
     align-items: flex-start;
-  }
-  
-  .filters {
-    margin-top: 10px;
   }
 }
 </style>

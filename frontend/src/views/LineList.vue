@@ -1,107 +1,147 @@
 <template>
-  <div class="line-list-container">
-    <header class="header">
-      <div class="header-content">
-        <h1>Line Management</h1>
-        <div class="header-actions">
-          <button @click="goBack" class="back-button">← Back to Dashboard</button>
-          <button @click="handleAddLine" class="add-line-button">+ Add New Line</button>
-        </div>
-      </div>
-    </header>
-
-    <main class="main-content">
-      <div class="content-wrapper">
+  <AppLayout 
+    page-title="Line Management"
+    :breadcrumbs="breadcrumbs"
+  >
+    <template #actions>
+      <Button 
+        @click="goBack" 
+        icon="pi pi-arrow-left"
+        label="Back to Dashboard"
+        severity="secondary"
+        outlined
+      />
+      <Button 
+        @click="handleAddLine" 
+        icon="pi pi-plus"
+        label="Add New Line"
+        severity="success"
+      />
+    </template>
+    
+    <div class="content-wrapper">
         <!-- Lines List Section -->
-        <div class="lines-section">
-          <div v-if="loading" class="loading">Loading lines...</div>
-          
-          <div v-else-if="lines.length === 0" class="no-lines">
-            <div class="empty-state">
-              <h3>No lines found</h3>
-              <p>Start by creating your first transportation line.</p>
-              <button @click="handleAddLine" class="add-line-button-large">
-                + Create First Line
-              </button>
-            </div>
-          </div>
-
-          <div v-else class="lines-grid">
-            <div 
-              v-for="line in lines" 
-              :key="line._id" 
-              class="line-card"
-              @click="viewLine(line._id)"
-            >
-              <div class="line-header">
-                <h3 class="line-name">{{ line.name }}</h3>
-                <span class="status-badge" :class="line.isActive ? 'active' : 'inactive'">
-                  {{ line.isActive ? 'Active' : 'Inactive' }}
-                </span>
-              </div>
-
-              <div class="line-info">
-                <div class="line-stats">
-                  <div class="stat-item">
-                    <span class="stat-label">Route:</span>
-                    <span class="stat-value">{{ line.route?.name || 'No Route' }}</span>
-                  </div>
-                  <div class="stat-item">
-                    <span class="stat-label">Vehicle:</span>
-                    <span class="stat-value">{{ line.vehicle?.licensePlate || 'No Vehicle' }}</span>
-                  </div>
-                  <div class="stat-item">
-                    <span class="stat-label">Driver:</span>
-                    <span class="stat-value">{{ getDriverName(line.driver) }}</span>
-                  </div>
-                </div>
-
-                <div class="line-details">
-                  <div class="detail-item">
-                    <strong>Start Time:</strong>
-                    <span class="start-time">{{ formatTime(line.rideStartTime) }}</span>
-                  </div>
-                  <div class="detail-item">
-                    <strong>Duration:</strong>
-                    <span class="schedule-duration">{{ formatScheduleDuration(line.schedule) }}</span>
-                  </div>
-                  <div class="detail-item">
-                    <strong>Operating Days:</strong>
-                    <span class="schedule-days">{{ formatScheduleDays(line.schedule) }}</span>
-                  </div>
-                  <div class="detail-item">
-                    <strong>Students:</strong>
-                    <span class="student-count">{{ line.students?.length || 0 }} assigned</span>
-                  </div>
-                </div>
-
-                <div class="line-meta">
-                  <div class="line-dates">
-                    Created: {{ formatDate(line.createdAt) }}
-                  </div>
-                  <div class="line-capacity" v-if="line.vehicle">
-                    Capacity: {{ line.students?.length || 0 }}/{{ line.vehicle.capacity }}
-                  </div>
-                </div>
+        <Card class="lines-section">
+          <template #content>
+            <div v-if="loading" class="loading">Loading lines...</div>
+            
+            <div v-else-if="lines.length === 0" class="no-lines">
+              <div class="empty-state">
+                <h3>No lines found</h3>
+                <p>Start by creating your first transportation line.</p>
+                <Button 
+                  @click="handleAddLine" 
+                  icon="pi pi-plus"
+                  label="Create First Line"
+                  severity="success"
+                  size="large"
+                />
               </div>
             </div>
-          </div>
-        </div>
+
+            <div v-else class="lines-grid">
+              <Card 
+                v-for="line in lines" 
+                :key="line._id" 
+                class="line-card"
+                @click="viewLine(line._id)"
+              >
+                <template #header>
+                  <div class="line-header">
+                    <h3 class="line-name">{{ line.name }}</h3>
+                    <div class="status-container">
+                      <i 
+                        :class="line.isActive ? 'pi pi-check-circle' : 'pi pi-times-circle'"
+                        :style="{ color: line.isActive ? 'var(--p-green-500)' : 'var(--p-red-500)' }"
+                      ></i>
+                      <span class="status-text" :class="line.isActive ? 'active' : 'inactive'">
+                        {{ line.isActive ? 'Active' : 'Inactive' }}
+                      </span>
+                    </div>
+                  </div>
+                </template>
+                
+                <template #content>
+                  <div class="line-info">
+                    <div class="line-stats">
+                      <div class="stat-item">
+                        <span class="stat-label">Route:</span>
+                        <span class="stat-value">{{ line.route?.name || 'No Route' }}</span>
+                      </div>
+                      <div class="stat-item">
+                        <span class="stat-label">Vehicle:</span>
+                        <span class="stat-value">{{ line.vehicle?.licensePlate || 'No Vehicle' }}</span>
+                      </div>
+                      <div class="stat-item">
+                        <span class="stat-label">Driver:</span>
+                        <span class="stat-value">{{ getDriverName(line.driver) }}</span>
+                      </div>
+                    </div>
+
+                    <div class="line-details">
+                      <div class="detail-item">
+                        <i class="pi pi-clock detail-icon"></i>
+                        <strong>Start Time:</strong>
+                        <span class="start-time">{{ formatTime(line.rideStartTime) }}</span>
+                      </div>
+                      <div class="detail-item">
+                        <i class="pi pi-calendar detail-icon"></i>
+                        <strong>Duration:</strong>
+                        <span class="schedule-duration">{{ formatScheduleDuration(line.schedule) }}</span>
+                      </div>
+                      <div class="detail-item">
+                        <i class="pi pi-calendar-times detail-icon"></i>
+                        <strong>Operating Days:</strong>
+                        <span class="schedule-days">{{ formatScheduleDays(line.schedule) }}</span>
+                      </div>
+                      <div class="detail-item">
+                        <i class="pi pi-users detail-icon"></i>
+                        <strong>Students:</strong>
+                        <span class="student-count">{{ line.students?.length || 0 }} assigned</span>
+                      </div>
+                    </div>
+                  </div>
+                </template>
+                
+                <template #footer>
+                  <div class="line-meta">
+                    <div class="line-dates">
+                      <i class="pi pi-info-circle"></i>
+                      Created: {{ formatDate(line.createdAt) }}
+                    </div>
+                    <div class="line-capacity" v-if="line.vehicle">
+                      <i class="pi pi-users"></i>
+                      Capacity: {{ line.students?.length || 0 }}/{{ line.vehicle.capacity }}
+                    </div>
+                  </div>
+                </template>
+              </Card>
+            </div>
+          </template>
+        </Card>
       </div>
-    </main>
-  </div>
+    </AppLayout>
 </template>
 
 <script>
 import { ref, inject, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import apiService from '../services/api'
+import AppLayout from '../components/AppLayout.vue'
 
 export default {
   name: 'LineList',
+  components: {
+    AppLayout
+  },
   setup() {
     const authStore = inject('authStore')
     const router = useRouter()
+    
+    const breadcrumbs = ref([
+      { label: 'Dashboard', path: '/home' },
+      { label: 'Line Management' }
+    ])
     
     const loading = ref(false)
     const lines = ref([])
@@ -230,6 +270,7 @@ export default {
     })
     
     return {
+      breadcrumbs,
       loading,
       lines,
       fetchLines,
@@ -248,70 +289,7 @@ export default {
 </script>
 
 <style scoped>
-.line-list-container {
-  min-height: 100vh;
-  background-color: #f8f9fa;
-}
-
-.header {
-  background-color: #007bff;
-  color: white;
-  padding: 1rem 0;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.header-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.header h1 {
-  margin: 0;
-}
-
-.header-actions {
-  display: flex;
-  gap: 12px;
-}
-
-.back-button {
-  background-color: #6c757d;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.back-button:hover {
-  background-color: #545b62;
-}
-
-.add-line-button {
-  background-color: #28a745;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  font-weight: 500;
-}
-
-.add-line-button:hover {
-  background-color: #218838;
-}
-
-.main-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 30px 20px;
-}
+/* Line list specific styles */
 
 .content-wrapper {
   display: flex;
@@ -319,16 +297,9 @@ export default {
   gap: 20px;
 }
 
-.lines-section {
-  background: white;
-  border-radius: 8px;
-  padding: 30px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
 .loading {
   text-align: center;
-  color: #666;
+  color: var(--p-text-muted-color);
   padding: 40px;
   font-size: 1.1rem;
 }
@@ -339,29 +310,13 @@ export default {
 }
 
 .empty-state h3 {
-  color: #333;
+  color: var(--p-text-color);
   margin-bottom: 10px;
 }
 
 .empty-state p {
-  color: #666;
+  color: var(--p-text-muted-color);
   margin-bottom: 30px;
-}
-
-.add-line-button-large {
-  background-color: #28a745;
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 1rem;
-  font-weight: 500;
-  transition: background-color 0.2s;
-}
-
-.add-line-button-large:hover {
-  background-color: #218838;
 }
 
 .lines-grid {
@@ -371,12 +326,8 @@ export default {
 }
 
 .line-card {
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 20px;
   transition: all 0.2s;
   cursor: pointer;
-  background: white;
 }
 
 .line-card:hover {
@@ -389,31 +340,34 @@ export default {
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 15px;
+  padding: 1.25rem 1.25rem 0 1.25rem;
 }
 
 .line-name {
   margin: 0;
-  color: #333;
+  color: var(--p-text-color);
   font-size: 1.25rem;
   font-weight: 600;
 }
 
-.status-badge {
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: bold;
+.status-container {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-text {
+  font-size: 0.875rem;
+  font-weight: 500;
   text-transform: uppercase;
 }
 
-.status-badge.active {
-  background-color: #28a745;
-  color: white;
+.status-text.active {
+  color: var(--p-green-500);
 }
 
-.status-badge.inactive {
-  background-color: #6c757d;
-  color: white;
+.status-text.inactive {
+  color: var(--p-red-500);
 }
 
 .line-stats {
@@ -422,8 +376,8 @@ export default {
   gap: 10px;
   margin-bottom: 15px;
   padding: 10px;
-  background-color: #f8f9fa;
-  border-radius: 4px;
+  background-color: var(--p-surface-50);
+  border-radius: var(--p-border-radius);
 }
 
 .stat-item {
@@ -433,14 +387,14 @@ export default {
 .stat-label {
   display: block;
   font-size: 0.8rem;
-  color: #666;
+  color: var(--p-text-muted-color);
   margin-bottom: 2px;
 }
 
 .stat-value {
   display: block;
   font-weight: 600;
-  color: #333;
+  color: var(--p-text-color);
   font-size: 0.9rem;
 }
 
@@ -449,37 +403,36 @@ export default {
 }
 
 .detail-item {
+  display: flex;
+  align-items: center;
   font-size: 0.9rem;
-  margin-bottom: 5px;
+  margin-bottom: 8px;
+  gap: 8px;
 }
 
-.schedule-type {
-  color: #007bff;
-  font-weight: 500;
-  margin-left: 8px;
+.detail-icon {
+  color: var(--p-primary-color);
+  font-size: 0.875rem;
 }
 
 .start-time {
-  color: #28a745;
+  color: var(--p-green-500);
   font-weight: 500;
-  margin-left: 8px;
 }
 
 .schedule-duration {
-  color: #007bff;
+  color: var(--p-primary-color);
   font-weight: 500;
-  margin-left: 8px;
 }
 
 .schedule-days {
-  color: #28a745;
+  color: var(--p-green-500);
   font-weight: 500;
-  margin-left: 8px;
 }
 
 .student-count {
-  color: #666;
-  margin-left: 8px;
+  color: var(--p-text-muted-color);
+  font-weight: 500;
 }
 
 .line-meta {
@@ -487,7 +440,14 @@ export default {
   justify-content: space-between;
   align-items: center;
   font-size: 0.8rem;
-  color: #666;
+  color: var(--p-text-muted-color);
+}
+
+.line-dates,
+.line-capacity {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .line-capacity {

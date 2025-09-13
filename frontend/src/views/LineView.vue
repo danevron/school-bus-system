@@ -1,33 +1,38 @@
 <template>
-  <div class="line-view-container">
-    <header class="header">
-      <div class="header-content">
-        <div class="header-info">
-          <h1 v-if="line">{{ line.name }}</h1>
-          <h1 v-else>Line Details</h1>
-          <div class="status-badge" v-if="line" :class="line.isActive ? 'active' : 'inactive'">
-            {{ line.isActive ? 'Active' : 'Inactive' }}
-          </div>
-        </div>
-        <div class="header-actions">
-          <button @click="goBack" class="back-button">← Back to Lines</button>
-          <button 
-            v-if="canActivateLine"
-            @click="activateLineAction" 
-            class="activate-button"
-            :disabled="activating"
-          >
-            {{ activating ? 'Activating...' : 'Activate Line' }}
-          </button>
-          <button @click="manageRoute" class="edit-button" :disabled="!line">
-            Manage Stops and Students
-          </button>
-        </div>
+  <AppLayout 
+    :page-title="line ? line.name : 'Line Details'"
+    :breadcrumbs="breadcrumbs"
+  >
+    <template #actions>
+      <div v-if="line" class="status-badge" :class="line.isActive ? 'active' : 'inactive'">
+        {{ line.isActive ? 'Active' : 'Inactive' }}
       </div>
-    </header>
-
-    <main class="main-content">
-      <div v-if="loading" class="loading-container">
+      <Button 
+        @click="goBack" 
+        icon="pi pi-arrow-left"
+        label="Back to Lines"
+        severity="secondary"
+        outlined
+      />
+      <Button 
+        v-if="canActivateLine"
+        @click="activateLineAction" 
+        icon="pi pi-play"
+        :label="activating ? 'Activating...' : 'Activate Line'"
+        severity="warning"
+        :loading="activating"
+        :disabled="activating"
+      />
+      <Button 
+        @click="manageRoute" 
+        icon="pi pi-cog"
+        label="Manage Stops and Students"
+        severity="success"
+        :disabled="!line"
+      />
+    </template>
+    
+    <div v-if="loading" class="loading-container">
         <div class="loading">Loading line details...</div>
       </div>
 
@@ -35,7 +40,7 @@
         <div class="error-message">
           <h3>Error Loading Line</h3>
           <p>{{ error }}</p>
-          <button @click="fetchLine" class="retry-button">Try Again</button>
+          <Button @click="fetchLine" label="Try Again" icon="pi pi-refresh" severity="info" />
         </div>
       </div>
 
@@ -63,282 +68,387 @@
         </div>
 
         <!-- Basic Information Section -->
-        <div class="info-section">
-          <h2>Line Information</h2>
-          <div class="info-grid">
-            <div class="info-item">
-              <label>Line Name</label>
-              <span>{{ line.name }}</span>
+        <Card class="info-section">
+          <template #header>
+            <div class="section-header-card">
+              <h2><i class="pi pi-info-circle"></i>Line Information</h2>
             </div>
-            <div class="info-item">
-              <label>Status</label>
-              <span class="status" :class="line.isActive ? 'active' : 'inactive'">
-                {{ line.isActive ? 'Active' : 'Inactive' }}
-              </span>
-            </div>
-            <div class="info-item">
-              <label>Created</label>
-              <span>{{ formatDate(line.createdAt) }}</span>
-            </div>
-            <div class="info-item">
-              <label>Last Updated</label>
-              <span>{{ formatDate(line.updatedAt) }}</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Assignment Details Section -->
-        <div class="assignment-section">
-          <h2>Assignments</h2>
-          <div class="assignment-grid">
-            <div class="assignment-item">
-              <div class="assignment-header">
-                <span class="assignment-icon">👨‍✈️</span>
-                <span class="assignment-label">Driver</span>
+          </template>
+          <template #content>
+            <div class="info-grid">
+              <div class="info-item">
+                <label>Line Name</label>
+                <span>{{ line.name }}</span>
               </div>
-              <div class="assignment-value">
-                {{ getDriverName(line.driver) }}
-              </div>
-            </div>
-            
-            <div class="assignment-item">
-              <div class="assignment-header">
-                <span class="assignment-icon">🚌</span>
-                <span class="assignment-label">Vehicle</span>
-              </div>
-              <div class="assignment-value">
-                {{ getVehicleName(line.vehicle) }}
-              </div>
-            </div>
-            
-            <div class="assignment-item">
-              <div class="assignment-header">
-                <span class="assignment-icon">👥</span>
-                <span class="assignment-label">Students</span>
-              </div>
-              <div class="assignment-value">
-                {{ line.students?.length || 0 }} assigned
-                <span v-if="line.maxCapacity" class="capacity">
-                  ({{ line.students?.length || 0 }}/{{ line.maxCapacity }})
+              <div class="info-item">
+                <label>Status</label>
+                <span class="status" :class="line.isActive ? 'active' : 'inactive'">
+                  {{ line.isActive ? 'Active' : 'Inactive' }}
                 </span>
               </div>
+              <div class="info-item">
+                <label>Created</label>
+                <span>{{ formatDate(line.createdAt) }}</span>
+              </div>
+              <div class="info-item">
+                <label>Last Updated</label>
+                <span>{{ formatDate(line.updatedAt) }}</span>
+              </div>
             </div>
-          </div>
-        </div>
+          </template>
+        </Card>
 
-        <!-- Schedule Section -->
-        <div class="schedule-section">
-          <h2>Schedule</h2>
-          <div class="schedule-details">
-            <div class="schedule-item">
-              <label>Ride Start Time</label>
-              <span class="start-time">{{ formatTime(line.rideStartTime) }}</span>
+        <!-- Assignment Details Section -->
+        <Card class="assignment-section">
+          <template #header>
+            <div class="section-header-card">
+              <h2><i class="pi pi-users"></i>Assignments</h2>
             </div>
-            <div class="schedule-item">
-              <label>Duration</label>
-              <span>{{ formatScheduleDuration(line.schedule) }}</span>
-            </div>
-            <div class="schedule-item">
-              <label>Operating Days</label>
-              <span class="operating-days">{{ formatScheduleDays(line.schedule) }}</span>
-            </div>
-            <div class="schedule-item">
-              <label>Schedule Type</label>
-              <span class="schedule-type">{{ formatScheduleType(line.schedule?.type) }}</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Route Management Section -->
-        <div class="route-section">
-          <div class="section-header">
-            <h2>Route Management</h2>
-          </div>
-          <div class="route-content">
-            <div v-if="line.route && line.route.stops && line.route.stops.length > 0" class="route-summary">
-              <div class="route-stats">
-                <div class="stat">
-                  <span class="stat-icon">📍</span>
-                  <div class="stat-info">
-                    <span class="stat-value">{{ line.route.stops.length }}</span>
-                    <span class="stat-label">Stops</span>
-                  </div>
+          </template>
+          <template #content>
+            <div class="assignment-grid">
+              <div class="assignment-item">
+                <div class="assignment-header">
+                  <i class="pi pi-user assignment-icon"></i>
+                  <span class="assignment-label">Driver</span>
                 </div>
-                <div class="stat">
-                  <span class="stat-icon">📏</span>
-                  <div class="stat-info">
-                    <span class="stat-value">{{ line.route.totalDistance || 0 }}km</span>
-                    <span class="stat-label">Distance</span>
-                  </div>
-                </div>
-                <div class="stat">
-                  <span class="stat-icon">⏱️</span>
-                  <div class="stat-info">
-                    <span class="stat-value">{{ line.route.estimatedDuration || 0 }}min</span>
-                    <span class="stat-label">Duration</span>
-                  </div>
+                <div class="assignment-value">
+                  {{ getDriverName(line.driver) }}
                 </div>
               </div>
-              <div class="route-stops">
-                <h4>Route Stops</h4>
-                <div class="stops-list">
-                  <div v-for="(stop, index) in line.route.stops" :key="index" class="stop-item">
-                    <span class="stop-number">{{ index + 1 }}</span>
-                    <div class="stop-info">
-                      <div class="stop-main">
-                        <span class="stop-name">{{ stop.name }}</span>
-                        <span class="stop-type" :class="stop.type">{{ stop.type }}</span>
+              
+              <div class="assignment-item">
+                <div class="assignment-header">
+                  <i class="pi pi-car assignment-icon"></i>
+                  <span class="assignment-label">Vehicle</span>
+                </div>
+                <div class="assignment-value">
+                  {{ getVehicleName(line.vehicle) }}
+                </div>
+              </div>
+              
+              <div class="assignment-item">
+                <div class="assignment-header">
+                  <i class="pi pi-users assignment-icon"></i>
+                  <span class="assignment-label">Students</span>
+                </div>
+                <div class="assignment-value">
+                  {{ line.students?.length || 0 }} assigned
+                  <span v-if="line.maxCapacity" class="capacity">
+                    ({{ line.students?.length || 0 }}/{{ line.maxCapacity }})
+                  </span>
+                </div>
+              </div>
+            </div>
+          </template>
+        </Card>
+
+        <!-- Schedule Section -->
+        <Card class="schedule-section">
+          <template #header>
+            <div class="section-header-card">
+              <h2><i class="pi pi-calendar"></i>Schedule</h2>
+            </div>
+          </template>
+          <template #content>
+            <div class="schedule-details">
+              <div class="schedule-item">
+                <label><i class="pi pi-clock"></i> Ride Start Time</label>
+                <span class="start-time">{{ formatTime(line.rideStartTime) }}</span>
+              </div>
+              <div class="schedule-item">
+                <label><i class="pi pi-calendar-times"></i> Duration</label>
+                <span>{{ formatScheduleDuration(line.schedule) }}</span>
+              </div>
+              <div class="schedule-item">
+                <label><i class="pi pi-calendar-plus"></i> Operating Days</label>
+                <span class="operating-days">{{ formatScheduleDays(line.schedule) }}</span>
+              </div>
+              <div class="schedule-item">
+                <label><i class="pi pi-tags"></i> Schedule Type</label>
+                <span class="schedule-type">{{ formatScheduleType(line.schedule?.type) }}</span>
+              </div>
+            </div>
+          </template>
+        </Card>
+
+        <!-- Route Management Section -->
+        <Card class="route-section">
+          <template #header>
+            <div class="section-header-card">
+              <h2><i class="pi pi-map"></i>Route Management</h2>
+            </div>
+          </template>
+          <template #content>
+            <div class="route-content">
+              <div v-if="line.route && line.route.stops && line.route.stops.length > 0" class="route-summary">
+                <div class="route-stats">
+                  <div class="stat">
+                    <span class="stat-icon">📍</span>
+                    <div class="stat-info">
+                      <span class="stat-value">{{ line.route.stops.length }}</span>
+                      <span class="stat-label">Stops</span>
+                    </div>
+                  </div>
+                  <div class="stat">
+                    <span class="stat-icon">📏</span>
+                    <div class="stat-info">
+                      <span class="stat-value">{{ line.route.totalDistance || 0 }}km</span>
+                      <span class="stat-label">Distance</span>
+                    </div>
+                  </div>
+                  <div class="stat">
+                    <span class="stat-icon">⏱️</span>
+                    <div class="stat-info">
+                      <span class="stat-value">{{ line.route.estimatedDuration || 0 }}min</span>
+                      <span class="stat-label">Duration</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="route-stops">
+                  <h4><i class="pi pi-map-marker"></i>Route Stops</h4>
+                  <div class="stops-timeline">
+                    <div 
+                      v-for="(stop, index) in line.route.stops" 
+                      :key="index"
+                      class="stop-item"
+                      :class="{ 
+                        'pickup-stop': stop.type === 'pickup',
+                        'dropoff-stop': stop.type === 'dropoff'
+                      }"
+                    >
+                      <div class="stop-marker">
+                        <div class="stop-number">{{ index + 1 }}</div>
+                        <div class="stop-type-icon">
+                          <span v-if="stop.type === 'pickup'">📍</span>
+                          <span v-else>🏁</span>
+                        </div>
                       </div>
-                      <div class="stop-students">
-                        <div v-if="getStopStudents(stop).pickup.length > 0" class="student-group pickup">
-                          <div class="student-group-header">🚏 Pickup ({{ getStopStudents(stop).pickup.length }}):</div>
-                          <div class="student-names">
-                            <span v-for="student in getStopStudents(stop).pickup" :key="student._id" class="student-name">
-                              {{ student.firstName }} {{ student.lastName }}
-                            </span>
+
+                      <div class="stop-content">
+                        <div class="stop-header">
+                          <h3 class="stop-name">{{ stop.name }}</h3>
+                          <div class="stop-actions">
+                            <div class="stop-badges">
+                              <span class="type-badge" :class="stop.type">
+                                {{ stop.type }}
+                              </span>
+                              <span class="time-badge" v-if="stop.estimatedTime">
+                                {{ formatTime(stop.estimatedTime) }}
+                              </span>
+                            </div>
                           </div>
                         </div>
-                        <div v-if="getStopStudents(stop).dropoff.length > 0" class="student-group dropoff">
-                          <div class="student-group-header">🏁 Dropoff ({{ getStopStudents(stop).dropoff.length }}):</div>
-                          <div class="student-names">
-                            <span v-for="student in getStopStudents(stop).dropoff" :key="student._id" class="student-name">
-                              {{ student.firstName }} {{ student.lastName }}
-                            </span>
+
+                        <div class="stop-details">
+                          <div class="stop-address" v-if="stop.address">
+                            <strong>Address:</strong> {{ stop.address }}
                           </div>
-                        </div>
-                        <div v-if="getStopStudents(stop).pickup.length === 0 && getStopStudents(stop).dropoff.length === 0" class="student-group none">
-                          No students assigned
+                          <div class="stop-time" v-if="stop.estimatedTime">
+                            <strong>Estimated Time:</strong> {{ stop.estimatedTime }} minutes from start
+                          </div>
+                          <div v-if="getStopStudents(stop).pickup.length > 0 || getStopStudents(stop).dropoff.length > 0" class="stop-usage-info">
+                            <div class="usage-indicator">
+                              <span class="usage-icon">👥</span>
+                              <span class="usage-text">
+                                {{ (getStopStudents(stop).pickup.length + getStopStudents(stop).dropoff.length) }} student{{ (getStopStudents(stop).pickup.length + getStopStudents(stop).dropoff.length) !== 1 ? 's' : '' }} assigned
+                              </span>
+                              <span class="usage-details">
+                                ({{ getStopStudents(stop).pickup.length }} pickup, {{ getStopStudents(stop).dropoff.length }} dropoff)
+                              </span>
+                            </div>
+                            <div class="assigned-students">
+                              <div v-if="getStopStudents(stop).pickup.length > 0" class="student-group pickup">
+                                <span class="group-label">Pickup:</span>
+                                {{ getStopStudents(stop).pickup.map(s => `${s.firstName} ${s.lastName}`).join(', ') }}
+                              </div>
+                              <div v-if="getStopStudents(stop).dropoff.length > 0" class="student-group dropoff">
+                                <span class="group-label">Dropoff:</span>
+                                {{ getStopStudents(stop).dropoff.map(s => `${s.firstName} ${s.lastName}`).join(', ') }}
+                              </div>
+                            </div>
+                          </div>
+                          <div v-else class="no-students-assigned">
+                            <span class="usage-icon">👥</span>
+                            <span class="usage-text muted">No students assigned to this stop</span>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-            <div v-else class="empty-route">
-              <div class="empty-icon">🗺️</div>
-              <div class="empty-text">
-                <h3>No Route Configured</h3>
-                <p>
-                  This line doesn't have any stops configured yet. Click "Manage Route" 
-                  to add stops and configure the pickup and dropoff locations.
-                </p>
+              <div v-else class="empty-route">
+                <div class="empty-icon">🗺️</div>
+                <div class="empty-text">
+                  <h3>No Route Configured</h3>
+                  <p>
+                    This line doesn't have any stops configured yet. Click "Manage Route" 
+                    to add stops and configure the pickup and dropoff locations.
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
+          </template>
+        </Card>
 
         <!-- Assigned Students Section -->
-        <div class="students-section">
-          <div class="section-header">
-            <h2>Assigned Students</h2>
-            <span class="student-count">{{ studentAssignments.length }} students</span>
-          </div>
-          
-          <div v-if="studentAssignments.length === 0" class="no-students">
-            <div class="empty-icon">👥</div>
-            <div class="empty-text">
-              <h3>No Students Assigned</h3>
-              <p>No students are currently assigned to this line. Use the Route Manager to add students and configure their pickup/dropoff stops.</p>
+        <Card class="students-section">
+          <template #header>
+            <div class="section-header-card">
+              <h2><i class="pi pi-users"></i>Assigned Students</h2>
+              <span class="student-count">{{ studentAssignments.length }} students</span>
             </div>
-          </div>
+          </template>
+          <template #content>
           
-          <div v-else class="students-list">
-            <div
-              v-for="assignment in studentAssignments"
-              :key="assignment._id"
-              class="student-assignment-item"
-            >
-              <div class="student-info">
-                <div class="student-name">
-                  {{ assignment.student.firstName }} {{ assignment.student.lastName }}
-                </div>
-                <div class="student-contact">
-                  <span class="phone">📞 {{ assignment.student.phone }}</span>
-                  <span v-if="assignment.student.email" class="email">✉️ {{ assignment.student.email }}</span>
-                </div>
-              </div>
-
-              <div class="assignment-details">
-                <div v-if="assignment.pickupStopDetails" class="stop-info pickup">
-                  <div class="stop-label">🚏 Pickup:</div>
-                  <div class="stop-details">
-                    <div class="stop-name">{{ assignment.pickupStopDetails.name }}</div>
-                    <div class="stop-time">{{ formatTime(assignment.pickupStopDetails.estimatedTime) }}</div>
-                  </div>
-                </div>
-                <div v-else class="stop-info no-stop">
-                  <div class="stop-label">🚏 Pickup:</div>
-                  <div class="no-stop-assigned">Not assigned</div>
-                </div>
-
-                <div v-if="assignment.dropoffStopDetails" class="stop-info dropoff">
-                  <div class="stop-label">🏁 Dropoff:</div>
-                  <div class="stop-details">
-                    <div class="stop-name">{{ assignment.dropoffStopDetails.name }}</div>
-                    <div class="stop-time">{{ formatTime(assignment.dropoffStopDetails.estimatedTime) }}</div>
-                  </div>
-                </div>
-                <div v-else class="stop-info no-stop">
-                  <div class="stop-label">🏁 Dropoff:</div>
-                  <div class="no-stop-assigned">Not assigned</div>
-                </div>
+            <div v-if="studentAssignments.length === 0" class="no-students">
+              <div class="empty-icon">👥</div>
+              <div class="empty-text">
+                <h3>No Students Assigned</h3>
+                <p>No students are currently assigned to this line. Use the Route Manager to add students and configure their pickup/dropoff stops.</p>
               </div>
             </div>
-          </div>
+            
+            <div v-else class="students-list">
+              <div
+                v-for="assignment in studentAssignments"
+                :key="assignment._id"
+                class="student-assignment-card"
+              >
+                <div class="student-header">
+                  <div class="student-avatar">
+                    <Avatar 
+                      :label="`${assignment.student.firstName[0]}${assignment.student.lastName[0]}`"
+                      size="large"
+                      shape="circle"
+                    />
+                  </div>
+                  <div class="student-info">
+                    <div class="student-name">
+                      <i class="pi pi-user"></i>
+                      {{ assignment.student.firstName }} {{ assignment.student.lastName }}
+                    </div>
+                    <div class="student-contact">
+                      <span class="contact-item phone">
+                        <i class="pi pi-phone"></i>
+                        {{ assignment.student.phone }}
+                      </span>
+                      <span v-if="assignment.student.email" class="contact-item email">
+                        <i class="pi pi-envelope"></i>
+                        {{ assignment.student.email }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="assignment-details">
+                  <div class="stops-row">
+                    <div class="stop-assignment pickup">
+                      <div class="stop-header">
+                        <i class="pi pi-sign-in stop-icon pickup-icon"></i>
+                        <span class="stop-label">Pickup</span>
+                      </div>
+                      <div v-if="assignment.pickupStopDetails" class="stop-content">
+                        <div class="stop-name">{{ assignment.pickupStopDetails.name }}</div>
+                        <div class="stop-time">
+                          <i class="pi pi-clock"></i>
+                          {{ formatTime(assignment.pickupStopDetails.estimatedTime) }}
+                        </div>
+                      </div>
+                      <div v-else class="no-stop-assigned">
+                        <span class="not-assigned">Not assigned</span>
+                      </div>
+                    </div>
+
+                    <div class="stop-assignment dropoff">
+                      <div class="stop-header">
+                        <i class="pi pi-sign-out stop-icon dropoff-icon"></i>
+                        <span class="stop-label">Dropoff</span>
+                      </div>
+                      <div v-if="assignment.dropoffStopDetails" class="stop-content">
+                        <div class="stop-name">{{ assignment.dropoffStopDetails.name }}</div>
+                        <div class="stop-time">
+                          <i class="pi pi-clock"></i>
+                          {{ formatTime(assignment.dropoffStopDetails.estimatedTime) }}
+                        </div>
+                      </div>
+                      <div v-else class="no-stop-assigned">
+                        <span class="not-assigned">Not assigned</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           
-          <div v-if="studentAssignments.length > 0" class="capacity-info">
-            <div class="capacity-bar">
-              <div 
-                class="capacity-filled" 
-                :style="{ width: `${(studentAssignments.length / (line?.maxCapacity || 1)) * 100}%` }"
-              ></div>
+            <div v-if="studentAssignments.length > 0" class="capacity-info">
+              <div class="capacity-bar">
+                <div 
+                  class="capacity-filled" 
+                  :style="{ width: `${(studentAssignments.length / (line?.maxCapacity || 1)) * 100}%` }"
+                ></div>
+              </div>
+              <div class="capacity-text">
+                {{ studentAssignments.length }} / {{ line?.maxCapacity || 0 }} students assigned
+              </div>
             </div>
-            <div class="capacity-text">
-              {{ studentAssignments.length }} / {{ line?.maxCapacity || 0 }} students assigned
-            </div>
-          </div>
-        </div>
+          </template>
+        </Card>
 
         <!-- Route Map Section -->
-        <div v-if="line.route && line.route.stops && line.route.stops.length > 0" class="map-section">
-          <RouteMap
-            :stops="line.route.stops"
-            :studentAssignments="studentAssignments"
-            :showDrivingInstructions="false"
-            :showDrivingRoute="true"
-            mapHeight="600px"
-            mapId="line-route-map"
-          />
-        </div>
+        <Card v-if="line.route && line.route.stops && line.route.stops.length > 0" class="map-section">
+          <template #header>
+            <div class="section-header-card">
+              <h2><i class="pi pi-map-marker"></i>Route Map</h2>
+            </div>
+          </template>
+          <template #content>
+            <RouteMap
+              :stops="line.route.stops"
+              :studentAssignments="studentAssignments"
+              :showDrivingInstructions="false"
+              :showDrivingRoute="true"
+              mapHeight="600px"
+              mapId="line-route-map"
+            />
+          </template>
+        </Card>
       </div>
 
       <div v-else class="not-found-container">
         <div class="not-found">
           <h3>Line Not Found</h3>
           <p>The requested line could not be found.</p>
-          <button @click="goBack" class="back-button">Back to Lines</button>
+          <Button @click="goBack" label="Back to Lines" icon="pi pi-arrow-left" severity="secondary" />
         </div>
       </div>
-    </main>
-  </div>
+    </AppLayout>
 </template>
 
 <script>
 import { ref, inject, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import apiService from '../services/api'
+import AppLayout from '../components/AppLayout.vue'
 import RouteMap from '../components/RouteMap.vue'
 
 export default {
   name: 'LineView',
   components: {
+    AppLayout,
     RouteMap
   },
   setup() {
     const authStore = inject('authStore')
     const router = useRouter()
     const route = useRoute()
+    
+    const breadcrumbs = ref([
+      { label: 'Dashboard', path: '/home' },
+      { label: 'Line Management', path: '/lines' },
+      { label: 'Line Details' }
+    ])
     
     const line = ref(null)
     const loading = ref(false)
@@ -548,6 +658,7 @@ export default {
     })
     
     return {
+      breadcrumbs,
       line,
       loading,
       error,
@@ -575,37 +686,7 @@ export default {
 </script>
 
 <style scoped>
-.line-view-container {
-  min-height: 100vh;
-  background-color: #f8f9fa;
-}
-
-.header {
-  background-color: #007bff;
-  color: white;
-  padding: 1rem 0;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.header-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.header-info {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.header-info h1 {
-  margin: 0;
-  font-size: 1.8rem;
-}
+/* Line view specific styles */
 
 .status-badge {
   padding: 4px 12px;
@@ -616,64 +697,34 @@ export default {
 }
 
 .status-badge.active {
-  background-color: #28a745;
+  background-color: var(--p-green-500);
   color: white;
 }
 
 .status-badge.inactive {
-  background-color: #6c757d;
+  background-color: var(--p-surface-400);
   color: white;
 }
 
-.header-actions {
+/* Card Header Styles */
+.section-header-card {
   display: flex;
-  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.25rem 0 1.25rem;
 }
 
-.back-button, .edit-button, .activate-button {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  font-weight: 500;
+.section-header-card h2 {
+  margin: 0;
+  color: var(--p-text-color);
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.back-button {
-  background-color: #6c757d;
-  color: white;
-}
-
-.back-button:hover {
-  background-color: #545b62;
-}
-
-.edit-button {
-  background-color: #28a745;
-  color: white;
-}
-
-.edit-button:hover:not(:disabled) {
-  background-color: #218838;
-}
-
-.edit-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-
-.activate-button {
-  background-color: #fd7e14;
-  color: white;
-}
-
-.activate-button:hover:not(:disabled) {
-  background-color: #e8690b;
-}
-
-.activate-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
+.section-header-card h2 i {
+  color: var(--p-primary-color);
 }
 
 .main-content {
@@ -691,30 +742,20 @@ export default {
 
 .loading {
   font-size: 1.1rem;
-  color: #666;
+  color: var(--p-text-muted-color);
 }
 
 .error-message, .not-found {
   text-align: center;
-  background: white;
+  background: var(--p-surface-0);
   padding: 40px;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: var(--p-border-radius);
+  box-shadow: var(--p-card-shadow);
 }
 
 .error-message h3, .not-found h3 {
-  color: #dc3545;
+  color: var(--p-red-500);
   margin-bottom: 15px;
-}
-
-.retry-button {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-top: 15px;
 }
 
 .success-message-container {
@@ -726,10 +767,10 @@ export default {
 }
 
 .success-message {
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  background: linear-gradient(135deg, var(--p-green-500) 0%, var(--p-green-400) 100%);
   color: white;
   padding: 15px 20px;
-  border-radius: 8px;
+  border-radius: var(--p-border-radius);
   box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
   display: flex;
   align-items: center;
@@ -820,9 +861,9 @@ export default {
 }
 
 .active-notice {
-  background-color: #fff3cd;
-  border-left-color: #ffc107;
-  color: #856404;
+  background-color: var(--p-yellow-50);
+  border-left-color: var(--p-yellow-500);
+  color: var(--p-yellow-800);
 }
 
 .notice-icon {
@@ -833,26 +874,13 @@ export default {
 .notice-content h3 {
   margin: 0 0 8px 0;
   font-size: 1.1rem;
-  color: #856404;
+  color: var(--p-yellow-800);
 }
 
 .notice-content p {
   margin: 0;
   line-height: 1.5;
   font-size: 0.95rem;
-}
-
-.info-section, .assignment-section, .schedule-section, .route-section, .students-section {
-  background: white;
-  border-radius: 8px;
-  padding: 30px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.info-section h2, .assignment-section h2, .schedule-section h2 {
-  margin: 0 0 20px 0;
-  color: #333;
-  font-size: 1.3rem;
 }
 
 .info-grid {
@@ -869,22 +897,22 @@ export default {
 
 .info-item label {
   font-weight: 600;
-  color: #666;
+  color: var(--p-text-muted-color);
   font-size: 0.9rem;
 }
 
 .info-item span {
-  color: #333;
+  color: var(--p-text-color);
   font-size: 1rem;
 }
 
 .status.active {
-  color: #28a745;
+  color: var(--p-green-500);
   font-weight: 600;
 }
 
 .status.inactive {
-  color: #6c757d;
+  color: var(--p-surface-400);
   font-weight: 600;
 }
 
@@ -896,9 +924,9 @@ export default {
 
 .assignment-item {
   padding: 15px;
-  background-color: #f8f9fa;
-  border-radius: 6px;
-  border-left: 4px solid #007bff;
+  background-color: var(--p-surface-50);
+  border-radius: var(--p-border-radius);
+  border-left: 4px solid var(--p-primary-color);
 }
 
 .assignment-header {
@@ -910,21 +938,22 @@ export default {
 
 .assignment-icon {
   font-size: 1.2rem;
+  color: var(--p-primary-color);
 }
 
 .assignment-label {
   font-weight: 600;
-  color: #666;
+  color: var(--p-text-muted-color);
   font-size: 0.9rem;
 }
 
 .assignment-value {
-  color: #333;
+  color: var(--p-text-color);
   font-size: 1rem;
 }
 
 .capacity {
-  color: #666;
+  color: var(--p-text-muted-color);
   font-size: 0.9rem;
 }
 
@@ -942,23 +971,30 @@ export default {
 
 .schedule-item label {
   font-weight: 600;
-  color: #666;
+  color: var(--p-text-muted-color);
   font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.schedule-item label i {
+  color: var(--p-primary-color);
 }
 
 .start-time {
-  color: #28a745;
+  color: var(--p-green-500);
   font-weight: 500;
   font-size: 1.1rem;
 }
 
 .operating-days {
-  color: #28a745;
+  color: var(--p-green-500);
   font-weight: 500;
 }
 
 .schedule-type {
-  color: #007bff;
+  color: var(--p-primary-color);
   font-weight: 500;
 }
 
@@ -984,8 +1020,8 @@ export default {
   align-items: center;
   gap: 12px;
   padding: 15px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
+  background-color: var(--p-surface-50);
+  border-radius: var(--p-border-radius);
   min-width: 140px;
 }
 
@@ -1001,144 +1037,215 @@ export default {
 .stat-value {
   font-size: 1.2rem;
   font-weight: 600;
-  color: #333;
+  color: var(--p-text-color);
 }
 
 .stat-label {
   font-size: 0.85rem;
-  color: #666;
+  color: var(--p-text-muted-color);
 }
 
 .route-stops h4 {
   margin: 0 0 15px 0;
-  color: #333;
+  color: var(--p-text-color);
   font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.stops-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+.route-stops h4 i {
+  color: var(--p-primary-color);
+}
+
+.stops-timeline {
+  position: relative;
 }
 
 .stop-item {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+}
+
+.stop-marker {
   display: flex;
   align-items: center;
-  gap: 15px;
-  padding: 12px;
-  background-color: #f8f9fa;
-  border-radius: 6px;
-  border-left: 3px solid #007bff;
+  margin-right: 20px;
+  position: relative;
+  z-index: 2;
 }
 
 .stop-number {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: var(--p-primary-color);
+  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
-  background-color: #007bff;
-  color: white;
-  border-radius: 50%;
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-weight: bold;
+  font-size: 0.9rem;
+  margin-right: 10px;
 }
 
-.stop-info {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+.pickup-stop .stop-number {
+  background-color: var(--p-cyan-500);
+}
+
+.dropoff-stop .stop-number {
+  background-color: var(--p-yellow-500);
+  color: var(--p-yellow-950);
+}
+
+.stop-type-icon {
+  font-size: 1.2rem;
+}
+
+.stop-content {
   flex: 1;
+  background-color: var(--p-surface-50);
+  border-radius: var(--p-border-radius);
+  padding: 20px;
+  border-left: 4px solid var(--p-primary-color);
 }
 
-.stop-main {
+.pickup-stop .stop-content {
+  border-left-color: var(--p-cyan-500);
+}
+
+.dropoff-stop .stop-content {
+  border-left-color: var(--p-yellow-500);
+}
+
+.stop-header {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 15px;
 }
 
 .stop-name {
-  font-weight: 500;
-  color: #333;
+  margin: 0;
+  color: var(--p-text-color);
+  font-size: 1.1rem;
+  flex: 1;
 }
 
-.stop-students {
+.stop-actions {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: 8px;
+  align-items: center;
+  gap: 15px;
 }
 
-.student-group {
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  width: 100%;
-}
-
-.student-group.pickup {
-  background-color: #d4edda;
-  border-left: 3px solid #155724;
-}
-
-.student-group.dropoff {
-  background-color: #d1ecf1;
-  border-left: 3px solid #0c5460;
-}
-
-.student-group.none {
-  background-color: #f8f9fa;
-  color: #6c757d;
-  font-style: italic;
-  text-align: center;
-  padding: 12px;
-}
-
-.student-group-header {
-  font-weight: 600;
-  margin-bottom: 6px;
-}
-
-.student-group.pickup .student-group-header {
-  color: #155724;
-}
-
-.student-group.dropoff .student-group-header {
-  color: #0c5460;
-}
-
-.student-names {
+.stop-badges {
   display: flex;
-  flex-wrap: wrap;
   gap: 8px;
 }
 
-.student-name {
-  background-color: rgba(255, 255, 255, 0.8);
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  font-weight: 500;
-}
-
-.stop-type {
-  padding: 2px 8px;
+.type-badge {
+  padding: 4px 8px;
   border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 500;
+  font-size: 0.7rem;
+  font-weight: bold;
   text-transform: uppercase;
-  width: fit-content;
 }
 
-.stop-type.pickup {
-  background-color: #d4edda;
-  color: #155724;
+.type-badge.pickup {
+  background-color: var(--p-cyan-500);
+  color: white;
 }
 
-.stop-type.dropoff {
-  background-color: #d1ecf1;
-  color: #0c5460;
+.type-badge.dropoff {
+  background-color: var(--p-yellow-500);
+  color: var(--p-yellow-950);
 }
+
+.time-badge {
+  padding: 4px 8px;
+  background-color: var(--p-surface-200);
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: bold;
+  color: var(--p-text-color);
+}
+
+.stop-details {
+  display: grid;
+  gap: 8px;
+}
+
+.stop-details > div {
+  font-size: 0.9rem;
+  color: var(--p-text-muted-color);
+}
+
+.stop-usage-info {
+  margin-top: 12px;
+  padding: 8px 12px;
+  background-color: var(--p-blue-50);
+  border-radius: var(--p-border-radius);
+  border-left: 3px solid var(--p-blue-500);
+}
+
+.usage-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.usage-icon {
+  font-size: 0.9rem;
+}
+
+.usage-text {
+  font-weight: 600;
+  color: var(--p-blue-600);
+  font-size: 0.85rem;
+}
+
+.usage-text.muted {
+  color: var(--p-text-muted-color);
+  font-weight: normal;
+}
+
+.usage-details {
+  color: var(--p-text-muted-color);
+  font-size: 0.75rem;
+}
+
+.assigned-students {
+  font-size: 0.75rem;
+  color: var(--p-text-color);
+  font-style: italic;
+  line-height: 1.3;
+}
+
+.student-group {
+  margin: 4px 0;
+}
+
+.group-label {
+  font-weight: 600;
+  color: var(--p-text-color);
+}
+
+.no-students-assigned {
+  margin-top: 12px;
+  padding: 8px 12px;
+  background-color: var(--p-surface-100);
+  border-radius: var(--p-border-radius);
+  border-left: 3px solid var(--p-surface-300);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Updated timeline styles complete */
 
 .empty-route {
   display: flex;
@@ -1146,7 +1253,7 @@ export default {
   gap: 20px;
   padding: 40px 20px;
   text-align: left;
-  color: #666;
+  color: var(--p-text-muted-color);
 }
 
 .empty-icon {
@@ -1156,7 +1263,7 @@ export default {
 
 .empty-text h3 {
   margin: 0 0 10px 0;
-  color: #333;
+  color: var(--p-text-color);
   font-size: 1.1rem;
 }
 
@@ -1325,7 +1432,7 @@ export default {
 .students-list {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 20px;
 }
 
 .student-assignment-item {
@@ -1455,8 +1562,166 @@ export default {
 .capacity-text {
   text-align: center;
   font-size: 0.9rem;
-  color: #495057;
+  color: var(--p-text-color);
   font-weight: 500;
+}
+
+/* Modern Student Card Styles */
+.student-assignment-card {
+  border: 1px solid var(--p-surface-border);
+  border-radius: var(--p-border-radius);
+  padding: 0;
+  background-color: var(--p-surface-0);
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.student-assignment-card:hover {
+  box-shadow: var(--p-card-shadow);
+  transform: translateY(-2px);
+}
+
+.student-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem;
+  border-bottom: 1px solid var(--p-surface-border);
+}
+
+.student-avatar {
+  flex-shrink: 0;
+}
+
+.student-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.student-name {
+  font-weight: 600;
+  color: var(--p-text-color);
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.student-name i {
+  color: var(--p-primary-color);
+  font-size: 0.9rem;
+}
+
+.student-contact {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.875rem;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--p-text-muted-color);
+}
+
+.contact-item i {
+  color: var(--p-primary-color);
+  font-size: 0.8rem;
+}
+
+.assignment-details {
+  padding: 1.25rem;
+}
+
+.stops-row {
+  display: flex;
+  align-items: stretch;
+  gap: 1rem;
+  min-height: 120px;
+}
+
+.stop-assignment {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.stop-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  flex-shrink: 0;
+}
+
+.stop-icon {
+  font-size: 1rem;
+  padding: 0.25rem;
+  border-radius: 50%;
+}
+
+.pickup-icon {
+  color: var(--p-green-600);
+  background-color: var(--p-green-50);
+}
+
+.dropoff-icon {
+  color: var(--p-orange-600);
+  background-color: var(--p-orange-50);
+}
+
+.stop-label {
+  font-weight: 500;
+  color: var(--p-text-color);
+  font-size: 0.875rem;
+}
+
+.stop-content {
+  background-color: var(--p-surface-50);
+  border-radius: var(--p-border-radius);
+  padding: 0.75rem;
+  border: 1px solid var(--p-surface-border);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.stop-content .stop-name {
+  font-weight: 500;
+  color: var(--p-text-color);
+  margin-bottom: 0.25rem;
+}
+
+.stop-content .stop-time {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--p-text-muted-color);
+}
+
+.stop-content .stop-time i {
+  color: var(--p-primary-color);
+}
+
+.no-stop-assigned {
+  padding: 0.75rem;
+  text-align: center;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.not-assigned {
+  color: var(--p-text-muted-color);
+  font-style: italic;
+  font-size: 0.875rem;
 }
 
 </style>

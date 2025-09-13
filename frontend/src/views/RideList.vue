@@ -1,158 +1,202 @@
 <template>
-  <div class="ride-list-container">
-    <header class="header">
-      <div class="header-content">
-        <h1>Ride Management</h1>
-        <div class="header-actions">
-          <button @click="goBack" class="back-button">← Back to Dashboard</button>
-          <button @click="handleAddRide" class="add-ride-button">+ Add New Ride</button>
-        </div>
-      </div>
-    </header>
-
-    <main class="main-content">
-      <div class="content-wrapper">
+  <AppLayout 
+    page-title="Ride Management"
+    :breadcrumbs="breadcrumbs"
+  >
+    <template #actions>
+      <Button 
+        @click="goBack" 
+        icon="pi pi-arrow-left"
+        label="Back to Dashboard"
+        severity="secondary"
+        outlined
+      />
+      <Button 
+        @click="handleAddRide" 
+        icon="pi pi-plus"
+        label="Add New Ride"
+        severity="success"
+      />
+    </template>
+    
+    <div class="content-wrapper">
         <!-- Filter Section -->
-        <div class="filters-section">
-          <div class="filter-group">
-            <label for="status-filter">Status:</label>
-            <select id="status-filter" v-model="selectedStatus" @change="filterRides">
-              <option value="">All Statuses</option>
-              <option value="scheduled">Scheduled</option>
-              <option value="in_progress">In Progress</option>
-              <option value="completed">Completed</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
-          </div>
-          <div class="filter-group">
-            <label for="date-filter">Date:</label>
-            <input 
-              type="date" 
-              id="date-filter" 
-              v-model="selectedDate" 
-              @change="filterRides"
-            />
-          </div>
-          <button @click="clearFilters" class="clear-filters-button">Clear Filters</button>
-        </div>
+        <Card class="filters-card">
+          <template #content>
+            <div class="filters-section">
+              <div class="filter-group">
+                <label for="status-filter">Status:</label>
+                <Select 
+                  id="status-filter" 
+                  v-model="selectedStatus" 
+                  :options="statusOptions"
+                  optionLabel="label"
+                  optionValue="value"
+                  placeholder="All Statuses"
+                />
+              </div>
+              <div class="filter-group">
+                <label for="date-filter">Date:</label>
+                <Calendar 
+                  id="date-filter" 
+                  v-model="selectedDate"
+                  dateFormat="yy-mm-dd"
+                />
+              </div>
+              <Button 
+                @click="clearFilters" 
+                label="Clear Filters"
+                severity="secondary"
+                outlined
+              />
+            </div>
+          </template>
+        </Card>
 
         <!-- Rides List Section -->
-        <div class="rides-section">
-          <div v-if="loading" class="loading">Loading rides...</div>
-          
-          <div v-else-if="error" class="error">
-            <h3>Error loading rides</h3>
-            <p>{{ error }}</p>
-            <button @click="loadRides" class="retry-button">Retry</button>
-          </div>
-          
-          <div v-else-if="filteredRides.length === 0" class="no-rides">
-            <div class="empty-state">
-              <h3>No rides found</h3>
-              <p v-if="hasActiveFilters">Try adjusting your filters or create a new ride.</p>
-              <p v-else>Start by creating your first ride.</p>
-              <button @click="handleAddRide" class="add-ride-button-large">
-                + Create First Ride
-              </button>
+        <Card class="rides-card">
+          <template #content>
+            <div v-if="loading" class="loading">Loading rides...</div>
+            
+            <div v-else-if="error" class="error">
+              <h3>Error loading rides</h3>
+              <p>{{ error }}</p>
+              <Button @click="loadRides" label="Retry" />
             </div>
-          </div>
+            
+            <div v-else-if="filteredRides.length === 0" class="no-rides">
+              <div class="empty-state">
+                <h3>No rides found</h3>
+                <p v-if="hasActiveFilters">Try adjusting your filters or create a new ride.</p>
+                <p v-else>Start by creating your first ride.</p>
+                <Button 
+                  @click="handleAddRide" 
+                  icon="pi pi-plus"
+                  label="Create First Ride"
+                  severity="success"
+                  size="large"
+                />
+              </div>
+            </div>
 
-          <div v-else class="rides-table-container">
-            <table class="rides-table">
-              <thead>
-                <tr>
-                  <th>Route</th>
-                  <th>Date</th>
-                  <th>Start Time</th>
-                  <th>Driver</th>
-                  <th>Vehicle</th>
-                  <th>Seats</th>
-                  <th>Status</th>
-                  <th>Line</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr 
-                  v-for="ride in filteredRides" 
-                  :key="ride._id" 
-                  class="ride-row"
-                  @click="viewRide(ride._id)"
-                >
-                  <td class="route-cell">
-                    <strong>{{ ride.route?.name || 'Unnamed Route' }}</strong>
-                    <div class="route-stops">{{ ride.route?.stops?.length || 0 }} stops</div>
-                  </td>
-                  <td>{{ formatDate(ride.date) }}</td>
-                  <td>{{ formatTime(ride.startTime) }}</td>
-                  <td>{{ getDriverName(ride.driver) }}</td>
-                  <td class="vehicle-cell">
-                    <div>{{ getVehicleName(ride.vehicle) }}</div>
-                  </td>
-                  <td class="seats-cell">
-                    <span class="seats-info">{{ ride.availableSeats }}/{{ ride.maxCapacity }}</span>
-                  </td>
-                  <td>
-                    <span class="status-badge" :class="getStatusClass(ride.status)">
-                      {{ getStatusLabel(ride.status) }}
-                    </span>
-                  </td>
-                  <td>
-                    <button 
-                      v-if="ride.lineId"
-                      @click.stop="viewLine(ride.lineId._id)"
-                      class="line-link-button"
-                      :title="`View line: ${ride.lineId.name}`"
-                    >
-                      {{ ride.lineId.name }}
-                    </button>
-                    <span v-else class="no-line">-</span>
-                  </td>
-                  <td class="actions-cell" @click.stop>
-                    <div class="action-buttons">
-                      <button 
-                        v-if="ride.status === 'scheduled'" 
-                        @click="startRide(ride._id)"
-                        class="action-button start-button"
-                        title="Start Ride"
-                      >
-                        Start
-                      </button>
-                      <button 
-                        v-if="ride.status === 'in_progress'" 
-                        @click="endRide(ride._id)"
-                        class="action-button end-button"
-                        title="End Ride"
-                      >
-                        End
-                      </button>
-                      <button 
-                        v-if="['scheduled', 'in_progress'].includes(ride.status)" 
-                        @click="cancelRide(ride._id)"
-                        class="action-button cancel-button"
-                        title="Cancel Ride"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+            <DataTable 
+              v-else
+              :value="filteredRides" 
+              :paginator="true" 
+              :rows="10"
+              :rowsPerPageOptions="[5, 10, 25]"
+              paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+              currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+              class="rides-table"
+              selectionMode="single"
+              @row-click="onRowClick"
+            >
+              <Column field="route" header="Route">
+                <template #body="slotProps">
+                  <div class="route-cell">
+                    <strong>{{ slotProps.data.route?.name || 'Unnamed Route' }}</strong>
+                    <div class="route-stops">{{ slotProps.data.route?.stops?.length || 0 }} stops</div>
+                  </div>
+                </template>
+              </Column>
+              
+              <Column field="date" header="Date">
+                <template #body="slotProps">
+                  {{ formatDate(slotProps.data.date) }}
+                </template>
+              </Column>
+              
+              <Column field="startTime" header="Start Time">
+                <template #body="slotProps">
+                  {{ formatTime(slotProps.data.startTime) }}
+                </template>
+              </Column>
+              
+              <Column field="driver" header="Driver">
+                <template #body="slotProps">
+                  {{ getDriverName(slotProps.data.driver) }}
+                </template>
+              </Column>
+              
+              <Column field="seats" header="Seats" class="seats-column">
+                <template #body="slotProps">
+                  <span class="seats-info">{{ slotProps.data.availableSeats }}/{{ slotProps.data.maxCapacity }}</span>
+                </template>
+              </Column>
+              
+              <Column field="status" header="Status">
+                <template #body="slotProps">
+                  <Tag :value="getStatusLabel(slotProps.data.status)" :severity="getStatusTagSeverity(slotProps.data.status)" />
+                </template>
+              </Column>
+              
+              <Column field="line" header="Line">
+                <template #body="slotProps">
+                  <Button 
+                    v-if="slotProps.data.lineId"
+                    @click="viewLine(slotProps.data.lineId._id)"
+                    :label="slotProps.data.lineId.name"
+                    link
+                    :title="`View line: ${slotProps.data.lineId.name}`"
+                  />
+                  <span v-else class="no-line">-</span>
+                </template>
+              </Column>
+              
+              <Column header="Actions" class="actions-column">
+                <template #body="slotProps">
+                  <div class="action-buttons">
+                    <Button
+                      v-if="slotProps.data.status === 'scheduled'"
+                      rounded
+                      variant="text"
+                      @click="startRide(slotProps.data._id)"
+                      icon="pi pi-play"
+                      severity="success"
+                      size="small"
+                      title="Start Ride"
+                    />
+                    <Button 
+                      v-if="slotProps.data.status === 'in_progress'" 
+                      rounded
+                      variant="text"
+                      @click="endRide(slotProps.data._id)"
+                      icon="pi pi-stop"
+                      severity="info"
+                      size="small"
+                      title="End Ride"
+                    />
+                    <Button 
+                      v-if="['scheduled', 'in_progress'].includes(slotProps.data.status)" 
+                      rounded
+                      variant="text"
+                      @click="cancelRide(slotProps.data._id)"
+                      icon="pi pi-times"
+                      severity="danger"
+                      size="small"
+                      title="Cancel Ride"
+                    />
+                  </div>
+                </template>
+              </Column>
+            </DataTable>
+          </template>
+        </Card>
       </div>
-    </main>
-  </div>
+    </AppLayout>
 </template>
 
 <script>
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import apiService from '../services/api.js'
+import AppLayout from '../components/AppLayout.vue'
 
 export default {
   name: 'RideList',
+  components: {
+    AppLayout
+  },
   setup() {
     const router = useRouter()
     const rides = ref([])
@@ -160,6 +204,19 @@ export default {
     const error = ref('')
     const selectedStatus = ref('')
     const selectedDate = ref('')
+    
+    const breadcrumbs = ref([
+      { label: 'Dashboard', path: '/home' },
+      { label: 'Ride Management' }
+    ])
+    
+    const statusOptions = ref([
+      { label: 'All Statuses', value: '' },
+      { label: 'Scheduled', value: 'scheduled' },
+      { label: 'In Progress', value: 'in_progress' },
+      { label: 'Completed', value: 'completed' },
+      { label: 'Cancelled', value: 'cancelled' }
+    ])
 
     const filteredRides = computed(() => {
       let filtered = [...rides.value]
@@ -171,7 +228,12 @@ export default {
       if (selectedDate.value) {
         filtered = filtered.filter(ride => {
           const rideDate = new Date(ride.date).toISOString().split('T')[0]
-          return rideDate === selectedDate.value
+          // Convert selectedDate to YYYY-MM-DD format avoiding timezone issues
+          const year = selectedDate.value.getFullYear()
+          const month = String(selectedDate.value.getMonth() + 1).padStart(2, '0')
+          const day = String(selectedDate.value.getDate()).padStart(2, '0')
+          const filterDate = `${year}-${month}-${day}`
+          return rideDate === filterDate
         })
       }
       
@@ -197,10 +259,6 @@ export default {
       }
     }
 
-    const filterRides = () => {
-      // Filtering is handled by computed property
-    }
-
     const clearFilters = () => {
       selectedStatus.value = ''
       selectedDate.value = ''
@@ -216,8 +274,14 @@ export default {
       return new Date(timeString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
 
-    const getStatusClass = (status) => {
-      return `status-${status?.toLowerCase().replace('_', '-')}`
+    const getStatusTagSeverity = (status) => {
+      const severities = {
+        'scheduled': 'info',
+        'in_progress': 'warn',
+        'completed': 'success',
+        'cancelled': 'danger'
+      }
+      return severities[status] || 'secondary'
     }
 
     const getStatusLabel = (status) => {
@@ -237,12 +301,6 @@ export default {
       return 'Loading...'
     }
 
-    const getVehicleName = (vehicle) => {
-      if (typeof vehicle === 'object' && vehicle) {
-        return `${vehicle.make} ${vehicle.vehicleModel} (${vehicle.licensePlate})`
-      }
-      return 'Loading...'
-    }
 
     const goBack = () => {
       router.push('/home')
@@ -291,6 +349,10 @@ export default {
       router.push(`/lines/${lineId}`)
     }
 
+    const onRowClick = (event) => {
+      viewRide(event.data._id)
+    }
+
     onMounted(() => {
       loadRides()
     })
@@ -301,100 +363,43 @@ export default {
       error,
       selectedStatus,
       selectedDate,
+      statusOptions,
       filteredRides,
       hasActiveFilters,
+      breadcrumbs,
       loadRides,
-      filterRides,
       clearFilters,
       formatDate,
       formatTime,
-      getStatusClass,
+      getStatusTagSeverity,
       getStatusLabel,
       getDriverName,
-      getVehicleName,
       goBack,
       handleAddRide,
       viewRide,
       startRide,
       endRide,
       cancelRide,
-      viewLine
+      viewLine,
+      onRowClick
     }
   }
 }
 </script>
 
 <style scoped>
-.ride-list-container {
-  min-height: 100vh;
-  background-color: #f8f9fa;
-}
+/* Ride list specific styles */
 
-.header {
-  background-color: #007bff;
-  color: white;
-  padding: 1rem 0;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.header-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
+.content-wrapper {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.header h1 {
-  margin: 0;
-  font-size: 1.8rem;
-}
-
-.header-actions {
-  display: flex;
-  gap: 15px;
-}
-
-.back-button, .add-ride-button {
-  background-color: rgba(255, 255, 255, 0.2);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.back-button:hover, .add-ride-button:hover {
-  background-color: rgba(255, 255, 255, 0.3);
-}
-
-.add-ride-button {
-  background-color: #28a745;
-  border-color: #28a745;
-}
-
-.add-ride-button:hover {
-  background-color: #218838;
-}
-
-.main-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 30px 20px;
-}
-
-.filters-section {
-  background: white;
-  border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  display: flex;
+  flex-direction: column;
   gap: 20px;
-  align-items: end;
 }
+
+.filters-card {
+  margin-bottom: 0;
+}
+
 
 .filter-group {
   display: flex;
@@ -404,36 +409,31 @@ export default {
 
 .filter-group label {
   font-weight: 500;
-  color: #333;
+  color: var(--p-text-color);
 }
 
-.filter-group select,
-.filter-group input {
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 14px;
+.filters-section {
+  display: flex;
+  gap: 20px;
+  align-items: end;
 }
 
-.clear-filters-button {
-  background-color: #6c757d;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s;
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
-.clear-filters-button:hover {
-  background-color: #545b62;
+.filter-group label {
+  font-weight: 500;
+  color: var(--p-text-color);
 }
 
-.rides-section {
-  background: white;
-  border-radius: 8px;
-  padding: 30px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+.filters-section {
+  display: flex;
+  gap: 20px;
+  align-items: end;
 }
 
 .loading, .error {
@@ -442,17 +442,7 @@ export default {
 }
 
 .error {
-  color: #dc3545;
-}
-
-.retry-button {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-top: 10px;
+  color: var(--p-red-500);
 }
 
 .no-rides {
@@ -461,119 +451,34 @@ export default {
 }
 
 .empty-state h3 {
-  color: #666;
+  color: var(--p-text-color);
   margin-bottom: 10px;
 }
 
 .empty-state p {
-  color: #999;
+  color: var(--p-text-muted-color);
   margin-bottom: 20px;
-}
-
-.add-ride-button-large {
-  background-color: #28a745;
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.2s;
-}
-
-.add-ride-button-large:hover {
-  background-color: #218838;
-}
-
-.rides-table-container {
-  overflow-x: auto;
-}
-
-.rides-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: white;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-.rides-table th {
-  background-color: #f8f9fa;
-  padding: 16px 12px;
-  text-align: left;
-  font-weight: 600;
-  color: #495057;
-  border-bottom: 2px solid #dee2e6;
-  white-space: nowrap;
-}
-
-.rides-table td {
-  padding: 16px 12px;
-  border-bottom: 1px solid #dee2e6;
-  vertical-align: top;
-}
-
-.ride-row {
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.ride-row:hover {
-  background-color: #f8f9fa;
-}
-
-.route-cell {
-  min-width: 180px;
 }
 
 .route-cell strong {
   display: block;
   margin-bottom: 4px;
-  color: #333;
+  color: var(--p-text-color);
 }
 
 .route-stops {
   font-size: 0.875rem;
-  color: #6c757d;
-}
-
-.vehicle-cell {
-  min-width: 200px;
-  font-size: 0.875rem;
-}
-
-.seats-cell {
-  text-align: center;
+  color: var(--p-text-muted-color);
 }
 
 .seats-info {
   font-weight: 500;
-  color: #495057;
+  color: var(--p-text-color);
 }
-
-.status-badge {
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  white-space: nowrap;
-  display: inline-block;
-}
-
-.status-scheduled { background-color: #17a2b8; color: white; }
-.status-in-progress { background-color: #ffc107; color: #000; }
-.status-completed { background-color: #28a745; color: white; }
-.status-cancelled { background-color: #dc3545; color: white; }
 
 .no-line {
-  color: #6c757d;
+  color: var(--p-text-muted-color);
   font-style: italic;
-}
-
-.actions-cell {
-  min-width: 120px;
 }
 
 .action-buttons {
@@ -582,58 +487,28 @@ export default {
   flex-wrap: wrap;
 }
 
-.action-button {
-  padding: 6px 12px;
-  border: none;
-  border-radius: 4px;
+.rides-table :deep(.p-datatable-tbody) > tr {
   cursor: pointer;
-  font-size: 0.8rem;
-  transition: all 0.2s;
 }
 
-.start-button {
-  background-color: #28a745;
-  color: white;
+.rides-table :deep(.p-datatable-tbody) > tr:hover {
+  background-color: var(--p-surface-hover) !important;
 }
 
-.start-button:hover {
-  background-color: #218838;
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
 }
 
-.end-button {
-  background-color: #17a2b8;
-  color: white;
+.table-title {
+  margin: 0;
+  color: var(--p-text-color);
+  font-size: 1.25rem;
+  font-weight: 600;
 }
 
-.end-button:hover {
-  background-color: #138496;
-}
-
-.cancel-button {
-  background-color: #dc3545;
-  color: white;
-}
-
-.cancel-button:hover {
-  background-color: #c82333;
-}
-
-
-.line-link-button {
-  background: none;
-  border: none;
-  color: #007bff;
-  text-decoration: underline;
-  cursor: pointer;
-  font-size: inherit;
-  padding: 0;
-  font-family: inherit;
-}
-
-.line-link-button:hover {
-  color: #0056b3;
-  text-decoration: none;
-}
 
 @media (max-width: 768px) {
   .filters-section {
@@ -641,39 +516,9 @@ export default {
     align-items: stretch;
   }
   
-  .header-content {
-    flex-direction: column;
-    gap: 15px;
-    text-align: center;
-  }
-  
-  .header-actions {
-    justify-content: center;
-  }
-  
-  .rides-table-container {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-  
-  .rides-table {
-    min-width: 800px;
-  }
-  
-  .rides-table th,
-  .rides-table td {
-    padding: 12px 8px;
-    font-size: 0.875rem;
-  }
-  
   .action-buttons {
     flex-direction: column;
     gap: 2px;
-  }
-  
-  .action-button {
-    padding: 4px 8px;
-    font-size: 0.75rem;
   }
 }
 </style>

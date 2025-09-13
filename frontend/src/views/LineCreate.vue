@@ -4,211 +4,201 @@
       <div class="header-content">
         <h1>Create New Line</h1>
         <div class="header-actions">
-          <button @click="goBack" class="back-button">← Back to Lines</button>
-          <button @click="handleSave" class="save-button" :disabled="!isFormValid">
-            Create Line
-          </button>
+          <Button 
+            @click="goBack" 
+            icon="pi pi-arrow-left"
+            label="Back to Lines"
+            severity="secondary"
+            outlined
+          />
+          <Button 
+            @click="handleSave" 
+            icon="pi pi-check"
+            label="Create Line"
+            severity="success"
+            :disabled="!isFormValid"
+          />
         </div>
       </div>
     </header>
 
     <main class="main-content">
-      <div class="form-container">
+      <Card class="form-card">
+        <template #content>
+          <!-- Form Content -->
+          <div class="form-content">
+            <div class="form-section">
+              <h2>Line Information</h2>
+              <p class="section-description">
+                Create a new transportation line. You can assign students and configure routes after creating the line.
+              </p>
 
-        <!-- Form Content -->
-        <div class="form-content">
-          <div class="form-section">
-            <h2>Line Information</h2>
-            <p class="section-description">
-              Create a new transportation line. You can assign students and configure routes after creating the line.
-            </p>
+              <div class="form-group">
+                <label for="lineName" class="form-label">Line Name *</label>
+                <InputText
+                  id="lineName"
+                  v-model="formData.name"
+                  placeholder="Enter line name (e.g., Downtown Elementary Route)"
+                  maxlength="100"
+                  :invalid="!!errors.name"
+                  @blur="validateField('name')"
+                  @input="clearFieldError('name')"
+                />
+                <div v-if="errors.name" class="error-message">{{ errors.name }}</div>
+                <div class="field-hint">Choose a descriptive name for easy identification</div>
+              </div>
 
-            <div class="form-group">
-              <label for="lineName" class="form-label">Line Name *</label>
-              <input
-                id="lineName"
-                v-model="formData.name"
-                type="text"
-                class="form-input"
-                :class="{ 'error': errors.name }"
-                placeholder="Enter line name (e.g., Downtown Elementary Route)"
-                maxlength="100"
-                @blur="validateField('name')"
-                @input="clearFieldError('name')"
-              />
-              <div v-if="errors.name" class="error-message">{{ errors.name }}</div>
-              <div class="field-hint">Choose a descriptive name for easy identification</div>
-            </div>
-
-            <div class="form-group">
-              <label for="driver" class="form-label">Assigned Driver *</label>
-              <div class="select-wrapper">
-                <select
+              <div class="form-group">
+                <label for="driver" class="form-label">Assigned Driver *</label>
+                <Select
                   id="driver"
                   v-model="formData.driverId"
-                  class="form-select"
-                  :class="{ 'error': errors.driverId }"
+                  :options="availableDrivers"
+                  optionLabel="displayName"
+                  optionValue="_id"
+                  placeholder="Select a driver..."
+                  :invalid="!!errors.driverId"
+                  :loading="loadingDrivers"
                   @change="validateField('driverId')"
-                >
-                  <option value="">Select a driver...</option>
-                  <option
-                    v-for="driver in availableDrivers"
-                    :key="driver._id"
-                    :value="driver._id"
-                  >
-                    {{ driver.firstName }} {{ driver.lastName }}
-                    <span v-if="driver.email"> ({{ driver.email }})</span>
-                  </option>
-                </select>
+                />
+                <div v-if="errors.driverId" class="error-message">{{ errors.driverId }}</div>
+                <div v-if="loadingDrivers" class="loading-message">Loading available drivers...</div>
+                <div v-else-if="availableDrivers.length === 0" class="warning-message">
+                  No available drivers found. You may need to create driver accounts first.
+                </div>
               </div>
-              <div v-if="errors.driverId" class="error-message">{{ errors.driverId }}</div>
-              <div v-if="loadingDrivers" class="loading-message">Loading available drivers...</div>
-              <div v-else-if="availableDrivers.length === 0" class="warning-message">
-                No available drivers found. You may need to create driver accounts first.
-              </div>
-            </div>
 
-            <div class="form-group">
-              <label for="vehicle" class="form-label">Assigned Vehicle *</label>
-              <div class="select-wrapper">
-                <select
+              <div class="form-group">
+                <label for="vehicle" class="form-label">Assigned Vehicle *</label>
+                <Select
                   id="vehicle"
                   v-model="formData.vehicleId"
-                  class="form-select"
-                  :class="{ 'error': errors.vehicleId }"
+                  :options="availableVehicles"
+                  optionLabel="displayName"
+                  optionValue="_id"
+                  placeholder="Select a vehicle..."
+                  :invalid="!!errors.vehicleId"
+                  :loading="loadingVehicles"
                   @change="validateField('vehicleId')"
-                >
-                  <option value="">Select a vehicle...</option>
-                  <option
-                    v-for="vehicle in availableVehicles"
-                    :key="vehicle._id"
-                    :value="vehicle._id"
-                  >
-                    {{ vehicle.licensePlate }}
-                    <span v-if="vehicle.model"> - {{ vehicle.model }}</span>
-                    <span v-if="vehicle.capacity"> ({{ vehicle.capacity }} seats)</span>
-                  </option>
-                </select>
+                />
+                <div v-if="errors.vehicleId" class="error-message">{{ errors.vehicleId }}</div>
+                <div v-if="loadingVehicles" class="loading-message">Loading available vehicles...</div>
+                <div v-else-if="availableVehicles.length === 0" class="warning-message">
+                  No available vehicles found. You may need to create vehicle records first.
+                </div>
               </div>
-              <div v-if="errors.vehicleId" class="error-message">{{ errors.vehicleId }}</div>
-              <div v-if="loadingVehicles" class="loading-message">Loading available vehicles...</div>
-              <div v-else-if="availableVehicles.length === 0" class="warning-message">
-                No available vehicles found. You may need to create vehicle records first.
-              </div>
-            </div>
 
-            <div class="form-group">
-              <label class="form-label">Schedule Period *</label>
-              <p class="field-description">Set the operating period for this line</p>
-              
-              <div class="date-range-inputs">
-                <div class="date-input-group">
-                  <label for="startDate" class="date-label">Start Date</label>
-                  <input
-                    id="startDate"
-                    v-model="formData.startDate"
-                    type="date"
-                    class="form-input date-input"
-                    :class="{ 'error': errors.startDate }"
-                    :min="getTodayDate()"
-                    @change="validateField('startDate')"
-                  />
-                  <div v-if="errors.startDate" class="error-message">{{ errors.startDate }}</div>
+              <div class="form-group">
+                <label class="form-label">Schedule Period *</label>
+                <p class="field-description">Set the operating period for this line</p>
+                
+                <div class="date-range-inputs">
+                  <div class="date-input-group">
+                    <label for="startDate" class="date-label">Start Date</label>
+                    <Calendar
+                      id="startDate"
+                      v-model="formData.startDateObj"
+                      dateFormat="yy-mm-dd"
+                      :minDate="todayDate"
+                      :invalid="!!errors.startDate"
+                      @date-select="handleStartDateChange"
+                    />
+                    <div v-if="errors.startDate" class="error-message">{{ errors.startDate }}</div>
+                  </div>
+                  
+                  <div class="date-input-group">
+                    <label for="endDate" class="date-label">End Date</label>
+                    <Calendar
+                      id="endDate"
+                      v-model="formData.endDateObj"
+                      dateFormat="yy-mm-dd"
+                      :minDate="formData.startDateObj || todayDate"
+                      :invalid="!!errors.endDate"
+                      @date-select="handleEndDateChange"
+                    />
+                    <div v-if="errors.endDate" class="error-message">{{ errors.endDate }}</div>
+                  </div>
                 </div>
                 
-                <div class="date-input-group">
-                  <label for="endDate" class="date-label">End Date</label>
-                  <input
-                    id="endDate"
-                    v-model="formData.endDate"
-                    type="date"
-                    class="form-input date-input"
-                    :class="{ 'error': errors.endDate }"
-                    :min="formData.startDate || getTodayDate()"
-                    @change="validateField('endDate')"
-                  />
-                  <div v-if="errors.endDate" class="error-message">{{ errors.endDate }}</div>
+                <div class="field-hint">
+                  Duration: {{ calculateDuration() }}
                 </div>
               </div>
-              
-              <div class="field-hint">
-                Duration: {{ calculateDuration() }}
-              </div>
-            </div>
 
-            <div class="form-group">
-              <label class="form-label">Operating Days *</label>
-              <p class="field-description">Select the days of the week this line will operate</p>
-              <div class="days-selector">
-                <label 
-                  v-for="day in weekDays" 
-                  :key="day.value"
-                  class="day-option"
-                  :class="{ 'selected': formData.scheduleDays.includes(day.value) }"
-                >
-                  <input
-                    type="checkbox"
-                    :value="day.value"
-                    v-model="formData.scheduleDays"
-                    @change="validateField('scheduleDays')"
+              <div class="form-group">
+                <label class="form-label">Operating Days *</label>
+                <p class="field-description">Select the days of the week this line will operate</p>
+                <div class="days-selector">
+                  <label 
+                    v-for="day in weekDays" 
+                    :key="day.value"
+                    class="day-option"
+                    :class="{ 'selected': formData.scheduleDays.includes(day.value) }"
+                  >
+                    <input
+                      type="checkbox"
+                      :value="day.value"
+                      v-model="formData.scheduleDays"
+                      @change="validateField('scheduleDays')"
+                    />
+                    <span class="day-short">{{ day.short }}</span>
+                    <span class="day-full">{{ day.full }}</span>
+                  </label>
+                </div>
+                <div v-if="errors.scheduleDays" class="error-message">{{ errors.scheduleDays }}</div>
+                <div class="field-hint">
+                  Selected days: {{ formatSelectedDays() || 'None selected' }}
+                </div>
+                
+                <!-- Quick selection buttons -->
+                <div class="quick-select-buttons">
+                  <Button 
+                    type="button" 
+                    @click="selectWeekdays" 
+                    label="Weekdays Only"
+                    size="small"
+                    :severity="isWeekdaysSelected() ? 'primary' : 'secondary'"
+                    :outlined="!isWeekdaysSelected()"
                   />
-                  <span class="day-short">{{ day.short }}</span>
-                  <span class="day-full">{{ day.full }}</span>
-                </label>
+                  <Button 
+                    type="button" 
+                    @click="selectAllDays" 
+                    label="All Days"
+                    size="small"
+                    :severity="isAllDaysSelected() ? 'primary' : 'secondary'"
+                    :outlined="!isAllDaysSelected()"
+                  />
+                  <Button 
+                    type="button" 
+                    @click="clearSchedule" 
+                    label="Clear All"
+                    size="small"
+                    severity="secondary"
+                    outlined
+                  />
+                </div>
               </div>
-              <div v-if="errors.scheduleDays" class="error-message">{{ errors.scheduleDays }}</div>
-              <div class="field-hint">
-                Selected days: {{ formatSelectedDays() || 'None selected' }}
+
+              <div class="form-group">
+                <label for="rideStartTime" class="form-label">Ride Start Time *</label>
+                <p class="field-description">Set the daily departure time for this line</p>
+                <InputMask
+                  id="rideStartTime"
+                  v-model="formData.rideStartTime"
+                  mask="99:99"
+                  placeholder="HH:MM"
+                  :invalid="!!errors.rideStartTime"
+                  @blur="validateField('rideStartTime')"
+                  @input="clearFieldError('rideStartTime')"
+                />
+                <div v-if="errors.rideStartTime" class="error-message">{{ errors.rideStartTime }}</div>
+                <div class="field-hint">
+                  The time when the bus will start its route each operating day (24-hour format)
+                </div>
               </div>
-              
-              <!-- Quick selection buttons -->
-              <div class="quick-select-buttons">
-                <button 
-                  type="button" 
-                  @click="selectWeekdays" 
-                  class="quick-select-btn"
-                  :class="{ 'active': isWeekdaysSelected() }"
-                >
-                  Weekdays Only
-                </button>
-                <button 
-                  type="button" 
-                  @click="selectAllDays" 
-                  class="quick-select-btn"
-                  :class="{ 'active': isAllDaysSelected() }"
-                >
-                  All Days
-                </button>
-                <button 
-                  type="button" 
-                  @click="clearSchedule" 
-                  class="quick-select-btn clear"
-                >
-                  Clear All
-                </button>
-              </div>
+
             </div>
-
-            <div class="form-group">
-              <label for="rideStartTime" class="form-label">Ride Start Time *</label>
-              <p class="field-description">Set the daily departure time for this line</p>
-              <input
-                id="rideStartTime"
-                v-model="formData.rideStartTime"
-                type="time"
-                class="form-input time-input"
-                :class="{ 'error': errors.rideStartTime }"
-                @blur="validateField('rideStartTime')"
-                @input="clearFieldError('rideStartTime')"
-              />
-              <div v-if="errors.rideStartTime" class="error-message">{{ errors.rideStartTime }}</div>
-              <div class="field-hint">
-                The time when the bus will start its route each operating day
-              </div>
-            </div>
-
-          </div>
-
+          </div> 
           <!-- After Creation Info -->
           <div class="next-steps-preview">
             <h3>After Creating the Line</h3>
@@ -230,8 +220,8 @@
               <p><strong>Note:</strong> You can configure routes and assign students after creating the line through the line management interface.</p>
             </div>
           </div>
-        </div>
-      </div>
+        </template>
+      </Card>
     </main>
   </div>
 </template>
@@ -253,6 +243,8 @@ export default {
       vehicleId: '',
       startDate: '',
       endDate: '',
+      startDateObj: null,
+      endDateObj: null,
       scheduleDays: [],
       rideStartTime: ''
     })
@@ -273,11 +265,19 @@ export default {
       { value: 'saturday', short: 'Sat', full: 'Saturday' }
     ]
     
+    // Computed properties for PrimeVue components
+    const todayDate = computed(() => new Date())
+    
     const fetchAvailableDrivers = async () => {
       try {
         loadingDrivers.value = true
         const response = await apiService.get('/auth/users?role=driver&isActive=true')
-        availableDrivers.value = response.users || response.data || []
+        const drivers = response.users || response.data || []
+        // Add displayName for PrimeVue Select
+        availableDrivers.value = drivers.map(driver => ({
+          ...driver,
+          displayName: `${driver.firstName} ${driver.lastName}${driver.email ? ` (${driver.email})` : ''}`
+        }))
       } catch (error) {
         console.error('Failed to fetch drivers:', error)
       } finally {
@@ -289,12 +289,40 @@ export default {
       try {
         loadingVehicles.value = true
         const response = await apiService.get('/vehicles?isActive=true')
-        availableVehicles.value = response.vehicles || response.data || []
+        const vehicles = response.vehicles || response.data || []
+        // Add displayName for PrimeVue Select
+        availableVehicles.value = vehicles.map(vehicle => ({
+          ...vehicle,
+          displayName: `${vehicle.licensePlate}${vehicle.model ? ` - ${vehicle.model}` : ''}${vehicle.capacity ? ` (${vehicle.capacity} seats)` : ''}`
+        }))
       } catch (error) {
         console.error('Failed to fetch vehicles:', error)
       } finally {
         loadingVehicles.value = false
       }
+    }
+    
+    // Date handling methods for PrimeVue Calendar
+    const handleStartDateChange = (event) => {
+      const date = event
+      formData.value.startDateObj = date
+      formData.value.startDate = formatDateToString(date)
+      validateField('startDate')
+    }
+    
+    const handleEndDateChange = (event) => {
+      const date = event
+      formData.value.endDateObj = date
+      formData.value.endDate = formatDateToString(date)
+      validateField('endDate')
+    }
+    
+    const formatDateToString = (date) => {
+      if (!date) return ''
+      const year = date.getFullYear()
+      const month = String(date.getMonth() + 1).padStart(2, '0')
+      const day = String(date.getDate()).padStart(2, '0')
+      return `${year}-${month}-${day}`
     }
     
     const validateField = (field) => {
@@ -499,6 +527,7 @@ export default {
       availableVehicles,
       loadingVehicles,
       weekDays,
+      todayDate,
       isFormValid,
       validateField,
       clearFieldError,
@@ -511,7 +540,10 @@ export default {
       isWeekdaysSelected,
       isAllDaysSelected,
       handleSave,
-      goBack
+      goBack,
+      handleStartDateChange,
+      handleEndDateChange,
+      formatDateToString
     }
   }
 }
@@ -520,14 +552,14 @@ export default {
 <style scoped>
 .line-create-container {
   min-height: 100vh;
-  background-color: #f8f9fa;
+  background-color: var(--p-surface-ground);
 }
 
 .header {
-  background-color: #007bff;
+  background-color: var(--p-primary-color);
   color: white;
   padding: 1rem 0;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: var(--p-card-shadow);
 }
 
 .header-content {
@@ -541,58 +573,18 @@ export default {
 
 .header h1 {
   margin: 0;
+  font-size: 1.8rem;
 }
 
 .header-actions {
   display: flex;
-  gap: 12px;
-}
-
-.back-button {
-  background-color: #6c757d;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.back-button:hover {
-  background-color: #545b62;
-}
-
-.save-button {
-  background-color: #28a745;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  font-weight: 500;
-}
-
-.save-button:hover:not(:disabled) {
-  background-color: #218838;
-}
-
-.save-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
+  gap: 15px;
 }
 
 .main-content {
   max-width: 1200px;
   margin: 0 auto;
   padding: 30px 20px;
-}
-
-.form-container {
-  background: white;
-  border-radius: 8px;
-  padding: 30px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 
@@ -603,13 +595,13 @@ export default {
 }
 
 .form-section h2 {
-  color: #333;
+  color: var(--p-text-color);
   margin-bottom: 10px;
   font-size: 1.5rem;
 }
 
 .section-description {
-  color: #666;
+  color: var(--p-text-muted-color);
   margin-bottom: 30px;
   line-height: 1.5;
 }
@@ -621,52 +613,8 @@ export default {
 .form-label {
   display: block;
   font-weight: 500;
-  color: #333;
-  margin-bottom: 6px;
-}
-
-.form-input {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-  transition: border-color 0.2s;
-}
-
-.form-input:focus {
-  outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
-}
-
-.form-input.error {
-  border-color: #dc3545;
-}
-
-.select-wrapper {
-  position: relative;
-}
-
-.form-select {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-  background-color: white;
-  cursor: pointer;
-  transition: border-color 0.2s;
-}
-
-.form-select:focus {
-  outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
-}
-
-.form-select.error {
-  border-color: #dc3545;
+  color: var(--p-text-color);
+  margin-bottom: 8px;
 }
 
 .radio-group {
@@ -706,19 +654,19 @@ export default {
 }
 
 .error-message {
-  color: #dc3545;
+  color: var(--p-red-500);
   font-size: 0.875rem;
   margin-top: 4px;
 }
 
 .field-hint {
-  color: #6c757d;
+  color: var(--p-text-muted-color);
   font-size: 0.875rem;
   margin-top: 4px;
 }
 
 .field-description {
-  color: #666;
+  color: var(--p-text-muted-color);
   font-size: 0.9rem;
   margin-bottom: 12px;
   margin-top: -4px;
@@ -738,46 +686,9 @@ export default {
 
 .date-label {
   font-weight: 500;
-  color: #333;
+  color: var(--p-text-color);
   margin-bottom: 6px;
   font-size: 0.9rem;
-}
-
-.date-input {
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-  transition: border-color 0.2s;
-}
-
-.date-input:focus {
-  outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
-}
-
-.date-input.error {
-  border-color: #dc3545;
-}
-
-.time-input {
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-  transition: border-color 0.2s;
-  max-width: 200px;
-}
-
-.time-input:focus {
-  outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
-}
-
-.time-input.error {
-  border-color: #dc3545;
 }
 
 .days-selector {
@@ -801,13 +712,13 @@ export default {
 }
 
 .day-option:hover {
-  border-color: #007bff;
-  background-color: #f8f9fa;
+  border-color: var(--p-primary-color);
+  background-color: var(--p-surface-hover);
 }
 
 .day-option.selected {
-  border-color: #007bff;
-  background-color: #007bff;
+  border-color: var(--p-primary-color);
+  background-color: var(--p-primary-color);
   color: white;
 }
 
@@ -835,62 +746,31 @@ export default {
   margin-top: 12px;
 }
 
-.quick-select-btn {
-  padding: 6px 12px;
-  border: 1px solid #ddd;
-  background: white;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.875rem;
-  transition: all 0.2s;
-}
-
-.quick-select-btn:hover {
-  border-color: #007bff;
-  background-color: #f8f9fa;
-}
-
-.quick-select-btn.active {
-  border-color: #007bff;
-  background-color: #007bff;
-  color: white;
-}
-
-.quick-select-btn.clear {
-  border-color: #6c757d;
-  color: #6c757d;
-}
-
-.quick-select-btn.clear:hover {
-  border-color: #dc3545;
-  color: #dc3545;
-  background-color: #f8f9fa;
-}
-
 .loading-message {
-  color: #007bff;
+  color: var(--p-primary-color);
   font-size: 0.875rem;
   margin-top: 4px;
 }
 
 .warning-message {
-  color: #ffc107;
+  color: var(--p-yellow-600);
   font-size: 0.875rem;
   margin-top: 4px;
   padding: 8px;
-  background-color: #fff3cd;
-  border-radius: 4px;
+  background-color: var(--p-yellow-50);
+  border-radius: var(--p-border-radius);
+  border: 1px solid var(--p-yellow-200);
 }
 
 .next-steps-preview {
-  background-color: #f8f9fa;
-  border-radius: 8px;
+  background-color: var(--p-surface-50);
+  border-radius: var(--p-border-radius);
   padding: 20px;
   height: fit-content;
 }
 
 .next-steps-preview h3 {
-  color: #333;
+  color: var(--p-text-color);
   margin-bottom: 16px;
   font-size: 1.1rem;
 }
@@ -905,7 +785,7 @@ export default {
   display: flex;
   align-items: center;
   gap: 12px;
-  color: #666;
+  color: var(--p-text-muted-color);
   font-size: 0.9rem;
 }
 
@@ -916,14 +796,14 @@ export default {
 .info-note {
   margin-top: 20px;
   padding: 15px;
-  background-color: #e7f3ff;
-  border: 1px solid #b3d7ff;
-  border-radius: 6px;
+  background-color: var(--p-blue-50);
+  border: 1px solid var(--p-blue-200);
+  border-radius: var(--p-border-radius);
 }
 
 .info-note p {
   margin: 0;
-  color: #0056b3;
+  color: var(--p-blue-600);
   font-size: 0.9rem;
   line-height: 1.4;
 }

@@ -1,92 +1,206 @@
 <template>
   <div class="accept-invitation-container">
-    <div class="accept-card">
-      <h1>School Bus System</h1>
-      <h2>Complete Your Registration</h2>
+    <Card class="accept-card">
+      <template #header>
+        <div class="card-header">
+          <div class="header-content">
+            <i class="pi pi-users header-icon"></i>
+            <div class="header-text">
+              <h1>School Bus System</h1>
+              <h2>Complete Your Registration</h2>
+            </div>
+          </div>
+        </div>
+      </template>
       
-      <div v-if="loading" class="loading">
-        Loading invitation...
-      </div>
-      
-      <div v-else-if="error" class="error-state">
-        <div class="error-message">{{ error }}</div>
-        <router-link to="/login" class="back-link">Go to Login</router-link>
-      </div>
-      
-      <div v-else-if="invitation" class="invitation-content">
-        <div class="invitation-info">
-          <p><strong>You have been invited to join as:</strong> {{ invitation.role }}</p>
-          <p><strong>Email:</strong> {{ invitation.email }}</p>
-          <p><strong>Phone:</strong> {{ invitation.phone }}</p>
-          <p><strong>Invited by:</strong> {{ invitation.invitedBy }}</p>
-          <p class="expiry"><strong>Invitation expires:</strong> {{ formatDate(invitation.expiresAt) }}</p>
+      <template #content>
+        <div v-if="loading" class="loading-state">
+          <i class="pi pi-spin pi-spinner loading-icon"></i>
+          <p>Loading invitation...</p>
         </div>
         
-        <form @submit.prevent="handleAccept" class="accept-form">
-          <div class="form-group">
-            <label for="firstName">First Name:</label>
-            <input 
-              id="firstName"
-              type="text" 
-              v-model="acceptForm.firstName" 
-              required 
-              :disabled="submitting"
+        <div v-else-if="error" class="error-state">
+          <Card class="message-card error">
+            <template #content>
+              <div class="message-content">
+                <i class="pi pi-exclamation-triangle"></i>
+                <span>{{ error }}</span>
+              </div>
+            </template>
+          </Card>
+          <div class="error-actions">
+            <Button 
+              label="Go to Login" 
+              icon="pi pi-sign-in"
+              @click="$router.push('/login')"
+              outlined
+              severity="secondary"
             />
           </div>
-          
-          <div class="form-group">
-            <label for="lastName">Last Name:</label>
-            <input 
-              id="lastName"
-              type="text" 
-              v-model="acceptForm.lastName" 
-              required 
-              :disabled="submitting"
-            />
-          </div>
-          
-          <div class="form-group">
-            <label for="password">Password:</label>
-            <input 
-              id="password"
-              type="password" 
-              v-model="acceptForm.password" 
-              required 
-              minlength="6"
-              :disabled="submitting"
-            />
-            <small class="help-text">Minimum 6 characters</small>
-          </div>
-          
-          <div class="form-group">
-            <label for="confirmPassword">Confirm Password:</label>
-            <input 
-              id="confirmPassword"
-              type="password" 
-              v-model="confirmPassword" 
-              required 
-              :disabled="submitting"
-            />
-          </div>
-          
-          <button 
-            type="submit" 
-            class="accept-button"
-            :disabled="submitting || !passwordsMatch"
-          >
-            {{ submitting ? 'Creating Account...' : 'Create Account' }}
-          </button>
-        </form>
-        
-        <div v-if="acceptError" class="error-message">
-          {{ acceptError }}
         </div>
         
-        <div v-if="!passwordsMatch && confirmPassword" class="error-message">
-          Passwords do not match
+        <div v-else-if="invitation" class="invitation-content">
+          <Card class="invitation-info-card">
+            <template #header>
+              <div class="info-header">
+                <i class="pi pi-envelope"></i>
+                <span>Invitation Details</span>
+              </div>
+            </template>
+            <template #content>
+              <div class="invitation-details">
+                <div class="detail-item">
+                  <i class="pi pi-user-plus"></i>
+                  <div class="detail-content">
+                    <label>Role:</label>
+                    <span class="role-badge" :class="`role-${invitation.role}`">
+                      {{ invitation.role }}
+                    </span>
+                  </div>
+                </div>
+                
+                <div class="detail-item">
+                  <i class="pi pi-envelope"></i>
+                  <div class="detail-content">
+                    <label>Email:</label>
+                    <span>{{ invitation.email }}</span>
+                  </div>
+                </div>
+                
+                <div class="detail-item">
+                  <i class="pi pi-phone"></i>
+                  <div class="detail-content">
+                    <label>Phone:</label>
+                    <span>{{ invitation.phone }}</span>
+                  </div>
+                </div>
+                
+                <div class="detail-item">
+                  <i class="pi pi-user"></i>
+                  <div class="detail-content">
+                    <label>Invited by:</label>
+                    <span>{{ invitation.invitedBy }}</span>
+                  </div>
+                </div>
+                
+                <div class="detail-item expiry">
+                  <i class="pi pi-clock"></i>
+                  <div class="detail-content">
+                    <label>Expires:</label>
+                    <span>{{ formatDate(invitation.expiresAt) }}</span>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </Card>
+          
+          <Card class="form-card">
+            <template #header>
+              <div class="form-header">
+                <i class="pi pi-user-edit"></i>
+                <span>Create Your Account</span>
+              </div>
+            </template>
+            <template #content>
+              <form @submit.prevent="handleAccept" class="accept-form">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="firstName">First Name</label>
+                    <IconField>
+                      <InputIcon class="pi pi-user" />
+                      <InputText 
+                        id="firstName"
+                        v-model="acceptForm.firstName" 
+                        placeholder="Enter first name"
+                        required 
+                        :disabled="submitting"
+                      />
+                    </IconField>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label for="lastName">Last Name</label>
+                    <IconField>
+                      <InputIcon class="pi pi-user" />
+                      <InputText 
+                        id="lastName"
+                        v-model="acceptForm.lastName" 
+                        placeholder="Enter last name"
+                        required 
+                        :disabled="submitting"
+                      />
+                    </IconField>
+                  </div>
+                </div>
+                
+                <div class="form-group">
+                  <label for="password">Password</label>
+                  <IconField>
+                    <InputIcon class="pi pi-lock" />
+                    <Password 
+                      id="password"
+                      v-model="acceptForm.password" 
+                      placeholder="Enter password"
+                      :feedback="false"
+                      toggleMask
+                      required 
+                      :disabled="submitting"
+                    />
+                  </IconField>
+                  <small class="help-text">
+                    <i class="pi pi-info-circle"></i>
+                    Minimum 6 characters
+                  </small>
+                </div>
+                
+                <div class="form-group">
+                  <label for="confirmPassword">Confirm Password</label>
+                  <IconField>
+                    <InputIcon class="pi pi-lock" />
+                    <Password 
+                      id="confirmPassword"
+                      v-model="confirmPassword" 
+                      placeholder="Confirm password"
+                      :feedback="false"
+                      toggleMask
+                      required 
+                      :disabled="submitting"
+                    />
+                  </IconField>
+                  <div v-if="!passwordsMatch && confirmPassword" class="field-error">
+                    <i class="pi pi-exclamation-triangle"></i>
+                    Passwords do not match
+                  </div>
+                </div>
+                
+                <Button 
+                  type="submit" 
+                  class="submit-button"
+                  :loading="submitting"
+                  loadingIcon="pi pi-spin pi-spinner"
+                  :label="submitting ? 'Creating Account...' : 'Create Account'"
+                  icon="pi pi-check"
+                  severity="success"
+                  :disabled="submitting || !passwordsMatch"
+                  size="large"
+                />
+              </form>
+              
+              <div v-if="acceptError" class="form-message">
+                <Card class="message-card error">
+                  <template #content>
+                    <div class="message-content">
+                      <i class="pi pi-exclamation-triangle"></i>
+                      <span>{{ acceptError }}</span>
+                    </div>
+                  </template>
+                </Card>
+              </div>
+            </template>
+          </Card>
         </div>
-      </div>
-    </div>
+      </template>
+    </Card>
   </div>
 </template>
 
@@ -202,143 +316,282 @@ export default {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: #f5f5f5;
+  background: linear-gradient(135deg, var(--p-primary-50) 0%, var(--p-primary-100) 100%);
   padding: 20px;
 }
 
 .accept-card {
-  background: white;
-  border-radius: 8px;
-  padding: 40px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   width: 100%;
-  max-width: 500px;
+  max-width: 600px;
+  border-radius: var(--p-border-radius-lg);
+  box-shadow: var(--p-shadow-lg);
 }
 
-h1 {
-  text-align: center;
-  color: #333;
-  margin-bottom: 10px;
+.card-header {
+  background: var(--p-primary-500);
+  color: white;
+  border-radius: var(--p-border-radius-lg) var(--p-border-radius-lg) 0 0;
+  padding: 2rem;
 }
 
-h2 {
-  text-align: center;
-  color: #666;
-  margin-bottom: 30px;
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
 }
 
-.loading {
+.header-icon {
+  font-size: 3rem;
+  opacity: 0.9;
+}
+
+.header-text h1 {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 600;
+}
+
+.header-text h2 {
+  margin: 0.5rem 0 0 0;
+  font-size: 1rem;
+  opacity: 0.9;
+  font-weight: 400;
+}
+
+.loading-state {
   text-align: center;
-  color: #666;
-  padding: 40px;
+  padding: 3rem;
+  color: var(--p-text-muted-color);
+}
+
+.loading-icon {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  color: var(--p-primary-500);
+}
+
+.loading-state p {
+  margin: 0;
+  font-size: 1.1rem;
 }
 
 .error-state {
   text-align: center;
+  padding: 1rem;
 }
 
-.error-message {
-  color: #dc3545;
+.error-actions {
+  margin-top: 1.5rem;
+}
+
+.message-card {
+  border-radius: 6px;
+  margin-bottom: 1rem;
+}
+
+.message-card.error {
+  border-left: 4px solid var(--p-red-500);
+  background: var(--p-red-50);
+}
+
+.message-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+}
+
+.message-content i {
+  font-size: 1.25rem;
+  color: var(--p-red-500);
+}
+
+.invitation-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.invitation-info-card {
+  border: 1px solid var(--p-surface-border);
+}
+
+.info-header,
+.form-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 1rem 1.5rem;
+  background: var(--p-surface-50);
+  border-bottom: 1px solid var(--p-surface-border);
+  font-weight: 600;
+  color: var(--p-text-color);
+}
+
+.invitation-details {
+  padding: 0.5rem;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0.75rem;
+  border-radius: var(--p-border-radius);
+  margin-bottom: 0.5rem;
+}
+
+.detail-item:hover {
+  background: var(--p-surface-50);
+}
+
+.detail-item i {
+  font-size: 1.1rem;
+  color: var(--p-primary-500);
+  width: 20px;
   text-align: center;
-  margin: 15px 0;
-  padding: 10px;
-  background-color: #f8d7da;
-  border: 1px solid #f5c6cb;
-  border-radius: 4px;
 }
 
-.back-link {
-  display: inline-block;
-  color: #007bff;
-  text-decoration: none;
-  margin-top: 20px;
-  padding: 10px 20px;
-  border: 1px solid #007bff;
-  border-radius: 4px;
-  transition: all 0.2s;
+.detail-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
 }
 
-.back-link:hover {
-  background-color: #007bff;
-  color: white;
+.detail-content label {
+  font-size: 0.85rem;
+  color: var(--p-text-muted-color);
+  font-weight: 600;
+  margin: 0;
 }
 
-.invitation-info {
-  background-color: #f8f9fa;
-  border: 1px solid #dee2e6;
-  border-radius: 4px;
-  padding: 20px;
-  margin-bottom: 30px;
+.detail-content span {
+  color: var(--p-text-color);
+  font-weight: 500;
 }
 
-.invitation-info p {
-  margin: 8px 0;
-  color: #333;
-}
-
-.expiry {
-  color: #e83e8c;
+.role-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.8rem;
   font-weight: bold;
+  text-transform: uppercase;
+  display: inline-block;
+}
+
+.role-admin { background-color: var(--p-red-500); color: white; }
+.role-driver { background-color: var(--p-green-500); color: white; }
+.role-parent { background-color: var(--p-yellow-500); color: var(--p-surface-900); }
+.role-student { background-color: var(--p-blue-500); color: white; }
+
+.detail-item.expiry {
+  background: var(--p-orange-50);
+  border: 1px solid var(--p-orange-200);
+}
+
+.detail-item.expiry i {
+  color: var(--p-orange-500);
+}
+
+.detail-item.expiry .detail-content span {
+  color: var(--p-orange-600);
+  font-weight: 600;
+}
+
+.form-card {
+  border: 1px solid var(--p-surface-border);
 }
 
 .accept-form {
-  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
 }
 
 .form-group {
-  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
-label {
-  display: block;
-  margin-bottom: 5px;
-  color: #333;
-  font-weight: bold;
+.form-group label {
+  font-weight: 600;
+  color: var(--p-text-color);
+  font-size: 0.9rem;
 }
 
-input {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 16px;
+.form-group :deep(.p-inputtext),
+.form-group :deep(.p-password-input) {
+  padding-left: 2.5rem;
 }
 
-input:focus {
-  outline: none;
-  border-color: #007bff;
-}
-
-input:disabled {
-  background-color: #f5f5f5;
-  cursor: not-allowed;
+.form-group :deep(.p-icon-field .p-input-icon) {
+  left: 0.75rem;
+  color: var(--p-text-muted-color);
 }
 
 .help-text {
-  display: block;
-  color: #666;
-  font-size: 12px;
-  margin-top: 5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--p-text-muted-color);
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
 }
 
-.accept-button {
-  width: 100%;
-  padding: 12px;
-  background-color: #28a745;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.2s;
+.help-text i {
+  font-size: 0.8rem;
 }
 
-.accept-button:hover:not(:disabled) {
-  background-color: #218838;
+.field-error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--p-red-500);
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
 }
 
-.accept-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
+.field-error i {
+  font-size: 0.8rem;
+}
+
+.submit-button {
+  margin-top: 1rem;
+}
+
+.form-message {
+  margin-top: 1rem;
+}
+
+@media (max-width: 640px) {
+  .accept-invitation-container {
+    padding: 10px;
+  }
+  
+  .accept-card {
+    max-width: 100%;
+  }
+  
+  .header-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+  
+  .header-icon {
+    font-size: 2.5rem;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

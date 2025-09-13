@@ -1,18 +1,19 @@
 <template>
-  <div class="route-manager-container">
-    <header class="header">
-      <div class="header-content">
-        <div class="header-info">
-          <h1 v-if="line">Route Manager - {{ line.name }}</h1>
-          <h1 v-else>Route Manager</h1>
-        </div>
-        <div class="header-actions">
-          <button @click="goBack" class="back-button">← Back to Line</button>
-        </div>
-      </div>
-    </header>
-
-    <main class="main-content">
+  <AppLayout 
+    :page-title="line ? `Route Manager - ${line.name}` : 'Route Manager'"
+    :breadcrumbs="breadcrumbs"
+  >
+    <template #actions>
+      <Button 
+        @click="goBack" 
+        icon="pi pi-arrow-left"
+        label="Back to Line"
+        severity="secondary"
+        outlined
+      />
+    </template>
+    
+    <div class="route-manager-content">
       <div v-if="loading" class="loading">
         <div class="loading-spinner"></div>
         Loading route data...
@@ -22,47 +23,73 @@
         <div class="error-message">
           <h3>Error Loading Route</h3>
           <p>{{ error }}</p>
-          <button @click="fetchLine" class="retry-button">Try Again</button>
+          <Button @click="fetchLine" label="Try Again" icon="pi pi-refresh" severity="info" />
         </div>
       </div>
 
       <div v-else-if="line" class="content-wrapper">
         <!-- Route Overview -->
-        <div class="route-overview">
-          <div class="overview-grid">
+        <Card class="route-overview">
+          <template #header>
+            <div class="section-header-card">
+              <h2><i class="pi pi-chart-bar"></i>Route Overview</h2>
+            </div>
+          </template>
+          <template #content>
             <div class="overview-stats">
               <div class="stat-card">
-                <div class="stat-value">{{ routeData.stops.length }}</div>
-                <div class="stat-label">Total Stops</div>
+                <div class="stat-icon"><i class="pi pi-map-marker"></i></div>
+                <div class="stat-info">
+                  <div class="stat-value">{{ routeData.stops.length }}</div>
+                  <div class="stat-label">Total Stops</div>
+                </div>
               </div>
               <div class="stat-card">
-                <div class="stat-value">{{ routeData.totalDistance }} km</div>
-                <div class="stat-label">Total Distance</div>
+                <div class="stat-icon"><i class="pi pi-compass"></i></div>
+                <div class="stat-info">
+                  <div class="stat-value">{{ routeData.totalDistance }} km</div>
+                  <div class="stat-label">Total Distance</div>
+                </div>
               </div>
               <div class="stat-card">
-                <div class="stat-value">{{ formatDuration(routeData.estimatedDuration) }}</div>
-                <div class="stat-label">Est. Duration</div>
+                <div class="stat-icon"><i class="pi pi-clock"></i></div>
+                <div class="stat-info">
+                  <div class="stat-value">{{ formatDuration(routeData.estimatedDuration) }}</div>
+                  <div class="stat-label">Est. Duration</div>
+                </div>
               </div>
               <div class="stat-card">
-                <div class="stat-value">{{ getDriverName(line.driver) }}</div>
-                <div class="stat-label">Line Driver</div>
+                <div class="stat-icon"><i class="pi pi-user"></i></div>
+                <div class="stat-info">
+                  <div class="stat-value">{{ getDriverName(line.driver) }}</div>
+                  <div class="stat-label">Line Driver</div>
+                </div>
               </div>
               <div class="stat-card">
-                <div class="stat-value">{{ getVehicleName(line.vehicle) }}</div>
-                <div class="stat-label">Vehicle</div>
+                <div class="stat-icon"><i class="pi pi-car"></i></div>
+                <div class="stat-info">
+                  <div class="stat-value">{{ getVehicleName(line.vehicle) }}</div>
+                  <div class="stat-label">Vehicle</div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
+          </template>
+        </Card>
 
         <!-- Route Stops -->
-        <div class="route-stops">
-          <div class="stops-header">
-            <h2>Route Stops</h2>
-            <button @click="showStopDialog = true" class="add-stop-button">
-              + Add Stop
-            </button>
-          </div>
+        <Card class="route-stops">
+          <template #header>
+            <div class="section-header-card">
+              <h2><i class="pi pi-map"></i>Route Stops</h2>
+              <Button 
+                @click="showStopDialog = true" 
+                icon="pi pi-plus"
+                label="Add Stop"
+                severity="success"
+              />
+            </div>
+          </template>
+          <template #content>
           
           <div v-if="routeData.stops.length === 0" class="no-stops">
             <p>No stops have been defined for this route.</p>
@@ -99,33 +126,35 @@
                       </span>
                     </div>
                     <div class="stop-controls">
-                      <button 
+                      <Button 
                         v-if="index > 0"
                         @click="moveStopUp(index)"
-                        class="move-button"
+                        icon="pi pi-chevron-up"
                         :disabled="loading"
                         title="Move up"
-                      >
-                        ↑
-                      </button>
-                      <button 
+                        size="small"
+                        severity="secondary"
+                        outlined
+                      />
+                      <Button 
                         v-if="index < routeData.stops.length - 1"
                         @click="moveStopDown(index)"
-                        class="move-button"
+                        icon="pi pi-chevron-down"
                         :disabled="loading"
                         title="Move down"
-                      >
-                        ↓
-                      </button>
-                      <button 
+                        size="small"
+                        severity="secondary"
+                        outlined
+                      />
+                      <Button 
                         @click="deleteStop(index)"
-                        class="delete-button"
-                        :class="{ 'delete-disabled': !canDeleteStop(stop) }"
+                        :icon="canDeleteStop(stop) ? 'pi pi-trash' : 'pi pi-lock'"
                         :disabled="loading || !canDeleteStop(stop)"
                         :title="canDeleteStop(stop) ? 'Delete stop' : 'Cannot delete: stop has assigned students'"
-                      >
-                        {{ canDeleteStop(stop) ? '🗑️' : '🔒' }}
-                      </button>
+                        size="small"
+                        :severity="canDeleteStop(stop) ? 'danger' : 'secondary'"
+                        outlined
+                      />
                     </div>
                   </div>
                 </div>
@@ -153,37 +182,48 @@
                   </div>
                 </div>
               </div>
-
-              <div v-if="index < routeData.stops.length - 1" class="route-connector"></div>
             </div>
           </div>
-        </div>
+          </template>
+        </Card>
 
         <!-- Route Map -->
-        <div v-if="routeData.stops.length > 0">
-          <RouteMap
-            :stops="routeData.stops"
-            :studentAssignments="studentAssignments"
-            :showDrivingInstructions="true"
-            :showDrivingRoute="true"
-            :showDetailedPopups="true"
-            :formatTime="formatTime"
-            mapHeight="800px"
-            mapId="route-manager-map"
-            @route-updated="handleRouteUpdate"
-          />
-        </div>
+        <Card v-if="routeData.stops.length > 0" class="route-map-section">
+          <template #header>
+            <div class="section-header-card">
+              <h2><i class="pi pi-map-marker"></i>Interactive Route Map</h2>
+            </div>
+          </template>
+          <template #content>
+            <RouteMap
+              :stops="routeData.stops"
+              :studentAssignments="studentAssignments"
+              :showDrivingInstructions="true"
+              :showDrivingRoute="true"
+              :showDetailedPopups="true"
+              :formatTime="formatTime"
+              mapHeight="800px"
+              mapId="route-manager-map"
+              @route-updated="handleRouteUpdate"
+            />
+          </template>
+        </Card>
 
         <!-- Student Management Section -->
-        <div class="student-management">
-          <div class="students-header">
-            <h2>Assigned Students</h2>
-            <button @click="showStudentDialog = true" class="add-student-button">
-              + Add Student
-            </button>
-          </div>
-          
-          <div v-if="loadingStudents" class="loading-students">
+        <Card class="student-management">
+          <template #header>
+            <div class="section-header-card">
+              <h2><i class="pi pi-users"></i>Assigned Students</h2>
+              <Button 
+                @click="showStudentDialog = true" 
+                icon="pi pi-plus"
+                label="Add Student"
+                severity="success"
+              />
+            </div>
+          </template>
+          <template #content>
+            <div v-if="loadingStudents" class="loading-students">
             <div class="loading-spinner"></div>
             Loading student assignments...
           </div>
@@ -196,75 +236,105 @@
             <div
               v-for="assignment in studentAssignments"
               :key="assignment._id"
-              class="student-assignment-item"
+              class="student-assignment-card"
             >
-              <div class="student-info">
-                <div class="student-name">
-                  {{ assignment.student.firstName }} {{ assignment.student.lastName }}
+              <div class="student-header">
+                <div class="student-avatar">
+                  <Avatar 
+                    :label="`${assignment.student.firstName[0]}${assignment.student.lastName[0]}`"
+                    size="large"
+                    shape="circle"
+                  />
                 </div>
-                <div class="student-contact">
-                  <span class="phone">📞 {{ assignment.student.phone }}</span>
-                  <span v-if="assignment.student.email" class="email">✉️ {{ assignment.student.email }}</span>
+                <div class="student-info">
+                  <div class="student-name">
+                    <i class="pi pi-user"></i>
+                    {{ assignment.student.firstName }} {{ assignment.student.lastName }}
+                  </div>
+                  <div class="student-contact">
+                    <span class="contact-item phone">
+                      <i class="pi pi-phone"></i>
+                      {{ assignment.student.phone }}
+                    </span>
+                    <span v-if="assignment.student.email" class="contact-item email">
+                      <i class="pi pi-envelope"></i>
+                      {{ assignment.student.email }}
+                    </span>
+                  </div>
+                </div>
+                <div class="assignment-actions">
+                  <Button 
+                    @click="editStudentAssignment(assignment)" 
+                    icon="pi pi-pencil"
+                    severity="secondary"
+                    size="small"
+                    outlined
+                    title="Edit stops"
+                  />
+                  <Button 
+                    @click="removeStudentAssignment(assignment)" 
+                    icon="pi pi-trash"
+                    severity="danger"
+                    size="small"
+                    outlined
+                    title="Remove student"
+                  />
                 </div>
               </div>
 
               <div class="assignment-details">
-                <div v-if="assignment.pickupStopDetails" class="stop-info pickup">
-                  <div class="stop-label">🚏 Pickup:</div>
-                  <div class="stop-details">
-                    <div class="stop-name">{{ assignment.pickupStopDetails.name }}</div>
-                    <div class="stop-time">{{ formatTime(assignment.pickupStopDetails.estimatedTime) }}</div>
+                <div class="stops-row">
+                  <div class="stop-assignment pickup">
+                    <div class="stop-header">
+                      <i class="pi pi-sign-in stop-icon pickup-icon"></i>
+                      <span class="stop-label">Pickup</span>
+                    </div>
+                    <div v-if="assignment.pickupStopDetails" class="stop-content">
+                      <div class="stop-name">{{ assignment.pickupStopDetails.name }}</div>
+                      <div class="stop-time">
+                        <i class="pi pi-clock"></i>
+                        {{ formatTime(assignment.pickupStopDetails.estimatedTime) }}
+                      </div>
+                    </div>
+                    <div v-else class="no-stop-assigned">
+                      <span class="not-assigned">Not assigned</span>
+                    </div>
+                  </div>
+
+                  <div class="stop-assignment dropoff">
+                    <div class="stop-header">
+                      <i class="pi pi-sign-out stop-icon dropoff-icon"></i>
+                      <span class="stop-label">Dropoff</span>
+                    </div>
+                    <div v-if="assignment.dropoffStopDetails" class="stop-content">
+                      <div class="stop-name">{{ assignment.dropoffStopDetails.name }}</div>
+                      <div class="stop-time">
+                        <i class="pi pi-clock"></i>
+                        {{ formatTime(assignment.dropoffStopDetails.estimatedTime) }}
+                      </div>
+                    </div>
+                    <div v-else class="no-stop-assigned">
+                      <span class="not-assigned">Not assigned</span>
+                    </div>
                   </div>
                 </div>
-                <div v-else class="stop-info no-stop">
-                  <div class="stop-label">🚏 Pickup:</div>
-                  <div class="no-stop-assigned">Not assigned</div>
-                </div>
-
-                <div v-if="assignment.dropoffStopDetails" class="stop-info dropoff">
-                  <div class="stop-label">🏁 Dropoff:</div>
-                  <div class="stop-details">
-                    <div class="stop-name">{{ assignment.dropoffStopDetails.name }}</div>
-                    <div class="stop-time">{{ formatTime(assignment.dropoffStopDetails.estimatedTime) }}</div>
-                  </div>
-                </div>
-                <div v-else class="stop-info no-stop">
-                  <div class="stop-label">🏁 Dropoff:</div>
-                  <div class="no-stop-assigned">Not assigned</div>
-                </div>
-              </div>
-
-              <div class="assignment-actions">
-                <button 
-                  @click="editStudentAssignment(assignment)" 
-                  class="edit-button"
-                  title="Edit stops"
-                >
-                  ✏️
-                </button>
-                <button 
-                  @click="removeStudentAssignment(assignment)" 
-                  class="remove-button"
-                  title="Remove student"
-                >
-                  🗑️
-                </button>
               </div>
             </div>
-          </div>
+            </div>
 
-          <div v-if="studentAssignments.length > 0" class="capacity-info">
-            <div class="capacity-bar">
-              <div 
-                class="capacity-filled" 
-                :style="{ width: `${(studentAssignments.length / (line?.maxCapacity || 1)) * 100}%` }"
-              ></div>
+            <div v-if="studentAssignments.length > 0" class="capacity-info">
+              <div class="capacity-bar">
+                <div 
+                  class="capacity-filled" 
+                  :style="{ width: `${(studentAssignments.length / (line?.maxCapacity || 1)) * 100}%` }"
+                ></div>
+              </div>
+              <div class="capacity-text">
+                {{ studentAssignments.length }} / {{ line?.maxCapacity || 0 }} students assigned
+              </div>
             </div>
-            <div class="capacity-text">
-              {{ studentAssignments.length }} / {{ line?.maxCapacity || 0 }} students assigned
-            </div>
-          </div>
-        </div>
+          </template>
+        </Card>
 
       </div>
 
@@ -272,10 +342,9 @@
         <div class="not-found">
           <h3>Line Not Found</h3>
           <p>The requested line could not be found.</p>
-          <button @click="goBack" class="back-button">Back to Lines</button>
+          <Button @click="goBack" label="Back to Lines" icon="pi pi-arrow-left" severity="secondary" />
         </div>
       </div>
-    </main>
     
     <!-- Stop Creation Dialog -->
     <StopCreationDialog 
@@ -301,13 +370,15 @@
       @close="handleStopSelectionClose"
       @save="handleStopAssignmentSave"
     />
-  </div>
+    </div>
+    </AppLayout>
 </template>
 
 <script>
 import { ref, reactive, inject, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import apiService from '../services/api'
+import AppLayout from '../components/AppLayout.vue'
 import StopCreationDialog from '../components/StopCreationDialog.vue'
 import StudentSelectionDialog from '../components/StudentSelectionDialog.vue'
 import StopSelectionDialog from '../components/StopSelectionDialog.vue'
@@ -316,6 +387,7 @@ import RouteMap from '../components/RouteMap.vue'
 export default {
   name: 'LineRouteManager',
   components: {
+    AppLayout,
     StopCreationDialog,
     StudentSelectionDialog,
     StopSelectionDialog,
@@ -325,6 +397,14 @@ export default {
     const authStore = inject('authStore')
     const router = useRouter()
     const route = useRoute()
+    const lineId = route.params.lineId
+    
+    const breadcrumbs = ref([
+      { label: 'Dashboard', path: '/home' },
+      { label: 'Line Management', path: '/lines' },
+      { label: 'Line Details', path: `/lines/${lineId}` },
+      { label: 'Route Manager' }
+    ])
     
     const loading = ref(false)
     const error = ref('')
@@ -712,6 +792,7 @@ export default {
     
     
     return {
+      breadcrumbs,
       loading,
       error,
       line,
@@ -755,60 +836,15 @@ export default {
 </script>
 
 <style scoped>
-.route-manager-container {
-  min-height: 100vh;
-  background-color: #f8f9fa;
-}
+/* Route Manager specific styles */
 
-.header {
-  background-color: #007bff;
-  color: white;
-  padding: 1rem 0;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.header-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.header-info {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.header h1 {
-  margin: 0;
-}
-
-.back-button {
-  background-color: #6c757d;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.back-button:hover {
-  background-color: #545b62;
-}
-
-.main-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 30px 20px;
+.route-manager-content {
+  /* Content wrapper for proper layout */
 }
 
 .loading {
   text-align: center;
-  color: #666;
+  color: var(--p-text-muted-color);
   padding: 60px 20px;
   font-size: 1.1rem;
 }
@@ -816,8 +852,8 @@ export default {
 .loading-spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #007bff;
+  border: 4px solid var(--p-surface-200);
+  border-top: 4px solid var(--p-primary-color);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 20px;
@@ -834,36 +870,23 @@ export default {
 }
 
 .error-message {
-  background: white;
+  background: var(--p-surface-0);
   padding: 40px;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: var(--p-border-radius);
+  box-shadow: var(--p-card-shadow);
 }
 
 .error-message h3 {
-  color: #dc3545;
+  color: var(--p-red-500);
   margin-bottom: 10px;
 }
 
 .error-message p {
-  color: #666;
+  color: var(--p-text-muted-color);
   margin-bottom: 30px;
 }
 
-.retry-button {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.2s;
-}
-
-.retry-button:hover {
-  background-color: #0056b3;
-}
+/* Removed - using PrimeVue Button component */
 
 .content-wrapper {
   display: flex;
@@ -871,101 +894,75 @@ export default {
   gap: 30px;
 }
 
-.route-overview,
-.route-stops,
-.route-summary,
-.student-management {
-  background: white;
-  border-radius: 8px;
-  padding: 30px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
+/* Removed - using PrimeVue Card components */
 
-/* Stop Management Styles */
-.stops-header {
+/* PrimeVue Card Headers */
+.section-header-card {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  border-bottom: 2px solid #e9ecef;
-  padding-bottom: 10px;
+  padding: 1.25rem 1.25rem 0 1.25rem;
 }
 
-.stops-header h2 {
+.section-header-card h2 {
   margin: 0;
-  color: #333;
+  color: var(--p-text-color);
+  font-size: 1.25rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.add-stop-button {
-  background-color: #28a745;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: background-color 0.2s;
+.section-header-card h2 i {
+  color: var(--p-primary-color);
 }
 
-.add-stop-button:hover {
-  background-color: #218838;
-}
-
-.route-overview h2,
-.route-stops h2,
-.route-summary h2 {
-  color: #333;
-  margin-bottom: 20px;
-  border-bottom: 2px solid #e9ecef;
-  padding-bottom: 10px;
-}
-
-.overview-grid {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 30px;
-  align-items: start;
-}
-
-.overview-item h3 {
-  color: #495057;
-  margin-bottom: 10px;
-}
-
-.overview-item p {
-  color: #666;
-  line-height: 1.5;
-}
+/* Removed obsolete styles */
 
 .overview-stats {
   display: flex;
   gap: 20px;
+  flex-wrap: wrap;
 }
 
 .stat-card {
-  text-align: center;
+  display: flex;
+  align-items: center;
+  gap: 12px;
   padding: 20px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  min-width: 120px;
+  background-color: var(--p-surface-50);
+  border-radius: var(--p-border-radius);
+  min-width: 200px;
+  flex: 1;
+}
+
+.stat-icon {
+  font-size: 1.5rem;
+  color: var(--p-primary-color);
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
 }
 
 .stat-value {
   font-size: 1.5rem;
   font-weight: bold;
-  color: #007bff;
+  color: var(--p-primary-color);
   display: block;
 }
 
 .stat-label {
   font-size: 0.85rem;
-  color: #666;
+  color: var(--p-text-muted-color);
   margin-top: 5px;
 }
 
 .no-stops {
   text-align: center;
-  color: #666;
+  color: var(--p-text-muted-color);
   font-style: italic;
   padding: 40px;
 }
@@ -994,7 +991,7 @@ export default {
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  background-color: #007bff;
+  background-color: var(--p-primary-color);
   color: white;
   display: flex;
   align-items: center;
@@ -1005,12 +1002,12 @@ export default {
 }
 
 .pickup-stop .stop-number {
-  background-color: #17a2b8;
+  background-color: var(--p-cyan-500);
 }
 
 .dropoff-stop .stop-number {
-  background-color: #ffc107;
-  color: #000;
+  background-color: var(--p-yellow-500);
+  color: var(--p-yellow-950);
 }
 
 .stop-type-icon {
@@ -1019,18 +1016,18 @@ export default {
 
 .stop-content {
   flex: 1;
-  background-color: #f8f9fa;
-  border-radius: 8px;
+  background-color: var(--p-surface-50);
+  border-radius: var(--p-border-radius);
   padding: 20px;
-  border-left: 4px solid #007bff;
+  border-left: 4px solid var(--p-primary-color);
 }
 
 .pickup-stop .stop-content {
-  border-left-color: #17a2b8;
+  border-left-color: var(--p-cyan-500);
 }
 
 .dropoff-stop .stop-content {
-  border-left-color: #ffc107;
+  border-left-color: var(--p-yellow-500);
 }
 
 .stop-header {
@@ -1042,7 +1039,7 @@ export default {
 
 .stop-name {
   margin: 0;
-  color: #333;
+  color: var(--p-text-color);
   font-size: 1.1rem;
   flex: 1;
 }
@@ -1063,48 +1060,7 @@ export default {
   gap: 4px;
 }
 
-.move-button,
-.delete-button {
-  background-color: #6c757d;
-  color: white;
-  border: none;
-  padding: 4px 8px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 12px;
-  transition: background-color 0.2s;
-  min-width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.move-button:hover:not(:disabled) {
-  background-color: #007bff;
-}
-
-.delete-button:hover:not(:disabled) {
-  background-color: #dc3545;
-}
-
-.move-button:disabled,
-.delete-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-
-.delete-button.delete-disabled {
-  background-color: #ffeaea;
-  border-color: #dc3545;
-  color: #dc3545;
-  cursor: not-allowed;
-}
-
-.delete-button.delete-disabled:hover {
-  background-color: #ffeaea;
-  border-color: #dc3545;
-}
+/* Removed - using PrimeVue Button components */
 
 .type-badge {
   padding: 4px 8px;
@@ -1115,22 +1071,22 @@ export default {
 }
 
 .type-badge.pickup {
-  background-color: #17a2b8;
+  background-color: var(--p-cyan-500);
   color: white;
 }
 
 .type-badge.dropoff {
-  background-color: #ffc107;
-  color: #000;
+  background-color: var(--p-yellow-500);
+  color: var(--p-yellow-950);
 }
 
 .time-badge {
   padding: 4px 8px;
-  background-color: #e9ecef;
+  background-color: var(--p-surface-200);
   border-radius: 12px;
   font-size: 0.7rem;
   font-weight: bold;
-  color: #495057;
+  color: var(--p-text-color);
 }
 
 .stop-details {
@@ -1140,15 +1096,15 @@ export default {
 
 .stop-details > div {
   font-size: 0.9rem;
-  color: #666;
+  color: var(--p-text-muted-color);
 }
 
 .stop-usage-info {
   margin-top: 12px;
   padding: 8px 12px;
-  background-color: #e3f2fd;
-  border-radius: 6px;
-  border-left: 3px solid #2196f3;
+  background-color: var(--p-blue-50);
+  border-radius: var(--p-border-radius);
+  border-left: 3px solid var(--p-blue-500);
 }
 
 .usage-indicator {
@@ -1164,75 +1120,21 @@ export default {
 
 .usage-text {
   font-weight: 600;
-  color: #1976d2;
+  color: var(--p-blue-600);
   font-size: 0.85rem;
 }
 
 .usage-details {
-  color: #666;
+  color: var(--p-text-muted-color);
   font-size: 0.75rem;
 }
 
 .assigned-students {
   font-size: 0.75rem;
-  color: #555;
+  color: var(--p-text-color);
   font-style: italic;
   line-height: 1.3;
 }
-
-.route-connector {
-  position: absolute;
-  left: 15px;
-  top: 50px;
-  width: 2px;
-  height: 40px;
-  background-color: #dee2e6;
-  z-index: 1;
-}
-
-.summary-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
-}
-
-.summary-item h4 {
-  color: #495057;
-  margin-bottom: 15px;
-  border-bottom: 1px solid #e9ecef;
-  padding-bottom: 8px;
-}
-
-.type-breakdown {
-  display: flex;
-  gap: 15px;
-}
-
-.type-count {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.count {
-  font-weight: bold;
-  color: #333;
-}
-
-.timeline-info > div,
-.metadata-info > div {
-  margin-bottom: 8px;
-  font-size: 0.9rem;
-  color: #666;
-}
-
-.no-timeline {
-  color: #999;
-  font-style: italic;
-}
-
-
-
 
 
 .not-found-container {
@@ -1244,28 +1146,18 @@ export default {
 
 .not-found {
   text-align: center;
-  background: white;
+  background: var(--p-surface-0);
   padding: 40px;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: var(--p-border-radius);
+  box-shadow: var(--p-card-shadow);
 }
 
 .not-found h3 {
-  color: #dc3545;
+  color: var(--p-red-500);
   margin-bottom: 15px;
 }
 
 @media (max-width: 768px) {
-  .header-content {
-    flex-direction: column;
-    gap: 15px;
-    text-align: center;
-  }
-  
-  .header-info {
-    flex-direction: column;
-    gap: 10px;
-  }
   
   .overview-grid {
     grid-template-columns: 1fr;
@@ -1286,47 +1178,19 @@ export default {
   }
 }
 
-/* Student Management Styles */
-.students-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  border-bottom: 2px solid #e9ecef;
-  padding-bottom: 10px;
-}
-
-.students-header h2 {
-  margin: 0;
-  color: #333;
-}
-
-.add-student-button {
-  background-color: #28a745;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: background-color 0.2s;
-}
-
-.add-student-button:hover {
-  background-color: #218838;
-}
+/* Removed - using PrimeVue Card and Button components */
 
 .loading-students {
   text-align: center;
   padding: 40px 20px;
-  color: #666;
+  color: var(--p-text-muted-color);
 }
 
 .loading-students .loading-spinner {
   width: 32px;
   height: 32px;
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid #28a745;
+  border: 3px solid var(--p-surface-200);
+  border-top: 3px solid var(--p-green-500);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 15px;
@@ -1334,7 +1198,7 @@ export default {
 
 .no-students {
   text-align: center;
-  color: #666;
+  color: var(--p-text-muted-color);
   font-style: italic;
   padding: 40px 20px;
 }
@@ -1342,19 +1206,19 @@ export default {
 .students-list {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 20px;
 }
 
 .student-assignment-item {
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  border: 1px solid var(--p-surface-300);
+  border-radius: var(--p-border-radius);
   padding: 20px;
-  background-color: #f8f9fa;
+  background-color: var(--p-surface-50);
   transition: box-shadow 0.2s;
 }
 
 .student-assignment-item:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--p-card-shadow);
 }
 
 .student-assignment-item {
@@ -1372,7 +1236,7 @@ export default {
 
 .student-name {
   font-weight: 600;
-  color: #333;
+  color: var(--p-text-color);
   font-size: 1.1rem;
 }
 
@@ -1381,7 +1245,7 @@ export default {
   flex-direction: column;
   gap: 4px;
   font-size: 0.85rem;
-  color: #666;
+  color: var(--p-text-muted-color);
 }
 
 .phone, .email {
@@ -1401,26 +1265,26 @@ export default {
   flex-direction: column;
   gap: 8px;
   padding: 12px;
-  border-radius: 6px;
-  background-color: white;
-  border: 1px solid #e9ecef;
+  border-radius: var(--p-border-radius);
+  background-color: var(--p-surface-0);
+  border: 1px solid var(--p-surface-300);
 }
 
 .stop-info.pickup {
-  border-left: 4px solid #17a2b8;
+  border-left: 4px solid var(--p-cyan-500);
 }
 
 .stop-info.dropoff {
-  border-left: 4px solid #ffc107;
+  border-left: 4px solid var(--p-yellow-500);
 }
 
 .stop-info.no-stop {
-  border-left: 4px solid #dee2e6;
+  border-left: 4px solid var(--p-surface-300);
 }
 
 .stop-label {
   font-weight: 600;
-  color: #495057;
+  color: var(--p-text-color);
   font-size: 0.85rem;
   display: flex;
   align-items: center;
@@ -1434,18 +1298,18 @@ export default {
 }
 
 .stop-name {
-  color: #333;
+  color: var(--p-text-color);
   font-weight: 500;
 }
 
 .stop-time {
-  color: #007bff;
+  color: var(--p-primary-color);
   font-size: 0.85rem;
   font-weight: 500;
 }
 
 .no-stop-assigned {
-  color: #999;
+  color: var(--p-text-muted-color);
   font-style: italic;
   font-size: 0.85rem;
 }
@@ -1459,8 +1323,8 @@ export default {
 
 .edit-button, .remove-button {
   background: none;
-  border: 1px solid #dee2e6;
-  border-radius: 6px;
+  border: 1px solid var(--p-surface-300);
+  border-radius: var(--p-border-radius);
   width: 36px;
   height: 36px;
   cursor: pointer;
@@ -1472,27 +1336,27 @@ export default {
 }
 
 .edit-button:hover {
-  border-color: #007bff;
-  background-color: #e3f2fd;
+  border-color: var(--p-primary-color);
+  background-color: var(--p-primary-50);
 }
 
 .remove-button:hover {
-  border-color: #dc3545;
-  background-color: #ffeaea;
+  border-color: var(--p-red-500);
+  background-color: var(--p-red-50);
 }
 
 .capacity-info {
   margin-top: 20px;
   padding: 15px;
-  background-color: #f8f9fa;
-  border-radius: 6px;
-  border: 1px solid #e9ecef;
+  background-color: var(--p-surface-50);
+  border-radius: var(--p-border-radius);
+  border: 1px solid var(--p-surface-300);
 }
 
 .capacity-bar {
   width: 100%;
   height: 8px;
-  background-color: #e9ecef;
+  background-color: var(--p-surface-300);
   border-radius: 4px;
   overflow: hidden;
   margin-bottom: 8px;
@@ -1500,15 +1364,179 @@ export default {
 
 .capacity-filled {
   height: 100%;
-  background: linear-gradient(90deg, #28a745 0%, #ffc107 70%, #dc3545 100%);
+  background: linear-gradient(90deg, var(--p-green-500) 0%, var(--p-yellow-500) 70%, var(--p-red-500) 100%);
   transition: width 0.3s ease;
 }
 
 .capacity-text {
   text-align: center;
   font-size: 0.9rem;
-  color: #495057;
+  color: var(--p-text-color);
   font-weight: 500;
+}
+
+/* Modern Student Card Styles */
+.student-assignment-card {
+  border: 1px solid var(--p-surface-border);
+  border-radius: var(--p-border-radius);
+  padding: 0;
+  background-color: var(--p-surface-0);
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.student-assignment-card:hover {
+  box-shadow: var(--p-card-shadow);
+  transform: translateY(-2px);
+}
+
+.student-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem;
+  border-bottom: 1px solid var(--p-surface-border);
+}
+
+.student-avatar {
+  flex-shrink: 0;
+}
+
+.student-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.student-name {
+  font-weight: 600;
+  color: var(--p-text-color);
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.student-name i {
+  color: var(--p-primary-color);
+  font-size: 0.9rem;
+}
+
+.student-contact {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.875rem;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--p-text-muted-color);
+}
+
+.contact-item i {
+  color: var(--p-primary-color);
+  font-size: 0.8rem;
+}
+
+.assignment-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.assignment-details {
+  padding: 1.25rem;
+}
+
+.stops-row {
+  display: flex;
+  align-items: stretch;
+  gap: 1rem;
+  min-height: 120px;
+}
+
+.stop-assignment {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.stop-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  flex-shrink: 0;
+}
+
+.stop-icon {
+  font-size: 1rem;
+  padding: 0.25rem;
+  border-radius: 50%;
+}
+
+.pickup-icon {
+  color: var(--p-green-600);
+  background-color: var(--p-green-50);
+}
+
+.dropoff-icon {
+  color: var(--p-orange-600);
+  background-color: var(--p-orange-50);
+}
+
+.stop-label {
+  font-weight: 500;
+  color: var(--p-text-color);
+  font-size: 0.875rem;
+}
+
+.stop-content {
+  background-color: var(--p-surface-50);
+  border-radius: var(--p-border-radius);
+  padding: 0.75rem;
+  border: 1px solid var(--p-surface-border);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.stop-content .stop-name {
+  font-weight: 500;
+  color: var(--p-text-color);
+  margin-bottom: 0.25rem;
+}
+
+.stop-content .stop-time {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--p-text-muted-color);
+}
+
+.stop-content .stop-time i {
+  color: var(--p-primary-color);
+}
+
+.no-stop-assigned {
+  padding: 0.75rem;
+  text-align: center;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.not-assigned {
+  color: var(--p-text-muted-color);
+  font-style: italic;
+  font-size: 0.875rem;
 }
 
 @media (max-width: 768px) {

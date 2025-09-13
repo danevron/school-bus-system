@@ -1,118 +1,185 @@
 <template>
-  <div class="home-container">
-    <header class="header">
-      <div class="header-content">
-        <h1>School Bus System</h1>
-        <div class="user-info">
-          <span>Welcome, {{ authStore.user?.firstName }} {{ authStore.user?.lastName }}</span>
-          <span class="role-badge" :class="roleClass">{{ userRole }}</span>
-          <button @click="handleLogout" class="logout-button">Logout</button>
-        </div>
-      </div>
-    </header>
+  <AppLayout 
+    page-title="Dashboard" 
+    :show-action-bar="false"
+  >
+      <Card class="dashboard">
+        <template #content>
+          <div class="welcome-section">
+            <h2>Welcome to the School Bus Management System</h2>
+          </div>
 
-    <main class="main-content">
-      <div class="dashboard">
-        <div class="welcome-section">
-          <h2>Dashboard</h2>
-          <p>Welcome to the School Bus Management System. Your role is: <strong>{{ userRole }}</strong></p>
-        </div>
+          <div class="role-specific-content">
+            <!-- Admin View -->
+            <div v-if="userRole === 'admin'" class="admin-dashboard">
+              <div class="dashboard-cards">
+                <Card class="dashboard-card">
+                  <template #title>
+                    <h4>Lines Management</h4>
+                  </template>
+                  <template #content>
+                    <p>Create and manage transportation lines with routes</p>
+                    <Button @click="goToLineManagement" class="w-full">
+                      Manage Lines
+                    </Button>
+                  </template>
+                </Card>
+                
+                <Card class="dashboard-card">
+                  <template #title>
+                    <h4>Users Management</h4>
+                  </template>
+                  <template #content>
+                    <p>Manage drivers, parents, and students</p>
+                    <Button @click="goToUserManagement" class="w-full">
+                      Manage Users
+                    </Button>
+                  </template>
+                </Card>
+                
+                <Card class="dashboard-card">
+                  <template #title>
+                    <h4>Ride Management</h4>
+                  </template>
+                  <template #content>
+                    <p>Create and manage individual rides</p>
+                    <Button @click="goToRideManagement" class="w-full">
+                      Manage Rides
+                    </Button>
+                  </template>
+                </Card>
+              </div>
+            </div>
 
-        <div class="role-specific-content">
-          <!-- Admin View -->
-          <div v-if="userRole === 'admin'" class="admin-dashboard">
-            <h3>Admin Dashboard</h3>
-            <div class="dashboard-cards">
-              <div class="dashboard-card">
-                <h4>Lines Management</h4>
-                <p>Create and manage transportation lines with routes</p>
-                <button class="action-button" @click="goToLineManagement">Manage Lines</button>
+            <!-- Driver View -->
+            <div v-if="userRole === 'driver'" class="driver-dashboard">
+              <h3>Driver Dashboard</h3>
+              <div class="dashboard-cards">
+                <Card class="dashboard-card">
+                  <template #title>
+                    <h4>My Lines</h4>
+                  </template>
+                  <template #content>
+                    <p>View and manage your assigned transportation lines</p>
+                    <Button disabled class="w-full" severity="secondary">
+                      View Lines
+                    </Button>
+                  </template>
+                </Card>
+                
+                <Card class="dashboard-card">
+                  <template #title>
+                    <h4>Today's Schedule</h4>
+                  </template>
+                  <template #content>
+                    <p>Check today's transportation schedule</p>
+                    <Button disabled class="w-full" severity="secondary">
+                      View Schedule
+                    </Button>
+                  </template>
+                </Card>
+                
+                <Card class="dashboard-card">
+                  <template #title>
+                    <h4>Student Status</h4>
+                  </template>
+                  <template #content>
+                    <p>Update student pickup/dropoff status</p>
+                    <Button disabled class="w-full" severity="secondary">
+                      Update Status
+                    </Button>
+                  </template>
+                </Card>
               </div>
-              <div class="dashboard-card">
-                <h4>Users Management</h4>
-                <p>Manage drivers, parents, and students</p>
-                <button class="action-button" @click="goToUserManagement">Manage Users</button>
+            </div>
+
+            <!-- Parent View -->
+            <div v-if="userRole === 'parent'" class="parent-dashboard">
+              <h3>Parent Dashboard</h3>
+              <div class="dashboard-cards">
+                <Card class="dashboard-card">
+                  <template #title>
+                    <h4>My Children's Transportation</h4>
+                  </template>
+                  <template #content>
+                    <p>View your children's transportation schedules</p>
+                    <Button disabled class="w-full" severity="secondary">
+                      View Transportation
+                    </Button>
+                  </template>
+                </Card>
+                
+                <Card class="dashboard-card">
+                  <template #title>
+                    <h4>Transportation Status</h4>
+                  </template>
+                  <template #content>
+                    <p>View your children's current transportation assignments</p>
+                    <Button disabled class="w-full" severity="secondary">
+                      View Assignments
+                    </Button>
+                  </template>
+                </Card>
               </div>
-              <div class="dashboard-card">
-                <h4>Ride Management</h4>
-                <p>Create and manage individual rides</p>
-                <button class="action-button" @click="goToRideManagement">Manage Rides</button>
+            </div>
+
+            <!-- Student View -->
+            <div v-if="userRole === 'student'" class="student-dashboard">
+              <h3>Student Dashboard</h3>
+              <div class="dashboard-cards">
+                <Card class="dashboard-card">
+                  <template #title>
+                    <h4>My Transportation</h4>
+                  </template>
+                  <template #content>
+                    <p>View your assigned transportation lines</p>
+                    <Button disabled class="w-full" severity="secondary">
+                      View Transportation
+                    </Button>
+                  </template>
+                </Card>
+                
+                <Card class="dashboard-card">
+                  <template #title>
+                    <h4>Today's Schedule</h4>
+                  </template>
+                  <template #content>
+                    <p>Check today's transportation information</p>
+                    <Button disabled class="w-full" severity="secondary">
+                      Today's Info
+                    </Button>
+                  </template>
+                </Card>
+                
+                <Card class="dashboard-card">
+                  <template #title>
+                    <h4>Route Information</h4>
+                  </template>
+                  <template #content>
+                    <p>View your route details</p>
+                    <Button disabled class="w-full" severity="secondary">
+                      View Route
+                    </Button>
+                  </template>
+                </Card>
               </div>
             </div>
           </div>
-
-          <!-- Driver View -->
-          <div v-if="userRole === 'driver'" class="driver-dashboard">
-            <h3>Driver Dashboard</h3>
-            <div class="dashboard-cards">
-              <div class="dashboard-card">
-                <h4>My Lines</h4>
-                <p>View and manage your assigned transportation lines</p>
-                <button class="action-button" disabled>View Lines</button>
-              </div>
-              <div class="dashboard-card">
-                <h4>Today's Schedule</h4>
-                <p>Check today's transportation schedule</p>
-                <button class="action-button" disabled>View Schedule</button>
-              </div>
-              <div class="dashboard-card">
-                <h4>Student Status</h4>
-                <p>Update student pickup/dropoff status</p>
-                <button class="action-button" disabled>Update Status</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Parent View -->
-          <div v-if="userRole === 'parent'" class="parent-dashboard">
-            <h3>Parent Dashboard</h3>
-            <div class="dashboard-cards">
-              <div class="dashboard-card">
-                <h4>My Children's Transportation</h4>
-                <p>View your children's transportation schedules</p>
-                <button class="action-button" disabled>View Transportation</button>
-              </div>
-              <div class="dashboard-card">
-                <h4>Transportation Status</h4>
-                <p>View your children's current transportation assignments</p>
-                <button class="action-button" disabled>View Assignments</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Student View -->
-          <div v-if="userRole === 'student'" class="student-dashboard">
-            <h3>Student Dashboard</h3>
-            <div class="dashboard-cards">
-              <div class="dashboard-card">
-                <h4>My Transportation</h4>
-                <p>View your assigned transportation lines</p>
-                <button class="action-button" disabled>View Transportation</button>
-              </div>
-              <div class="dashboard-card">
-                <h4>Today's Schedule</h4>
-                <p>Check today's transportation information</p>
-                <button class="action-button" disabled>Today's Info</button>
-              </div>
-              <div class="dashboard-card">
-                <h4>Route Information</h4>
-                <p>View your route details</p>
-                <button class="action-button" disabled>View Route</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </main>
-  </div>
+        </template>
+      </Card>
+  </AppLayout>
 </template>
 
 <script>
 import { inject, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import AppLayout from '../components/AppLayout.vue'
 
 export default {
   name: 'Home',
+  components: {
+    AppLayout
+  },
   setup() {
     const authStore = inject('authStore')
     const router = useRouter()
@@ -120,16 +187,6 @@ export default {
     const userRole = computed(() => {
       return authStore.user?.role || 'Unknown'
     })
-    
-    const roleClass = computed(() => {
-      const role = userRole.value.toLowerCase()
-      return `role-${role}`
-    })
-    
-    const handleLogout = () => {
-      authStore.logout()
-      router.push('/login')
-    }
     
     const goToUserManagement = () => {
       router.push('/user-management')
@@ -144,10 +201,7 @@ export default {
     }
     
     return {
-      authStore,
       userRole,
-      roleClass,
-      handleLogout,
       goToUserManagement,
       goToLineManagement,
       goToRideManagement
@@ -157,77 +211,7 @@ export default {
 </script>
 
 <style scoped>
-.home-container {
-  min-height: 100vh;
-  background-color: #f8f9fa;
-}
-
-.header {
-  background-color: #007bff;
-  color: white;
-  padding: 1rem 0;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.header-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.header h1 {
-  margin: 0;
-  font-size: 1.8rem;
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.role-badge {
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: bold;
-  text-transform: uppercase;
-}
-
-.role-admin { background-color: #dc3545; }
-.role-driver { background-color: #28a745; }
-.role-parent { background-color: #ffc107; color: #000; }
-.role-student { background-color: #17a2b8; }
-
-.logout-button {
-  background-color: #6c757d;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.logout-button:hover {
-  background-color: #545b62;
-}
-
-.main-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 30px 20px;
-}
-
-.dashboard {
-  background: white;
-  border-radius: 8px;
-  padding: 30px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
+/* Dashboard specific styles */
 
 .welcome-section {
   margin-bottom: 40px;
@@ -235,12 +219,12 @@ export default {
 }
 
 .welcome-section h2 {
-  color: #333;
+  color: var(--p-text-color);
   margin-bottom: 10px;
 }
 
 .welcome-section p {
-  color: #666;
+  color: var(--p-text-muted-color);
   font-size: 1.1rem;
 }
 
@@ -249,53 +233,32 @@ export default {
 }
 
 .role-specific-content h3 {
-  color: #333;
+  color: var(--p-text-color);
   margin-bottom: 20px;
   font-size: 1.5rem;
 }
 
 .dashboard-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 20px;
   margin-bottom: 30px;
 }
 
 .dashboard-card {
-  background: #f8f9fa;
-  border: 1px solid #dee2e6;
-  border-radius: 8px;
-  padding: 20px;
   text-align: center;
 }
 
 .dashboard-card h4 {
-  color: #333;
-  margin-bottom: 10px;
+  color: var(--p-text-color);
+  margin: 0;
+  font-size: 1.1rem;
 }
 
 .dashboard-card p {
-  color: #666;
+  color: var(--p-text-muted-color);
   margin-bottom: 15px;
-  font-size: 0.9rem;
-}
-
-.action-button {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.action-button:hover:not(:disabled) {
-  background-color: #0056b3;
-}
-
-.action-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
+  font-size: 0.95rem;
+  line-height: 1.4;
 }
 </style>

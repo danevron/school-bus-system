@@ -1,59 +1,69 @@
 <template>
   <div class="login-container">
-    <div class="login-card">
-      <h1>School Bus System</h1>
-      
-      <!-- Toggle between Login and Signup -->
-      <div class="form-toggle">
-        <button 
-          type="button"
-          @click="isSignup = false" 
-          :class="['toggle-btn', { active: !isSignup }]"
-        >
-          Login
-        </button>
-        <button 
-          type="button"
-          @click="isSignup = true" 
-          :class="['toggle-btn', { active: isSignup }]"
-        >
-          Sign Up
-        </button>
-      </div>
+    <Card class="login-card">
+      <template #content>
+        <!-- Logo and Header Section -->
+        <div class="login-header">
+          <div class="logo-container">
+            <i class="pi pi-car" style="font-size: 3rem; color: var(--p-primary-color);"></i>
+          </div>
+          <h1>Welcome to PrimeLand!</h1>
+          <p class="login-subtitle">Sign in to continue</p>
+        </div>
+        <!-- Toggle between Login and Signup -->
+        <div class="form-toggle">
+          <SelectButton 
+            v-model="selectedMode" 
+            :options="modeOptions"
+            optionLabel="label"
+            optionValue="value"
+          />
+        </div>
 
-      <h2>{{ isSignup ? 'Create Account' : 'Login' }}</h2>
+        <h2>{{ isSignup ? 'Create Account' : 'Login' }}</h2>
       
       <!-- Login Form -->
       <form v-if="!isSignup" @submit.prevent="handleLogin" class="login-form">
         <div class="form-group">
           <label for="email">Email:</label>
-          <input 
-            id="email"
-            type="email" 
-            v-model="email" 
-            required 
-            :disabled="authStore.loading"
-          />
+          <IconField>
+            <InputIcon>
+              <i class="pi pi-envelope" />
+            </InputIcon>
+            <InputText 
+              id="email"
+              type="email" 
+              v-model="email" 
+              required 
+              :disabled="authStore.loading"
+              fluid
+              placeholder="Enter your email"
+            />
+          </IconField>
         </div>
         
         <div class="form-group">
           <label for="password">Password:</label>
-          <input 
+          <Password 
             id="password"
-            type="password" 
             v-model="password" 
             required 
             :disabled="authStore.loading"
+            fluid
+            placeholder="Enter your password"
+            :feedback="false"
+            toggleMask
           />
         </div>
         
-        <button 
+        <Button 
           type="submit" 
-          class="login-button"
+          class="w-full"
           :disabled="authStore.loading"
+          :loading="authStore.loading"
         >
           {{ authStore.loading ? 'Logging in...' : 'Login' }}
-        </button>
+        </Button>
       </form>
 
       <!-- Signup Form -->
@@ -61,91 +71,124 @@
         <div class="form-row">
           <div class="form-group">
             <label for="signup-firstName">First Name:</label>
-            <input 
-              id="signup-firstName"
-              type="text" 
-              v-model="signupForm.firstName" 
-              required 
-              :disabled="authStore.loading"
-            />
+            <IconField>
+              <InputIcon>
+                  <i class="pi pi-user" />
+              </InputIcon>
+              <InputText 
+                id="signup-firstName"
+                v-model="signupForm.firstName" 
+                required 
+                :disabled="authStore.loading"
+                fluid
+                placeholder="First name"
+              />
+            </IconField>
           </div>
           <div class="form-group">
             <label for="signup-lastName">Last Name:</label>
-            <input 
-              id="signup-lastName"
-              type="text" 
-              v-model="signupForm.lastName" 
-              required 
-              :disabled="authStore.loading"
-            />
+            <IconField>
+              <InputIcon>
+                  <i class="pi pi-user" />
+              </InputIcon>
+              <InputText 
+                id="signup-lastName"
+                v-model="signupForm.lastName" 
+                required 
+                :disabled="authStore.loading"
+                fluid
+                placeholder="Last name"
+              />
+            </IconField>
           </div>
         </div>
 
         <div class="form-group">
           <label for="signup-email">Email:</label>
-          <input 
-            id="signup-email"
-            type="email" 
-            v-model="signupForm.email" 
-            required 
-            :disabled="authStore.loading"
-          />
+          <IconField>
+            <InputIcon>
+              <i class="pi pi-envelope" />
+            </InputIcon>
+            <InputText 
+              id="signup-email"
+              type="email" 
+              v-model="signupForm.email" 
+              required 
+              :disabled="authStore.loading"
+              fluid
+              placeholder="Enter your email"
+            />
+          </IconField>
         </div>
 
         <div class="form-group">
           <label for="signup-phone">Phone:</label>
-          <input 
-            id="signup-phone"
-            type="tel" 
-            v-model="signupForm.phone" 
-            required 
-            :disabled="authStore.loading"
-            placeholder="+1234567890"
-          />
+
+          <IconField>
+            <InputIcon>
+              <i class="pi pi-phone" />
+            </InputIcon>
+            <InputText 
+              id="signup-phone"
+              type="tel" 
+              v-model="signupForm.phone" 
+              required 
+              :disabled="authStore.loading"
+              fluid
+              placeholder="+1234567890"
+            />
+          </IconField>
         </div>
 
 
         <div class="form-group">
           <label for="signup-password">Password:</label>
-          <input 
+          <Password 
             id="signup-password"
-            type="password" 
             v-model="signupForm.password" 
             required 
             :disabled="authStore.loading"
-            minlength="6"
+            fluid
+            placeholder="Enter password (min 6 characters)"
+            :feedback="true"
+            toggleMask
           />
         </div>
 
         <div class="form-group">
           <label for="signup-confirmPassword">Confirm Password:</label>
-          <input 
+          <Password 
             id="signup-confirmPassword"
-            type="password" 
             v-model="signupForm.confirmPassword" 
             required 
             :disabled="authStore.loading"
-            minlength="6"
+            fluid
+            placeholder="Confirm your password"
+            :feedback="false"
+            toggleMask
           />
         </div>
         
-        <button 
+        <Button 
           type="submit" 
-          class="signup-button"
+          class="w-full"
           :disabled="authStore.loading || !isSignupFormValid"
+          :loading="authStore.loading"
+          severity="success"
         >
           {{ authStore.loading ? 'Creating Account...' : 'Create Account' }}
-        </button>
+        </Button>
       </form>
       
-      <div v-if="successMessage" class="success-message">
-        {{ successMessage }}
-      </div>
+        <div v-if="successMessage" class="success-message">
+          {{ successMessage }}
+        </div>
 
-      <div v-if="authStore.error" class="error-message">
-        {{ authStore.error }}
-      </div>
-    </div>
+        <div v-if="authStore.error" class="error-message">
+          {{ authStore.error }}
+        </div>
+      </template>
+    </Card>
   </div>
 </template>
 
@@ -160,7 +203,11 @@ export default {
     const router = useRouter()
     const route = useRoute()
     
-    const isSignup = ref(false)
+    const selectedMode = ref('login')
+    const modeOptions = ref([
+      { label: 'Login', value: 'login' },
+      { label: 'Sign Up', value: 'signup' }
+    ])
     const email = ref('')
     const password = ref('')
     const successMessage = ref('')
@@ -172,6 +219,10 @@ export default {
       phone: '',
       password: '',
       confirmPassword: ''
+    })
+    
+    const isSignup = computed(() => {
+      return selectedMode.value === 'signup'
     })
     
     const isSignupFormValid = computed(() => {
@@ -216,6 +267,7 @@ export default {
     }
     
     
+    
     onMounted(() => {
       if (route.query.message) {
         successMessage.value = route.query.message
@@ -223,6 +275,8 @@ export default {
     })
     
     return {
+      selectedMode,
+      modeOptions,
       isSignup,
       email,
       password,
@@ -243,148 +297,95 @@ export default {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: #f5f5f5;
+  background-color: var(--p-surface-ground);
   padding: 20px;
 }
 
 .login-card {
-  background: white;
-  border-radius: 8px;
-  padding: 40px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 450px;
+  box-shadow: var(--p-card-shadow);
 }
 
 .form-toggle {
   display: flex;
-  background-color: #f8f9fa;
-  border-radius: 6px;
-  padding: 4px;
-  margin-bottom: 20px;
-}
-
-.toggle-btn {
-  flex: 1;
-  padding: 8px 16px;
-  background: none;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.2s;
-  color: #666;
-}
-
-.toggle-btn.active {
-  background-color: #007bff;
-  color: white;
+  justify-content: center;
+  margin-bottom: 2rem;
 }
 
 .form-row {
   display: flex;
-  gap: 15px;
+  gap: 1rem;
 }
 
 .form-row .form-group {
   flex: 1;
 }
 
-h1 {
+.login-header {
   text-align: center;
-  color: #333;
-  margin-bottom: 10px;
+  margin-bottom: 2rem;
+}
+
+.logo-container {
+  margin-bottom: 1rem;
+}
+
+.login-header h1 {
+  color: var(--p-text-color);
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}
+
+.login-subtitle {
+  color: var(--p-text-muted-color);
+  font-size: 1rem;
+  margin: 0 0 2rem 0;
 }
 
 h2 {
   text-align: center;
-  color: #666;
-  margin-bottom: 30px;
+  color: var(--p-text-muted-color);
+  margin-bottom: 2rem;
+  font-weight: 500;
 }
 
-.login-form {
-  margin-bottom: 30px;
+.login-form,
+.signup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 .form-group {
-  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 label {
-  display: block;
-  margin-bottom: 5px;
-  color: #333;
-  font-weight: bold;
-}
-
-input {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 16px;
-}
-
-input:focus {
-  outline: none;
-  border-color: #007bff;
-}
-
-input:disabled {
-  background-color: #f5f5f5;
-  cursor: not-allowed;
-}
-
-.login-button,
-.signup-button {
-  width: 100%;
-  padding: 12px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.login-button:hover:not(:disabled),
-.signup-button:hover:not(:disabled) {
-  background-color: #0056b3;
-}
-
-.login-button:disabled,
-.signup-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-
-.signup-button {
-  background-color: #28a745;
-}
-
-.signup-button:hover:not(:disabled) {
-  background-color: #218838;
+  font-weight: 600;
+  color: var(--p-text-color);
 }
 
 .success-message {
-  color: #28a745;
+  color: var(--p-green-600);
   text-align: center;
-  margin-bottom: 15px;
-  padding: 10px;
-  background-color: #d4edda;
-  border: 1px solid #c3e6cb;
-  border-radius: 4px;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background-color: var(--p-green-50);
+  border: 1px solid var(--p-green-200);
+  border-radius: var(--p-border-radius);
 }
 
 .error-message {
-  color: #dc3545;
+  color: var(--p-red-600);
   text-align: center;
-  margin-top: 15px;
-  padding: 10px;
-  background-color: #f8d7da;
-  border: 1px solid #f5c6cb;
-  border-radius: 4px;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background-color: var(--p-red-50);
+  border: 1px solid var(--p-red-200);
+  border-radius: var(--p-border-radius);
 }
 </style>
