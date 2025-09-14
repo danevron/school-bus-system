@@ -7,6 +7,7 @@
     "save": "Save",
     "cancel": "Cancel",
     "delete": "Delete",
+    "remove": "Remove",
     "edit": "Edit",
     "add": "Add",
     "search": "Search",
@@ -83,7 +84,7 @@
       "password": "Enter your password",
       "firstName": "First name",
       "lastName": "Last name",
-      "phone": "+1234567890",
+      "phone": "052-1234567",
       "signupPassword": "Enter password (min 6 characters)",
       "confirmPassword": "Confirm your password"
     },
@@ -451,13 +452,16 @@
     "lineNotFoundError": "Line not found. It may have been deleted or the ID is invalid.",
     "failedToAddStop": "Failed to add stop",
     "cannotDeleteStopMessage": "Cannot delete \"{stopName}\": This stop is currently assigned to {studentCount} student(s): {students}.\n\nPlease remove student assignments before deleting this stop.",
-    "confirmDeleteStop": "Are you sure you want to delete \"{stopName}\"?",
+    "confirmDeleteStopSimple": "Are you sure you want to delete this stop?",
+    "confirmDeleteStopHeader": "Delete Stop",
     "removeStudentAssignmentsFirst": "Please remove student assignments before deleting this stop.",
     "failedToDeleteStop": "Failed to delete stop",
     "failedToReorderStops": "Failed to reorder stops",
     "failedToAssignStudent": "Failed to assign student to line",
     "failedToUpdateStudentAssignment": "Failed to update student assignment",
     "confirmRemoveStudent": "Remove {studentName} from this line?",
+    "confirmRemoveStudentSimple": "Are you sure you want to remove this student from the line?",
+    "confirmRemoveStudentHeader": "Remove Student",
     "failedToRemoveStudent": "Failed to remove student from line"
   },
   "invitation": {
@@ -532,12 +536,6 @@
     "note": "Note",
     "noteText": "You can configure routes and assign students after creating the line through the line management interface.",
     "failedToCreateLine": "Failed to create line. Please try again.",
-    "selectBothDates": "Select both dates to see duration",
-    "oneDayDuration": "1 day",
-    "daysDuration": "{days} days",
-    "weeksDuration": "{weeks} week | {weeks} weeks",
-    "weeksDaysDuration": "{weeks} week {days} day | {weeks} weeks {days} days",
-    "yearsDuration": "{years} year | {years} years",
     "days": {
       "sunday": "Sunday",
       "monday": "Monday",
@@ -613,6 +611,20 @@
     "updateAssignment": "Update Assignment",
     "addStudent": "Add Student",
     "addStudentNoStops": "Add Student (No Stops)"
+  },
+  "liveTrackingMap": {
+    "loadingMap": "Loading map...",
+    "noLiveLocationData": "No Live Location Data",
+    "noLocationDescription": "The bus hasn't shared location data yet or GPS is not available.",
+    "center": "Center",
+    "centerOnBus": "Center on Bus",
+    "pickup": "Pickup",
+    "dropoff": "Dropoff",
+    "noAddressProvided": "No address provided",
+    "schoolBus": "School Bus",
+    "liveLocation": "Live Location",
+    "latitude": "Lat",
+    "longitude": "Lng"
   },
   "messages": {
     "studentCreated": "Student created successfully!",

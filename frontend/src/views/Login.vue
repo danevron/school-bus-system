@@ -133,11 +133,12 @@
             <InputIcon>
               <i class="pi pi-phone" />
             </InputIcon>
-            <InputText 
+            <InputMask 
               id="signup-phone"
               type="tel" 
               v-model="signupForm.phone" 
-              required 
+              required
+              mask="999-9999999"
               :disabled="authStore.loading"
               fluid
               :placeholder="$t('login.placeholders.phone')"

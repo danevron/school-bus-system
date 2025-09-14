@@ -63,7 +63,7 @@
                     <InputMask 
                       id="studentPhone"
                       v-model="studentForm.phone" 
-                      mask="(999) 999-9999"
+                      mask="999-9999999"
                       :placeholder="$t('login.placeholders.phone')"
                       required 
                       :disabled="loading"
@@ -468,7 +468,7 @@ export default {
     const authStore = inject('authStore')
     const router = useRouter()
     const { t } = useI18n()
-    
+
     const breadcrumbs = computed(() => [
       { label: t('navigation.dashboard'), path: '/home' },
       { label: t('users.title') }

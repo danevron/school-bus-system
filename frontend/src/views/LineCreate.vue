@@ -117,10 +117,6 @@
                     <div v-if="errors.endDate" class="error-message">{{ errors.endDate }}</div>
                   </div>
                 </div>
-                
-                <div class="field-hint">
-                  {{ $t('lineCreate.duration') }}: {{ calculateDuration() }}
-                </div>
               </div>
 
               <div class="form-group">
@@ -470,38 +466,6 @@ export default {
       return today.toISOString().split('T')[0]
     }
     
-    const calculateDuration = () => {
-      if (!formData.value.startDate || !formData.value.endDate) {
-        return t('lineCreate.selectBothDates')
-      }
-      
-      const start = new Date(formData.value.startDate)
-      const end = new Date(formData.value.endDate)
-      const diffTime = Math.abs(end - start)
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1 // +1 to include both start and end date
-      
-      if (diffDays === 1) {
-        return t('lineCreate.oneDayDuration')
-      } else if (diffDays < 30) {
-        return t('lineCreate.daysDuration', { days: diffDays })
-      } else if (diffDays < 365) {
-        const weeks = Math.floor(diffDays / 7)
-        const remainingDays = diffDays % 7
-        if (weeks > 0) {
-          if (remainingDays > 0) {
-            return t('lineCreate.weeksDaysDuration', { weeks, days: remainingDays })
-          } else {
-            return t('lineCreate.weeksDuration', { weeks })
-          }
-        } else {
-          return t('lineCreate.daysDuration', { days: diffDays })
-        }
-      } else {
-        const years = Math.floor(diffDays / 365)
-        return t('lineCreate.yearsDuration', { years })
-      }
-    }
-    
     const selectWeekdays = () => {
       formData.value.scheduleDays = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday']
       clearFieldError('scheduleDays')
@@ -552,7 +516,6 @@ export default {
       validateField,
       clearFieldError,
       getTodayDate,
-      calculateDuration,
       formatSelectedDays,
       selectWeekdays,
       selectAllDays,

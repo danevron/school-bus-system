@@ -207,14 +207,14 @@
               <div class="stat">
                 <i class="pi pi-globe stat-icon"></i>
                 <div class="stat-info">
-                  <span class="stat-value">{{ ride.route.totalDistance || 0 }}km</span>
+                  <span class="stat-value">{{ ride.route.totalDistance || 0 }} {{ $t('common.km') }}</span>
                   <span class="stat-label">{{ $t('rideView.distance') }}</span>
                 </div>
               </div>
               <div class="stat">
                 <i class="pi pi-clock stat-icon"></i>
                 <div class="stat-info">
-                  <span class="stat-value">{{ ride.route.estimatedDuration || 0 }}min</span>
+                  <span class="stat-value">{{ ride.route.estimatedDuration || 0 }} {{ $t('common.min') }}</span>
                   <span class="stat-label">{{ $t('rideView.duration') }}</span>
                 </div>
               </div>
@@ -227,7 +227,7 @@
                   <div class="stop-info">
                     <div class="stop-main">
                       <span class="stop-name">{{ stop.name }}</span>
-                      <span class="stop-type" :class="stop.type">{{ stop.type }}</span>
+                      <span class="stop-type" :class="stop.type">{{ $t('rideView.' + stop.type) }}</span>
                     </div>
                     <div class="stop-address">{{ stop.address }}</div>
                     <div v-if="stop.estimatedArrivalTime" class="stop-time">
@@ -604,7 +604,7 @@
               </div>
               <div v-if="rideProgress && rideProgress.totalDistance" class="info-item">
                 <span class="info-label">{{ $t('rideView.distanceTraveled') }}:</span>
-                <span class="info-value">{{ Math.round(rideProgress.totalDistance * 100) / 100 }} km</span>
+                <span class="info-value">{{ Math.round(rideProgress.totalDistance * 100) / 100 }} {{ $t('common.km') }}</span>
               </div>
             </div>
             

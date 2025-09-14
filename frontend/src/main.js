@@ -23,6 +23,8 @@ import SelectButton from 'primevue/selectbutton'
 import Avatar from 'primevue/avatar'
 import Toast from 'primevue/toast'
 import ToastService from 'primevue/toastservice'
+import ConfirmDialog from 'primevue/confirmdialog'
+import ConfirmationService from 'primevue/confirmationservice'
 import InputMask from 'primevue/inputmask'
 import IconField from 'primevue/iconfield'
 import InputIcon from 'primevue/inputicon'
@@ -48,6 +50,7 @@ app.use(PrimeVue, {
   }
 })
 app.use(ToastService)
+app.use(ConfirmationService)
 
 // Register PrimeVue components globally
 app.component('Button', Button)
@@ -64,6 +67,7 @@ app.component('Checkbox', Checkbox)
 app.component('SelectButton', SelectButton)
 app.component('Avatar', Avatar)
 app.component('Toast', Toast)
+app.component('ConfirmDialog', ConfirmDialog)
 app.component('Select', Select) 
 app.component('InputMask', InputMask)
 app.component('IconField', IconField)

@@ -3,13 +3,13 @@
     <div :id="uniqueMapId" :style="{ height: mapHeight }" class="map-container">
       <div v-if="!mapLoaded" class="map-loading">
         <div class="loading-spinner"></div>
-        <span>Loading map...</span>
+        <span>{{ $t('liveTrackingMap.loadingMap') }}</span>
       </div>
       <div v-if="!busLocation && mapLoaded" class="no-location-overlay">
         <div class="no-location-content">
           <div class="no-location-icon">📍</div>
-          <h4>No Live Location Data</h4>
-          <p>The bus hasn't shared location data yet or GPS is not available.</p>
+          <h4>{{ $t('liveTrackingMap.noLiveLocationData') }}</h4>
+          <p>{{ $t('liveTrackingMap.noLocationDescription') }}</p>
         </div>
       </div>
     </div>
@@ -19,8 +19,8 @@
           📍 {{ Math.round(busLocation.latitude * 10000) / 10000 }}, 
           {{ Math.round(busLocation.longitude * 10000) / 10000 }}
         </span>
-        <button @click="centerOnBus" class="center-bus-btn" title="Center on Bus">
-          🎯 Center
+        <button @click="centerOnBus" class="center-bus-btn" :title="$t('liveTrackingMap.centerOnBus')">
+          🎯 {{ $t('liveTrackingMap.center') }}
         </button>
       </div>
     </div>
@@ -29,6 +29,7 @@
 
 <script>
 import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
@@ -57,6 +58,7 @@ export default {
     }
   },
   setup(props) {
+    const { t } = useI18n()
     const map = ref(null)
     const mapLoaded = ref(false)
     const busMarker = ref(null)
@@ -164,9 +166,9 @@ export default {
           <div class="stop-popup">
             <h4>${stop.name}</h4>
             <div class="popup-type">
-              <span class="type-badge ${stop.type}">${stop.type}</span>
+              <span class="type-badge ${stop.type}">${t('liveTrackingMap.' + stop.type)}</span>
             </div>
-            <div class="popup-address">${stop.address || 'No address provided'}</div>
+            <div class="popup-address">${stop.address || t('liveTrackingMap.noAddressProvided')}</div>
           </div>
         `
 
@@ -215,11 +217,11 @@ export default {
         // Bus popup
         const busPopupContent = `
           <div class="bus-popup">
-            <h4>🚌 School Bus</h4>
-            <p><strong>Live Location</strong></p>
+            <h4>🚌 ${t('liveTrackingMap.schoolBus')}</h4>
+            <p><strong>${t('liveTrackingMap.liveLocation')}</strong></p>
             <div class="coordinates">
-              <div>Lat: ${location.latitude.toFixed(6)}</div>
-              <div>Lng: ${location.longitude.toFixed(6)}</div>
+              <div>${t('liveTrackingMap.latitude')}: ${location.latitude.toFixed(6)}</div>
+              <div>${t('liveTrackingMap.longitude')}: ${location.longitude.toFixed(6)}</div>
             </div>
           </div>
         `
@@ -292,7 +294,8 @@ export default {
     return {
       uniqueMapId,
       mapLoaded,
-      centerOnBus
+      centerOnBus,
+      t
     }
   }
 }

@@ -192,14 +192,14 @@
                   <div class="stat">
                     <span class="stat-icon">📏</span>
                     <div class="stat-info">
-                      <span class="stat-value">{{ line.route.totalDistance || 0 }}km</span>
+                      <span class="stat-value">{{ line.route.totalDistance || 0 }} {{ $t('common.km') }}</span>
                       <span class="stat-label">{{ $t('lineView.distance') }}</span>
                     </div>
                   </div>
                   <div class="stat">
                     <span class="stat-icon">⏱️</span>
                     <div class="stat-info">
-                      <span class="stat-value">{{ line.route.estimatedDuration || 0 }}min</span>
+                      <span class="stat-value">{{ line.route.estimatedDuration || 0 }} {{ $t('common.min') }}</span>
                       <span class="stat-label">{{ $t('lineView.duration') }}</span>
                     </div>
                   </div>
@@ -249,9 +249,6 @@
                           <div v-if="getStopStudents(stop).pickup.length > 0 || getStopStudents(stop).dropoff.length > 0" class="stop-usage-info">
                             <div class="usage-indicator">
                               <span class="usage-icon">👥</span>
-                              <span class="usage-text">
-                                {{ (getStopStudents(stop).pickup.length + getStopStudents(stop).dropoff.length) }} {{ $t('lineView.studentAssigned', { count: getStopStudents(stop).pickup.length + getStopStudents(stop).dropoff.length }) }}
-                              </span>
                               <span class="usage-details">
                                 ({{ getStopStudents(stop).pickup.length }} {{ $t('lineView.pickup') }}, {{ getStopStudents(stop).dropoff.length }} {{ $t('lineView.dropoff') }})
                               </span>

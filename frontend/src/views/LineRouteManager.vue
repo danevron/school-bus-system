@@ -169,9 +169,6 @@
                   <div v-if="getStopUsageInfo(stop)" class="stop-usage-info">
                     <div class="usage-indicator">
                       <span class="usage-icon">👥</span>
-                      <span class="usage-text">
-                        {{ $t('routeManager.studentsAssigned', getStopUsageInfo(stop).totalStudents) }}
-                      </span>
                       <span class="usage-details">
                         ({{ getStopUsageInfo(stop).pickupCount }} {{ $t('lineView.pickup') }}, {{ getStopUsageInfo(stop).dropoffCount }} {{ $t('lineView.dropoff') }})
                       </span>
@@ -370,6 +367,9 @@
       @close="handleStopSelectionClose"
       @save="handleStopAssignmentSave"
     />
+
+    <!-- Confirm Dialog -->
+    <ConfirmDialog />
     </div>
     </AppLayout>
 </template>
@@ -378,6 +378,7 @@
 import { ref, reactive, computed, inject, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { useConfirm } from 'primevue/useconfirm'
 import apiService from '../services/api'
 import AppLayout from '../components/AppLayout.vue'
 import StopCreationDialog from '../components/StopCreationDialog.vue'
@@ -398,6 +399,7 @@ export default {
     const router = useRouter()
     const route = useRoute()
     const { t } = useI18n()
+    const confirm = useConfirm()
     const lineId = route.params.lineId
     
     const breadcrumbs = computed(() => [
@@ -576,27 +578,35 @@ export default {
         return
       }
       
-      if (!confirm(t('routeManager.confirmDeleteStop', { stopName: stop.name }))) return
-      
-      try {
-        loading.value = true
-        await apiService.delete(`/lines/${route.params.id}/route/stops/${index}`)
-        await fetchLine()
-        await fetchStopUsage()
-
-      } catch (error) {
-        console.error('Failed to delete stop:', error)
-        
-        // Handle detailed error from backend
-        if (error.response?.data?.affectedStudents) {
-          const details = error.response.data
-          alert(`${details.message}\n\n${details.details}\n\n${t('routeManager.removeStudentAssignmentsFirst')}`)
-        } else {
-          alert(error.response?.data?.message || t('routeManager.failedToDeleteStop'))
+      confirm.require({
+        message: t('routeManager.confirmDeleteStopSimple'),
+        header: t('routeManager.confirmDeleteStopHeader'),
+        icon: 'pi pi-exclamation-triangle',
+        acceptLabel: t('common.delete'),
+        rejectLabel: t('common.cancel'),
+        acceptClass: 'p-button-danger',
+        rejectClass: 'p-button-secondary p-button-outlined',
+        accept: async () => {
+          try {
+            loading.value = true
+            await apiService.delete(`/lines/${route.params.id}/route/stops/${index}`)
+            await fetchLine()
+            await fetchStopUsage()
+          } catch (error) {
+            console.error('Failed to delete stop:', error)
+            
+            // Handle detailed error from backend
+            if (error.response?.data?.affectedStudents) {
+              const details = error.response.data
+              alert(`${details.message}\n\n${details.details}\n\n${t('routeManager.removeStudentAssignmentsFirst')}`)
+            } else {
+              alert(error.response?.data?.message || t('routeManager.failedToDeleteStop'))
+            }
+          } finally {
+            loading.value = false
+          }
         }
-      } finally {
-        loading.value = false
-      }
+      })
     }
 
     const canDeleteStop = (stop) => {
@@ -780,23 +790,30 @@ export default {
     }
 
     const removeStudentAssignment = async (assignment) => {
-      if (!confirm(t('routeManager.confirmRemoveStudent', { studentName: `${assignment.student.firstName} ${assignment.student.lastName}` }))) {
-        return
-      }
-
       const lineId = route.params.id
       if (!lineId) return
 
-      try {
-        loading.value = true
-        await apiService.delete(`/lines/${lineId}/student-assignments/${assignment._id}`)
-        await fetchStudentAssignments()
-      } catch (error) {
-        console.error('Failed to remove student assignment:', error)
-        alert(error.response?.data?.message || t('routeManager.failedToRemoveStudent'))
-      } finally {
-        loading.value = false
-      }
+      confirm.require({
+        message: t('routeManager.confirmRemoveStudentSimple'),
+        header: t('routeManager.confirmRemoveStudentHeader'),
+        icon: 'pi pi-exclamation-triangle',
+        acceptLabel: t('common.remove'),
+        rejectLabel: t('common.cancel'),
+        acceptClass: 'p-button-danger',
+        rejectClass: 'p-button-secondary p-button-outlined',
+        accept: async () => {
+          try {
+            loading.value = true
+            await apiService.delete(`/lines/${lineId}/student-assignments/${assignment._id}`)
+            await fetchStudentAssignments()
+          } catch (error) {
+            console.error('Failed to remove student assignment:', error)
+            alert(error.response?.data?.message || t('routeManager.failedToRemoveStudent'))
+          } finally {
+            loading.value = false
+          }
+        }
+      })
     }
     
     
@@ -1331,7 +1348,6 @@ export default {
 
 .assignment-actions {
   display: flex;
-  flex-direction: column;
   gap: 8px;
   align-items: center;
 }

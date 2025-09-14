@@ -7,6 +7,7 @@
     "save": "שמור",
     "cancel": "ביטול",
     "delete": "מחק",
+    "remove": "הסר",
     "edit": "עריכה",
     "add": "הוסף",
     "search": "חיפוש",
@@ -64,7 +65,7 @@
     }
   },
   "login": {
-    "title": "ברוכים הבאים למערכת ההסעות של זומר",
+    "title": "ברוכים הבאים למערכת ההסעות",
     "subtitle": "היכנס כדי להמשיך",
     "loginTab": "התחברות",
     "signupTab": "הרשמה",
@@ -91,7 +92,7 @@
   },
   "home": {
     "title": "דף הבית",
-    "welcome": "ברוכים הבאים למערכת ניהול ההסעות של זומר",
+    "welcome": "ברוכים הבאים למערכת ניהול ההסעות ",
     "quickActions": "פעולות מהירות",
     "systemOverview": "סקירת המערכת",
     "stats": {
@@ -464,13 +465,16 @@
     "lineNotFoundError": "הקו לא נמצא. ייתכן שנמחק או שהמזהה לא תקין.",
     "failedToAddStop": "נכשל בהוספת עצירה",
     "cannotDeleteStopMessage": "לא ניתן למחוק \"{stopName}\": עצירה זו מוקצית כרגע ל-{studentCount} תלמיד/ים: {students}.\n\nאנא הסר את הקצאות התלמידים לפני מחיקת העצירה.",
-    "confirmDeleteStop": "האם אתה בטוח שברצונך למחוק את \"{stopName}\"?",
+    "confirmDeleteStopSimple": "האם אתה בטוח שברצונך למחוק את העצירה?",
+    "confirmDeleteStopHeader": "מחק עצירה",
     "removeStudentAssignmentsFirst": "אנא הסר את הקצאות התלמידים לפני מחיקת העצירה.",
     "failedToDeleteStop": "נכשל במחיקת העצירה",
     "failedToReorderStops": "נכשל בסידור מחדש של העצירות",
     "failedToAssignStudent": "נכשל בהקצאת התלמיד לקו",
     "failedToUpdateStudentAssignment": "נכשל בעדכון הקצאת התלמיד",
     "confirmRemoveStudent": "להסיר את {studentName} מהקו הזה?",
+    "confirmRemoveStudentSimple": "האם אתה בטוח שברצונך להסיר את התלמיד מהקו?",
+    "confirmRemoveStudentHeader": "הסר תלמיד",
     "failedToRemoveStudent": "נכשל בהסרת התלמיד מהקו"
   },
   "invitation": {
@@ -545,12 +549,6 @@
     "note": "הערה",
     "noteText": "תוכל להגדיר מסלולים ולהקצות תלמידים לאחר יצירת הקו דרך ממשק ניהול הקווים.",
     "failedToCreateLine": "נכשל ביצירת הקו. אנא נסה שוב.",
-    "selectBothDates": "בחר את שני התאריכים כדי לראות משך זמן",
-    "oneDayDuration": "יום אחד",
-    "daysDuration": "{days} ימים",
-    "weeksDuration": "שבוע {weeks} | {weeks} שבועות",
-    "weeksDaysDuration": "שבוע {weeks} ו-{days} יום | {weeks} שבועות ו-{days} ימים",
-    "yearsDuration": "שנה {years} | {years} שנים",
     "days": {
       "sunday": "ראשון",
       "monday": "שני",
@@ -626,6 +624,20 @@
     "updateAssignment": "עדכן הקצאה",
     "addStudent": "הוסף תלמיד",
     "addStudentNoStops": "הוסף תלמיד (ללא תחנות)"
+  },
+  "liveTrackingMap": {
+    "loadingMap": "טוען מפה...",
+    "noLiveLocationData": "אין נתוני מיקום חי",
+    "noLocationDescription": "האוטובוס לא שיתף נתוני מיקום עדיין או שה-GPS לא זמין.",
+    "center": "מרכז",
+    "centerOnBus": "מרכז על האוטובוס",
+    "pickup": "איסוף",
+    "dropoff": "הורדה",
+    "noAddressProvided": "לא סופקה כתובת",
+    "schoolBus": "אוטובוס בית הספר",
+    "liveLocation": "מיקום חי",
+    "latitude": "קו רוחב",
+    "longitude": "קו אורך"
   },
   "messages": {
     "studentCreated": "התלמיד נוצר בהצלחה!",
