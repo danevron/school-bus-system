@@ -27,20 +27,28 @@ const createMessageCompiler = () => {
     return (ctx) => {
       let result = message
       
+      // Vue i18n passes a context object with helper functions
+      // ctx.named is a function to get named parameters
+      // ctx.list is a function to get positional parameters
+      
       // Handle named parameters like {name}, {count}, {first}, {last}
-      if (ctx && ctx.named) {
-        result = result.replace(/\{(\w+)\}/g, (match, key) => {
-          return ctx.named[key] !== undefined ? String(ctx.named[key]) : match
-        })
-      }
+      result = result.replace(/\{(\w+)\}/g, (match, key) => {
+        if (ctx && typeof ctx.named === 'function') {
+          const value = ctx.named(key)
+          return value !== undefined ? String(value) : match
+        }
+        return match
+      })
       
       // Handle positional parameters like {0}, {1}
-      if (ctx && ctx.list) {
-        result = result.replace(/\{(\d+)\}/g, (match, index) => {
+      result = result.replace(/\{(\d+)\}/g, (match, index) => {
+        if (ctx && typeof ctx.list === 'function') {
           const i = parseInt(index, 10)
-          return ctx.list[i] !== undefined ? String(ctx.list[i]) : match
-        })
-      }
+          const value = ctx.list(i)
+          return value !== undefined ? String(value) : match
+        }
+        return match
+      })
       
       return result
     }

@@ -177,7 +177,9 @@ export default {
           <div class="stop-popup">
             <h4>${stop.name}</h4>
             <div class="popup-type">
-              <span class="type-badge ${stop.type}">${stop.type}</span>
+              <span class="type-badge ${stop.type}">
+                ${ t('routeMap.' + stop.type) }
+              </span>
             </div>
         `
         
@@ -185,11 +187,7 @@ export default {
           // Route manager style - show detailed stop info
           popupContent += `
             <div class="popup-details">
-              <strong>Address:</strong><br>
-              ${stop.address || 'No address provided'}<br><br>
-              <strong>Coordinates:</strong><br>
-              ${stop.coordinates.latitude.toFixed(6)}, ${stop.coordinates.longitude.toFixed(6)}<br><br>
-              <strong>Time:</strong> ${props.formatTime ? props.formatTime(stop.estimatedTime) : 'N/A'} (${stop.estimatedTime || 0} min from start)
+              ${ stop.address || t('routeMap.noAddressProvided')}<br><br>
             </div>
           `
         } else {
@@ -211,7 +209,7 @@ export default {
               popupContent += `<div class="popup-students">`
               
               if (pickupStudents.length > 0) {
-                popupContent += `<div><strong>🚏 Pickup (${pickupStudents.length}):</strong></div>`
+                popupContent += `<div><strong> ${t('routeMap.pickup')} (${pickupStudents.length})</strong></div>`
                 pickupStudents.forEach(assignment => {
                   popupContent += `<div>• ${assignment.student.firstName} ${assignment.student.lastName}</div>`
                 })
@@ -219,7 +217,7 @@ export default {
               
               if (dropoffStudents.length > 0) {
                 if (pickupStudents.length > 0) popupContent += `<br>`
-                popupContent += `<div><strong>🏁 Dropoff (${dropoffStudents.length}):</strong></div>`
+                popupContent += `<div><strong>${t('routeMap.dropoff')} (${dropoffStudents.length})</strong></div>`
                 dropoffStudents.forEach(assignment => {
                   popupContent += `<div>• ${assignment.student.firstName} ${assignment.student.lastName}</div>`
                 })
