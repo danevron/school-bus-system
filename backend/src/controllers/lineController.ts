@@ -3,7 +3,6 @@ import Line from '../models/Line';
 import User from '../models/User';
 import Vehicle from '../models/Vehicle';
 import StudentAssignment from '../models/StudentAssignment';
-import Ride from '../models/Ride';
 import { lineValidation } from '../utils/validation';
 import { UserRole } from '../models/User';
 import { generateRidesForLine } from '../services/rideGenerationService';
@@ -115,12 +114,22 @@ export const updateLine = async (req: Request, res: Response): Promise<void> => 
   try {
     const { id } = req.params;
     const updateData = req.body;
+    const routeTotalDistance = updateData.route?.totalDistance;
+    const routeEstimatedDuration = updateData.route?.estimatedDuration;
 
     // Remove fields that shouldn't be updated directly
     delete updateData.route;
     delete updateData.driver;
     delete updateData.vehicle;
     delete updateData.students; // Students should be managed separately
+
+    if (routeTotalDistance !== undefined) {
+      updateData['route.totalDistance'] = routeTotalDistance;
+    }
+
+    if (routeEstimatedDuration !== undefined) {
+      updateData['route.estimatedDuration'] = routeEstimatedDuration;
+    }
 
     const line = await Line.findByIdAndUpdate(
       id,

@@ -327,6 +327,7 @@
     "vehicleAssigned": "Vehicle assigned",
     "noLineIdProvided": "No line ID provided",
     "failedToLoadLineDetails": "Failed to load line details",
+    "failedToUpdateRoute": "Failed to update route information",
     "lineActivatedSuccess": "Line activated successfully! Generated {rides} future rides.",
     "failedToActivateLine": "Failed to activate line"
   },

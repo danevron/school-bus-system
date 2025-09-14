@@ -375,7 +375,7 @@
 </template>
 
 <script>
-import { ref, reactive, inject, onMounted, onUnmounted, nextTick, watch } from 'vue'
+import { ref, reactive, inject, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import apiService from '../services/api'
@@ -395,7 +395,6 @@ export default {
     RouteMap
   },
   setup() {
-    const authStore = inject('authStore')
     const router = useRouter()
     const route = useRoute()
     const { t } = useI18n()
@@ -467,6 +466,25 @@ export default {
         loading.value = false
       }
       
+    }
+
+    const updateLineRouteInformation = async (updatedRoute) => {
+      const lineId = line.value?._id
+      if (!lineId) return
+
+      try {
+        loading.value = true
+        await apiService.put(`/lines/${lineId}`, { route: {
+          totalDistance: updatedRoute.totalDistance,
+          estimatedDuration: updatedRoute.estimatedDuration
+        }})
+
+        await fetchLine()
+      } catch (error) {
+        alert(error.response?.data?.message || t('routeManager.failedToUpdateRoute'))
+      } finally {
+        loading.value = false
+      }
     }
     
     const formatDuration = (minutes) => {
@@ -620,21 +638,16 @@ export default {
         router.push('/lines')
       }
     }
-    
-    const formatDistance = (distanceInMeters) => {
-      if (distanceInMeters < 1000) {
-        return `${Math.round(distanceInMeters)} ${t('common.m')}`
-      } else {
-        return `${(distanceInMeters / 1000).toFixed(1)} ${t('common.km')}`
+
+    const handleRouteUpdate = async (routeInfo) => {
+      if (routeInfo.totalDistance === routeData.totalDistance &&
+          routeInfo.estimatedDuration === routeData.estimatedDuration) {
+        return
       }
-    }
-    
-    
-    
-    
-    const handleRouteUpdate = (routeInfo) => {
+
       routeData.totalDistance = routeInfo.totalDistance
       routeData.estimatedDuration = routeInfo.estimatedDuration
+      await updateLineRouteInformation(routeInfo)
     }
 
     // Student management functions

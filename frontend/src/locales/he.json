@@ -340,6 +340,7 @@
     "vehicleAssigned": "רכב מוקצה",
     "noLineIdProvided": "לא סופק מזהה קו",
     "failedToLoadLineDetails": "נכשל בטעינת פרטי הקו",
+    "failedToUpdateRoute": "נכשל בעדכון מידע המסלול",
     "lineActivatedSuccess": "הקו הופעל בהצלחה! נוצרו {rides} נסיעות עתידיות.",
     "failedToActivateLine": "נכשל בהפעלת הקו"
   },
