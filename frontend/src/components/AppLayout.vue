@@ -41,11 +41,12 @@
               class="breadcrumb-item"
               :class="{ active: index === breadcrumbs.length - 1 }"
             >
+              <i v-if="index < breadcrumbs.length - 1 && isRTL" :class="['breadcrumb-separator', isRTL ? 'pi pi-chevron-left' : 'pi pi-chevron-right']"></i>
               <router-link v-if="crumb.path && index < breadcrumbs.length - 1" :to="crumb.path">
                 {{ crumb.label }}
               </router-link>
               <span v-else>{{ crumb.label }}</span>
-              <i v-if="index < breadcrumbs.length - 1" :class="['breadcrumb-separator', isRTL ? 'pi pi-chevron-left' : 'pi pi-chevron-right']"></i>
+              <i v-if="index < breadcrumbs.length - 1 && !isRTL" :class="['breadcrumb-separator', isRTL ? 'pi pi-chevron-left' : 'pi pi-chevron-right']"></i>
             </span>
           </div>
           <h1 class="page-title">{{ pageTitle }}</h1>
@@ -354,13 +355,18 @@ export default {
   direction: rtl;
 }
 
+[dir="rtl"] .page-info {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+}
+
 [dir="rtl"] .breadcrumb {
   direction: rtl;
-  flex-direction: row-reverse;
 }
 
 [dir="rtl"] .breadcrumb-item {
-  flex-direction: row;
+  flex-direction: row-reverse;
 }
 
 [dir="rtl"] .page-actions {

@@ -646,7 +646,7 @@ export default {
     const { t: $t } = useI18n()
     const rideId = route.params.id
 
-    const breadcrumbs = ref([
+    const breadcrumbs = computed(() => [
       { label: $t('navigation.dashboard'), path: '/home' },
       { label: $t('navigation.rideManagement'), path: '/rides' },
       { label: $t('rideView.rideDetails') }

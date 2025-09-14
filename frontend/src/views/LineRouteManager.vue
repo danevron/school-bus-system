@@ -375,7 +375,7 @@
 </template>
 
 <script>
-import { ref, reactive, inject, onMounted } from 'vue'
+import { ref, reactive, computed, inject, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import apiService from '../services/api'
@@ -400,7 +400,7 @@ export default {
     const { t } = useI18n()
     const lineId = route.params.lineId
     
-    const breadcrumbs = ref([
+    const breadcrumbs = computed(() => [
       { label: t('navigation.dashboard'), path: '/home' },
       { label: t('navigation.lineManagement'), path: '/lines' },
       { label: t('lineView.lineDetails'), path: `/lines/${lineId}` },

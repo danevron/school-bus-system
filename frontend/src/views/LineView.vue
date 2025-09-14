@@ -444,7 +444,7 @@ export default {
     const route = useRoute()
     const { t } = useI18n()
     
-    const breadcrumbs = ref([
+    const breadcrumbs = computed(() => [
       { label: t('navigation.dashboard'), path: '/home' },
       { label: t('navigation.lineManagement'), path: '/lines' },
       { label: t('lineView.lineDetails') }

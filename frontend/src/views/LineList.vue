@@ -124,7 +124,7 @@
 </template>
 
 <script>
-import { ref, inject, onMounted } from 'vue'
+import { ref, inject, onMounted, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import apiService from '../services/api'
@@ -140,7 +140,7 @@ export default {
     const router = useRouter()
     const { t } = useI18n()
     
-    const breadcrumbs = ref([
+    const breadcrumbs = computed(() => [
       { label: t('navigation.dashboard'), path: '/home' },
       { label: t('lines.title') }
     ])

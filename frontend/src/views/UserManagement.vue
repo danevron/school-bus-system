@@ -469,7 +469,7 @@ export default {
     const router = useRouter()
     const { t } = useI18n()
     
-    const breadcrumbs = ref([
+    const breadcrumbs = computed(() => [
       { label: t('navigation.dashboard'), path: '/home' },
       { label: t('users.title') }
     ])
