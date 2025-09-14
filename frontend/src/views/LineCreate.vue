@@ -2,19 +2,19 @@
   <div class="line-create-container">
     <header class="header">
       <div class="header-content">
-        <h1>Create New Line</h1>
+        <h1>{{ $t('lineCreate.title') }}</h1>
         <div class="header-actions">
           <Button 
             @click="goBack" 
             icon="pi pi-arrow-left"
-            label="Back to Lines"
+            :label="$t('lines.backToLines')"
             severity="secondary"
             outlined
           />
           <Button 
             @click="handleSave" 
             icon="pi pi-check"
-            label="Create Line"
+            :label="$t('lineCreate.createLine')"
             severity="success"
             :disabled="!isFormValid"
           />
@@ -28,73 +28,73 @@
           <!-- Form Content -->
           <div class="form-content">
             <div class="form-section">
-              <h2>Line Information</h2>
+              <h2>{{ $t('lineCreate.lineInformation') }}</h2>
               <p class="section-description">
-                Create a new transportation line. You can assign students and configure routes after creating the line.
+                {{ $t('lineCreate.lineInformationDescription') }}
               </p>
 
               <div class="form-group">
-                <label for="lineName" class="form-label">Line Name *</label>
+                <label for="lineName" class="form-label">{{ $t('lineCreate.lineName') }} *</label>
                 <InputText
                   id="lineName"
                   v-model="formData.name"
-                  placeholder="Enter line name (e.g., Downtown Elementary Route)"
+                  :placeholder="$t('lineCreate.lineNamePlaceholder')"
                   maxlength="100"
                   :invalid="!!errors.name"
                   @blur="validateField('name')"
                   @input="clearFieldError('name')"
                 />
                 <div v-if="errors.name" class="error-message">{{ errors.name }}</div>
-                <div class="field-hint">Choose a descriptive name for easy identification</div>
+                <div class="field-hint">{{ $t('lineCreate.lineNameHint') }}</div>
               </div>
 
               <div class="form-group">
-                <label for="driver" class="form-label">Assigned Driver *</label>
+                <label for="driver" class="form-label">{{ $t('lineCreate.assignedDriver') }} *</label>
                 <Select
                   id="driver"
                   v-model="formData.driverId"
                   :options="availableDrivers"
                   optionLabel="displayName"
                   optionValue="_id"
-                  placeholder="Select a driver..."
+                  :placeholder="$t('lineCreate.selectDriver')"
                   :invalid="!!errors.driverId"
                   :loading="loadingDrivers"
                   @change="validateField('driverId')"
                 />
                 <div v-if="errors.driverId" class="error-message">{{ errors.driverId }}</div>
-                <div v-if="loadingDrivers" class="loading-message">Loading available drivers...</div>
+                <div v-if="loadingDrivers" class="loading-message">{{ $t('lineCreate.loadingDrivers') }}</div>
                 <div v-else-if="availableDrivers.length === 0" class="warning-message">
-                  No available drivers found. You may need to create driver accounts first.
+                  {{ $t('lineCreate.noAvailableDrivers') }}
                 </div>
               </div>
 
               <div class="form-group">
-                <label for="vehicle" class="form-label">Assigned Vehicle *</label>
+                <label for="vehicle" class="form-label">{{ $t('lineCreate.assignedVehicle') }} *</label>
                 <Select
                   id="vehicle"
                   v-model="formData.vehicleId"
                   :options="availableVehicles"
                   optionLabel="displayName"
                   optionValue="_id"
-                  placeholder="Select a vehicle..."
+                  :placeholder="$t('lineCreate.selectVehicle')"
                   :invalid="!!errors.vehicleId"
                   :loading="loadingVehicles"
                   @change="validateField('vehicleId')"
                 />
                 <div v-if="errors.vehicleId" class="error-message">{{ errors.vehicleId }}</div>
-                <div v-if="loadingVehicles" class="loading-message">Loading available vehicles...</div>
+                <div v-if="loadingVehicles" class="loading-message">{{ $t('lineCreate.loadingVehicles') }}</div>
                 <div v-else-if="availableVehicles.length === 0" class="warning-message">
-                  No available vehicles found. You may need to create vehicle records first.
+                  {{ $t('lineCreate.noAvailableVehicles') }}
                 </div>
               </div>
 
               <div class="form-group">
-                <label class="form-label">Schedule Period *</label>
-                <p class="field-description">Set the operating period for this line</p>
+                <label class="form-label">{{ $t('lineCreate.schedulePeriod') }} *</label>
+                <p class="field-description">{{ $t('lineCreate.schedulePeriodDescription') }}</p>
                 
                 <div class="date-range-inputs">
                   <div class="date-input-group">
-                    <label for="startDate" class="date-label">Start Date</label>
+                    <label for="startDate" class="date-label">{{ $t('lineCreate.startDate') }}</label>
                     <Calendar
                       id="startDate"
                       v-model="formData.startDateObj"
@@ -107,7 +107,7 @@
                   </div>
                   
                   <div class="date-input-group">
-                    <label for="endDate" class="date-label">End Date</label>
+                    <label for="endDate" class="date-label">{{ $t('lineCreate.endDate') }}</label>
                     <Calendar
                       id="endDate"
                       v-model="formData.endDateObj"
@@ -121,13 +121,13 @@
                 </div>
                 
                 <div class="field-hint">
-                  Duration: {{ calculateDuration() }}
+                  {{ $t('lineCreate.duration') }}: {{ calculateDuration() }}
                 </div>
               </div>
 
               <div class="form-group">
-                <label class="form-label">Operating Days *</label>
-                <p class="field-description">Select the days of the week this line will operate</p>
+                <label class="form-label">{{ $t('lineCreate.operatingDays') }} *</label>
+                <p class="field-description">{{ $t('lineCreate.operatingDaysDescription') }}</p>
                 <div class="days-selector">
                   <label 
                     v-for="day in weekDays" 
@@ -147,7 +147,7 @@
                 </div>
                 <div v-if="errors.scheduleDays" class="error-message">{{ errors.scheduleDays }}</div>
                 <div class="field-hint">
-                  Selected days: {{ formatSelectedDays() || 'None selected' }}
+                  {{ $t('lineCreate.selectedDays') }}: {{ formatSelectedDays() || $t('lineCreate.noneSelected') }}
                 </div>
                 
                 <!-- Quick selection buttons -->
@@ -155,7 +155,7 @@
                   <Button 
                     type="button" 
                     @click="selectWeekdays" 
-                    label="Weekdays Only"
+                    :label="$t('lineCreate.weekdaysOnly')"
                     size="small"
                     :severity="isWeekdaysSelected() ? 'primary' : 'secondary'"
                     :outlined="!isWeekdaysSelected()"
@@ -163,7 +163,7 @@
                   <Button 
                     type="button" 
                     @click="selectAllDays" 
-                    label="All Days"
+                    :label="$t('lineCreate.allDays')"
                     size="small"
                     :severity="isAllDaysSelected() ? 'primary' : 'secondary'"
                     :outlined="!isAllDaysSelected()"
@@ -171,7 +171,7 @@
                   <Button 
                     type="button" 
                     @click="clearSchedule" 
-                    label="Clear All"
+                    :label="$t('lineCreate.clearAll')"
                     size="small"
                     severity="secondary"
                     outlined
@@ -180,20 +180,20 @@
               </div>
 
               <div class="form-group">
-                <label for="rideStartTime" class="form-label">Ride Start Time *</label>
-                <p class="field-description">Set the daily departure time for this line</p>
+                <label for="rideStartTime" class="form-label">{{ $t('lineCreate.rideStartTime') }} *</label>
+                <p class="field-description">{{ $t('lineCreate.rideStartTimeDescription') }}</p>
                 <InputMask
                   id="rideStartTime"
                   v-model="formData.rideStartTime"
                   mask="99:99"
-                  placeholder="HH:MM"
+                  :placeholder="$t('lineCreate.timeFormat')"
                   :invalid="!!errors.rideStartTime"
                   @blur="validateField('rideStartTime')"
                   @input="clearFieldError('rideStartTime')"
                 />
                 <div v-if="errors.rideStartTime" class="error-message">{{ errors.rideStartTime }}</div>
                 <div class="field-hint">
-                  The time when the bus will start its route each operating day (24-hour format)
+                  {{ $t('lineCreate.rideStartTimeHint') }}
                 </div>
               </div>
 
@@ -201,23 +201,23 @@
           </div> 
           <!-- After Creation Info -->
           <div class="next-steps-preview">
-            <h3>After Creating the Line</h3>
+            <h3>{{ $t('lineCreate.afterCreatingLine') }}</h3>
             <div class="step-preview">
               <div class="preview-item">
                 <span class="preview-icon">🗺️</span>
-                <span>Create or assign a route with pickup and dropoff stops</span>
+                <span>{{ $t('lineCreate.createRouteStep') }}</span>
               </div>
               <div class="preview-item">
                 <span class="preview-icon">👥</span>
-                <span>Assign students to the line and configure their stops</span>
+                <span>{{ $t('lineCreate.assignStudentsStep') }}</span>
               </div>
               <div class="preview-item">
                 <span class="preview-icon">🚌</span>
-                <span>Assign a vehicle for transportation services</span>
+                <span>{{ $t('lineCreate.assignVehicleStep') }}</span>
               </div>
             </div>
             <div class="info-note">
-              <p><strong>Note:</strong> You can configure routes and assign students after creating the line through the line management interface.</p>
+              <p><strong>{{ $t('lineCreate.note') }}:</strong> {{ $t('lineCreate.noteText') }}</p>
             </div>
           </div>
         </template>
@@ -229,6 +229,7 @@
 <script>
 import { ref, inject, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import apiService from '../services/api'
 
 export default {
@@ -236,6 +237,7 @@ export default {
   setup() {
     const authStore = inject('authStore')
     const router = useRouter()
+    const { t } = useI18n()
     
     const formData = ref({
       name: '',
@@ -255,15 +257,15 @@ export default {
     const availableVehicles = ref([])
     const loadingVehicles = ref(false)
     
-    const weekDays = [
-      { value: 'sunday', short: 'Sun', full: 'Sunday' },
-      { value: 'monday', short: 'Mon', full: 'Monday' },
-      { value: 'tuesday', short: 'Tue', full: 'Tuesday' },
-      { value: 'wednesday', short: 'Wed', full: 'Wednesday' },
-      { value: 'thursday', short: 'Thu', full: 'Thursday' },
-      { value: 'friday', short: 'Fri', full: 'Friday' },
-      { value: 'saturday', short: 'Sat', full: 'Saturday' }
-    ]
+    const weekDays = computed(() => [
+      { value: 'sunday', short: t('lineView.sun'), full: t('lineCreate.days.sunday') },
+      { value: 'monday', short: t('lineView.mon'), full: t('lineCreate.days.monday') },
+      { value: 'tuesday', short: t('lineView.tue'), full: t('lineCreate.days.tuesday') },
+      { value: 'wednesday', short: t('lineView.wed'), full: t('lineCreate.days.wednesday') },
+      { value: 'thursday', short: t('lineView.thu'), full: t('lineCreate.days.thursday') },
+      { value: 'friday', short: t('lineView.fri'), full: t('lineCreate.days.friday') },
+      { value: 'saturday', short: t('lineView.sat'), full: t('lineCreate.days.saturday') }
+    ])
     
     // Computed properties for PrimeVue components
     const todayDate = computed(() => new Date())
@@ -329,43 +331,43 @@ export default {
       switch (field) {
         case 'name':
           if (!formData.value.name.trim()) {
-            errors.value.name = 'Line name is required'
+            errors.value.name = t('lineCreate.validation.nameRequired')
           } else if (formData.value.name.length < 3) {
-            errors.value.name = 'Line name must be at least 3 characters'
+            errors.value.name = t('lineCreate.validation.nameMinLength')
           }
           break
         case 'driverId':
           if (!formData.value.driverId) {
-            errors.value.driverId = 'Please select a driver'
+            errors.value.driverId = t('lineCreate.validation.driverRequired')
           }
           break
         case 'vehicleId':
           if (!formData.value.vehicleId) {
-            errors.value.vehicleId = 'Please select a vehicle'
+            errors.value.vehicleId = t('lineCreate.validation.vehicleRequired')
           }
           break
         case 'startDate':
           if (!formData.value.startDate) {
-            errors.value.startDate = 'Start date is required'
+            errors.value.startDate = t('lineCreate.validation.startDateRequired')
           } else if (new Date(formData.value.startDate) < new Date().setHours(0,0,0,0)) {
-            errors.value.startDate = 'Start date cannot be in the past'
+            errors.value.startDate = t('lineCreate.validation.startDatePast')
           }
           break
         case 'endDate':
           if (!formData.value.endDate) {
-            errors.value.endDate = 'End date is required'
+            errors.value.endDate = t('lineCreate.validation.endDateRequired')
           } else if (formData.value.startDate && new Date(formData.value.endDate) < new Date(formData.value.startDate)) {
-            errors.value.endDate = 'End date must be after start date'
+            errors.value.endDate = t('lineCreate.validation.endDateAfterStart')
           }
           break
         case 'scheduleDays':
           if (!formData.value.scheduleDays.length) {
-            errors.value.scheduleDays = 'Please select at least one day'
+            errors.value.scheduleDays = t('lineCreate.validation.scheduleDaysRequired')
           }
           break
         case 'rideStartTime':
           if (!formData.value.rideStartTime) {
-            errors.value.rideStartTime = 'Ride start time is required'
+            errors.value.rideStartTime = t('lineCreate.validation.rideStartTimeRequired')
           }
           break
       }
@@ -443,13 +445,13 @@ export default {
       } catch (error) {
         console.error('Failed to create line:', error)
         // TODO: Add proper error handling UI
-        alert('Failed to create line. Please try again.')
+        alert(t('lineCreate.failedToCreateLine'))
       }
     }
     
     const formatSelectedDays = () => {
       if (!formData.value.scheduleDays.length) return ''
-      return weekDays
+      return weekDays.value
         .filter(day => formData.value.scheduleDays.includes(day.value))
         .map(day => day.short)
         .join(', ')
@@ -462,7 +464,7 @@ export default {
     
     const calculateDuration = () => {
       if (!formData.value.startDate || !formData.value.endDate) {
-        return 'Select both dates to see duration'
+        return t('lineCreate.selectBothDates')
       }
       
       const start = new Date(formData.value.startDate)
@@ -471,16 +473,24 @@ export default {
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1 // +1 to include both start and end date
       
       if (diffDays === 1) {
-        return '1 day'
+        return t('lineCreate.oneDayDuration')
       } else if (diffDays < 30) {
-        return `${diffDays} days`
+        return t('lineCreate.daysDuration', { days: diffDays })
       } else if (diffDays < 365) {
         const weeks = Math.floor(diffDays / 7)
         const remainingDays = diffDays % 7
-        return weeks > 0 ? `${weeks} week${weeks > 1 ? 's' : ''}${remainingDays > 0 ? ` ${remainingDays} day${remainingDays > 1 ? 's' : ''}` : ''}` : `${diffDays} days`
+        if (weeks > 0) {
+          if (remainingDays > 0) {
+            return t('lineCreate.weeksDaysDuration', { weeks, days: remainingDays })
+          } else {
+            return t('lineCreate.weeksDuration', { weeks })
+          }
+        } else {
+          return t('lineCreate.daysDuration', { days: diffDays })
+        }
       } else {
         const years = Math.floor(diffDays / 365)
-        return `${years} year${years > 1 ? 's' : ''}`
+        return t('lineCreate.yearsDuration', { years })
       }
     }
     
@@ -490,7 +500,7 @@ export default {
     }
     
     const selectAllDays = () => {
-      formData.value.scheduleDays = weekDays.map(day => day.value)
+      formData.value.scheduleDays = weekDays.value.map(day => day.value)
       clearFieldError('scheduleDays')
     }
     
@@ -520,6 +530,7 @@ export default {
     })
     
     return {
+      t,
       formData,
       errors,
       availableDrivers,

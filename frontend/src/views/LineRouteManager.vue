@@ -1,13 +1,13 @@
 <template>
   <AppLayout 
-    :page-title="line ? `Route Manager - ${line.name}` : 'Route Manager'"
+    :page-title="line ? `${$t('routeManager.routeManager')} - ${line.name}` : $t('routeManager.routeManager')"
     :breadcrumbs="breadcrumbs"
   >
     <template #actions>
       <Button 
         @click="goBack" 
         icon="pi pi-arrow-left"
-        label="Back to Line"
+        :label="$t('routeManager.backToLine')"
         severity="secondary"
         outlined
       />
@@ -16,14 +16,14 @@
     <div class="route-manager-content">
       <div v-if="loading" class="loading">
         <div class="loading-spinner"></div>
-        Loading route data...
+        {{ $t('routeManager.loadingRouteData') }}
       </div>
 
       <div v-else-if="error" class="error-state">
         <div class="error-message">
-          <h3>Error Loading Route</h3>
+          <h3>{{ $t('routeManager.errorLoadingRoute') }}</h3>
           <p>{{ error }}</p>
-          <Button @click="fetchLine" label="Try Again" icon="pi pi-refresh" severity="info" />
+          <Button @click="fetchLine" :label="$t('common.retry')" icon="pi pi-refresh" severity="info" />
         </div>
       </div>
 
@@ -32,7 +32,7 @@
         <Card class="route-overview">
           <template #header>
             <div class="section-header-card">
-              <h2><i class="pi pi-chart-bar"></i>Route Overview</h2>
+              <h2><i class="pi pi-chart-bar"></i>{{ $t('routeManager.routeOverview') }}</h2>
             </div>
           </template>
           <template #content>
@@ -41,35 +41,35 @@
                 <div class="stat-icon"><i class="pi pi-map-marker"></i></div>
                 <div class="stat-info">
                   <div class="stat-value">{{ routeData.stops.length }}</div>
-                  <div class="stat-label">Total Stops</div>
+                  <div class="stat-label">{{ $t('routeManager.totalStops') }}</div>
                 </div>
               </div>
               <div class="stat-card">
                 <div class="stat-icon"><i class="pi pi-compass"></i></div>
                 <div class="stat-info">
                   <div class="stat-value">{{ routeData.totalDistance }} km</div>
-                  <div class="stat-label">Total Distance</div>
+                  <div class="stat-label">{{ $t('routeManager.totalDistance') }}</div>
                 </div>
               </div>
               <div class="stat-card">
                 <div class="stat-icon"><i class="pi pi-clock"></i></div>
                 <div class="stat-info">
                   <div class="stat-value">{{ formatDuration(routeData.estimatedDuration) }}</div>
-                  <div class="stat-label">Est. Duration</div>
+                  <div class="stat-label">{{ $t('routeManager.estimatedDuration') }}</div>
                 </div>
               </div>
               <div class="stat-card">
                 <div class="stat-icon"><i class="pi pi-user"></i></div>
                 <div class="stat-info">
                   <div class="stat-value">{{ getDriverName(line.driver) }}</div>
-                  <div class="stat-label">Line Driver</div>
+                  <div class="stat-label">{{ $t('routeManager.lineDriver') }}</div>
                 </div>
               </div>
               <div class="stat-card">
                 <div class="stat-icon"><i class="pi pi-car"></i></div>
                 <div class="stat-info">
                   <div class="stat-value">{{ getVehicleName(line.vehicle) }}</div>
-                  <div class="stat-label">Vehicle</div>
+                  <div class="stat-label">{{ $t('lines.vehicle') }}</div>
                 </div>
               </div>
             </div>
@@ -80,11 +80,11 @@
         <Card class="route-stops">
           <template #header>
             <div class="section-header-card">
-              <h2><i class="pi pi-map"></i>Route Stops</h2>
+              <h2><i class="pi pi-map"></i>{{ $t('routeManager.routeStops') }}</h2>
               <Button 
                 @click="showStopDialog = true" 
                 icon="pi pi-plus"
-                label="Add Stop"
+                :label="$t('routeManager.addStop')"
                 severity="success"
               />
             </div>
@@ -92,7 +92,7 @@
           <template #content>
           
           <div v-if="routeData.stops.length === 0" class="no-stops">
-            <p>No stops have been defined for this route.</p>
+            <p>{{ $t('routeManager.noStopsDefined') }}</p>
           </div>
 
           <div v-else class="stops-timeline">
@@ -131,7 +131,7 @@
                         @click="moveStopUp(index)"
                         icon="pi pi-chevron-up"
                         :disabled="loading"
-                        title="Move up"
+                        :title="$t('routeManager.moveUp')"
                         size="small"
                         severity="secondary"
                         outlined
@@ -141,7 +141,7 @@
                         @click="moveStopDown(index)"
                         icon="pi pi-chevron-down"
                         :disabled="loading"
-                        title="Move down"
+                        :title="$t('routeManager.moveDown')"
                         size="small"
                         severity="secondary"
                         outlined
@@ -150,7 +150,7 @@
                         @click="deleteStop(index)"
                         :icon="canDeleteStop(stop) ? 'pi pi-trash' : 'pi pi-lock'"
                         :disabled="loading || !canDeleteStop(stop)"
-                        :title="canDeleteStop(stop) ? 'Delete stop' : 'Cannot delete: stop has assigned students'"
+                        :title="canDeleteStop(stop) ? $t('routeManager.deleteStop') : $t('routeManager.cannotDeleteStopHasStudents')"
                         size="small"
                         :severity="canDeleteStop(stop) ? 'danger' : 'secondary'"
                         outlined
@@ -161,19 +161,19 @@
 
                 <div class="stop-details">
                   <div class="stop-address">
-                    <strong>Address:</strong> {{ stop.address }}
+                    <strong>{{ $t('lineView.address') }}:</strong> {{ stop.address }}
                   </div>
                   <div class="stop-time">
-                    <strong>Estimated Time:</strong> {{ stop.estimatedTime }} minutes from start
+                    <strong>{{ $t('lineView.estimatedTime') }}:</strong> {{ stop.estimatedTime }} {{ $t('routeManager.minutesFromStart') }}
                   </div>
                   <div v-if="getStopUsageInfo(stop)" class="stop-usage-info">
                     <div class="usage-indicator">
                       <span class="usage-icon">👥</span>
                       <span class="usage-text">
-                        {{ getStopUsageInfo(stop).totalStudents }} student{{ getStopUsageInfo(stop).totalStudents !== 1 ? 's' : '' }} assigned
+                        {{ $t('routeManager.studentsAssigned', getStopUsageInfo(stop).totalStudents) }}
                       </span>
                       <span class="usage-details">
-                        ({{ getStopUsageInfo(stop).pickupCount }} pickup, {{ getStopUsageInfo(stop).dropoffCount }} dropoff)
+                        ({{ getStopUsageInfo(stop).pickupCount }} {{ $t('lineView.pickup') }}, {{ getStopUsageInfo(stop).dropoffCount }} {{ $t('lineView.dropoff') }})
                       </span>
                     </div>
                     <div class="assigned-students">
@@ -191,7 +191,7 @@
         <Card v-if="routeData.stops.length > 0" class="route-map-section">
           <template #header>
             <div class="section-header-card">
-              <h2><i class="pi pi-map-marker"></i>Interactive Route Map</h2>
+              <h2><i class="pi pi-map-marker"></i>{{ $t('routeManager.interactiveRouteMap') }}</h2>
             </div>
           </template>
           <template #content>
@@ -213,11 +213,11 @@
         <Card class="student-management">
           <template #header>
             <div class="section-header-card">
-              <h2><i class="pi pi-users"></i>Assigned Students</h2>
+              <h2><i class="pi pi-users"></i>{{ $t('lineView.assignedStudents') }}</h2>
               <Button 
                 @click="showStudentDialog = true" 
                 icon="pi pi-plus"
-                label="Add Student"
+                :label="$t('routeManager.addStudent')"
                 severity="success"
               />
             </div>
@@ -225,11 +225,11 @@
           <template #content>
             <div v-if="loadingStudents" class="loading-students">
             <div class="loading-spinner"></div>
-            Loading student assignments...
+            {{ $t('routeManager.loadingStudentAssignments') }}
           </div>
 
           <div v-else-if="studentAssignments.length === 0" class="no-students">
-            <p>No students have been assigned to this line yet.</p>
+            <p>{{ $t('routeManager.noStudentsAssigned') }}</p>
           </div>
 
           <div v-else class="students-list">
@@ -269,7 +269,7 @@
                     severity="secondary"
                     size="small"
                     outlined
-                    title="Edit stops"
+                    :title="$t('routeManager.editStops')"
                   />
                   <Button 
                     @click="removeStudentAssignment(assignment)" 
@@ -277,7 +277,7 @@
                     severity="danger"
                     size="small"
                     outlined
-                    title="Remove student"
+                    :title="$t('routeManager.removeStudent')"
                   />
                 </div>
               </div>
@@ -287,7 +287,7 @@
                   <div class="stop-assignment pickup">
                     <div class="stop-header">
                       <i class="pi pi-sign-in stop-icon pickup-icon"></i>
-                      <span class="stop-label">Pickup</span>
+                      <span class="stop-label">{{ $t('lineView.pickup') }}</span>
                     </div>
                     <div v-if="assignment.pickupStopDetails" class="stop-content">
                       <div class="stop-name">{{ assignment.pickupStopDetails.name }}</div>
@@ -297,14 +297,14 @@
                       </div>
                     </div>
                     <div v-else class="no-stop-assigned">
-                      <span class="not-assigned">Not assigned</span>
+                      <span class="not-assigned">{{ $t('lineView.notAssigned') }}</span>
                     </div>
                   </div>
 
                   <div class="stop-assignment dropoff">
                     <div class="stop-header">
                       <i class="pi pi-sign-out stop-icon dropoff-icon"></i>
-                      <span class="stop-label">Dropoff</span>
+                      <span class="stop-label">{{ $t('lineView.dropoff') }}</span>
                     </div>
                     <div v-if="assignment.dropoffStopDetails" class="stop-content">
                       <div class="stop-name">{{ assignment.dropoffStopDetails.name }}</div>
@@ -314,7 +314,7 @@
                       </div>
                     </div>
                     <div v-else class="no-stop-assigned">
-                      <span class="not-assigned">Not assigned</span>
+                      <span class="not-assigned">{{ $t('lineView.notAssigned') }}</span>
                     </div>
                   </div>
                 </div>
@@ -330,7 +330,7 @@
                 ></div>
               </div>
               <div class="capacity-text">
-                {{ studentAssignments.length }} / {{ line?.maxCapacity || 0 }} students assigned
+                {{ studentAssignments.length }} / {{ line?.maxCapacity || 0 }} {{ $t('routeManager.studentsAssignedCapacity') }}
               </div>
             </div>
           </template>
@@ -340,9 +340,9 @@
 
       <div v-else class="not-found-container">
         <div class="not-found">
-          <h3>Line Not Found</h3>
-          <p>The requested line could not be found.</p>
-          <Button @click="goBack" label="Back to Lines" icon="pi pi-arrow-left" severity="secondary" />
+          <h3>{{ $t('lineView.lineNotFound') }}</h3>
+          <p>{{ $t('lineView.lineNotFoundDesc') }}</p>
+          <Button @click="goBack" :label="$t('lines.backToLines')" icon="pi pi-arrow-left" severity="secondary" />
         </div>
       </div>
     
@@ -377,6 +377,7 @@
 <script>
 import { ref, reactive, inject, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import apiService from '../services/api'
 import AppLayout from '../components/AppLayout.vue'
 import StopCreationDialog from '../components/StopCreationDialog.vue'
@@ -397,13 +398,14 @@ export default {
     const authStore = inject('authStore')
     const router = useRouter()
     const route = useRoute()
+    const { t } = useI18n()
     const lineId = route.params.lineId
     
     const breadcrumbs = ref([
-      { label: 'Dashboard', path: '/home' },
-      { label: 'Line Management', path: '/lines' },
-      { label: 'Line Details', path: `/lines/${lineId}` },
-      { label: 'Route Manager' }
+      { label: t('navigation.dashboard'), path: '/home' },
+      { label: t('navigation.lineManagement'), path: '/lines' },
+      { label: t('lineView.lineDetails'), path: `/lines/${lineId}` },
+      { label: t('routeManager.routeManager') }
     ])
     
     const loading = ref(false)
@@ -430,7 +432,7 @@ export default {
     const fetchLine = async () => {
       const lineId = route.params.id
       if (!lineId) {
-        error.value = 'No line ID provided'
+        error.value = t('lineView.noLineIdProvided')
         return
       }
       
@@ -457,9 +459,9 @@ export default {
       } catch (err) {
         console.error('Failed to fetch line:', err)
         if (err.response?.status === 404) {
-          error.value = 'Line not found. It may have been deleted or the ID is invalid.'
+          error.value = t('routeManager.lineNotFoundError')
         } else {
-          error.value = 'Failed to load line details. Please try again.'
+          error.value = t('lineView.failedToLoadLineDetails')
         }
       } finally {
         loading.value = false
@@ -487,15 +489,15 @@ export default {
     }
     
     const getDriverName = (driver) => {
-      if (!driver) return 'No driver assigned'
-      if (typeof driver === 'string') return 'Driver assigned'
-      return `${driver.firstName || ''} ${driver.lastName || ''}`.trim() || 'Driver assigned'
+      if (!driver) return t('routeManager.noDriverAssigned')
+      if (typeof driver === 'string') return t('routeManager.driverAssigned')
+      return `${driver.firstName || ''} ${driver.lastName || ''}`.trim() || t('routeManager.driverAssigned')
     }
     
     const getVehicleName = (vehicle) => {
-      if (!vehicle) return 'No vehicle assigned'
-      if (typeof vehicle === 'string') return 'Vehicle assigned'
-      return vehicle.licensePlate || 'Vehicle assigned'
+      if (!vehicle) return t('routeManager.noVehicleAssigned')
+      if (typeof vehicle === 'string') return t('routeManager.vehicleAssigned')
+      return vehicle.licensePlate || t('routeManager.vehicleAssigned')
     }
     
 
@@ -515,7 +517,7 @@ export default {
         
       } catch (error) {
         console.error('Failed to add stop:', error)
-        alert(error.response?.data?.message || 'Failed to add stop')
+        alert(error.response?.data?.message || t('routeManager.failedToAddStop'))
       } finally {
         loading.value = false
       }
@@ -552,11 +554,11 @@ export default {
         const students = [...usage.pickupStudents, ...usage.dropoffStudents]
         const uniqueStudents = [...new Set(students)]
         
-        alert(`Cannot delete "${stop.name}": This stop is currently assigned to ${uniqueStudents.length} student(s): ${uniqueStudents.join(', ')}.\n\nPlease remove student assignments before deleting this stop.`)
+        alert(t('routeManager.cannotDeleteStopMessage', { stopName: stop.name, studentCount: uniqueStudents.length, students: uniqueStudents.join(', ') }))
         return
       }
       
-      if (!confirm(`Are you sure you want to delete "${stop.name}"?`)) return
+      if (!confirm(t('routeManager.confirmDeleteStop', { stopName: stop.name }))) return
       
       try {
         loading.value = true
@@ -570,9 +572,9 @@ export default {
         // Handle detailed error from backend
         if (error.response?.data?.affectedStudents) {
           const details = error.response.data
-          alert(`${details.message}\n\n${details.details}\n\nPlease remove student assignments before deleting this stop.`)
+          alert(`${details.message}\n\n${details.details}\n\n${t('routeManager.removeStudentAssignmentsFirst')}`)
         } else {
-          alert(error.response?.data?.message || 'Failed to delete stop')
+          alert(error.response?.data?.message || t('routeManager.failedToDeleteStop'))
         }
       } finally {
         loading.value = false
@@ -605,7 +607,7 @@ export default {
 
       } catch (error) {
         console.error('Failed to reorder stops:', error)
-        alert(error.response?.data?.message || 'Failed to reorder stops')
+        alert(error.response?.data?.message || t('routeManager.failedToReorderStops'))
       } finally {
         loading.value = false
       }
@@ -722,7 +724,7 @@ export default {
         
       } catch (error) {
         console.error('Failed to assign student to line:', error)
-        alert(error.response?.data?.message || 'Failed to assign student to line')
+        alert(error.response?.data?.message || t('routeManager.failedToAssignStudent'))
       } finally {
         loading.value = false
       }
@@ -747,7 +749,7 @@ export default {
         
       } catch (error) {
         console.error('Failed to update student assignment:', error)
-        alert(error.response?.data?.message || 'Failed to update student assignment')
+        alert(error.response?.data?.message || t('routeManager.failedToUpdateStudentAssignment'))
       } finally {
         loading.value = false
       }
@@ -765,7 +767,7 @@ export default {
     }
 
     const removeStudentAssignment = async (assignment) => {
-      if (!confirm(`Remove ${assignment.student.firstName} ${assignment.student.lastName} from this line?`)) {
+      if (!confirm(t('routeManager.confirmRemoveStudent', { studentName: `${assignment.student.firstName} ${assignment.student.lastName}` }))) {
         return
       }
 
@@ -778,7 +780,7 @@ export default {
         await fetchStudentAssignments()
       } catch (error) {
         console.error('Failed to remove student assignment:', error)
-        alert(error.response?.data?.message || 'Failed to remove student from line')
+        alert(error.response?.data?.message || t('routeManager.failedToRemoveStudent'))
       } finally {
         loading.value = false
       }

@@ -6,8 +6,8 @@
           <div class="header-content">
             <i class="pi pi-users header-icon"></i>
             <div class="header-text">
-              <h1>School Bus System</h1>
-              <h2>Complete Your Registration</h2>
+              <h1>{{ $t('invitation.schoolBusSystem') }}</h1>
+              <h2>{{ $t('invitation.completeRegistration') }}</h2>
             </div>
           </div>
         </div>
@@ -16,7 +16,7 @@
       <template #content>
         <div v-if="loading" class="loading-state">
           <i class="pi pi-spin pi-spinner loading-icon"></i>
-          <p>Loading invitation...</p>
+          <p>{{ $t('invitation.loadingInvitation') }}</p>
         </div>
         
         <div v-else-if="error" class="error-state">
@@ -30,7 +30,7 @@
           </Card>
           <div class="error-actions">
             <Button 
-              label="Go to Login" 
+              :label="$t('invitation.goToLogin')" 
               icon="pi pi-sign-in"
               @click="$router.push('/login')"
               outlined
@@ -44,7 +44,7 @@
             <template #header>
               <div class="info-header">
                 <i class="pi pi-envelope"></i>
-                <span>Invitation Details</span>
+                <span>{{ $t('invitation.invitationDetails') }}</span>
               </div>
             </template>
             <template #content>
@@ -52,7 +52,7 @@
                 <div class="detail-item">
                   <i class="pi pi-user-plus"></i>
                   <div class="detail-content">
-                    <label>Role:</label>
+                    <label>{{ $t('invitation.role') }}:</label>
                     <span class="role-badge" :class="`role-${invitation.role}`">
                       {{ invitation.role }}
                     </span>
@@ -62,7 +62,7 @@
                 <div class="detail-item">
                   <i class="pi pi-envelope"></i>
                   <div class="detail-content">
-                    <label>Email:</label>
+                    <label>{{ $t('invitation.email') }}:</label>
                     <span>{{ invitation.email }}</span>
                   </div>
                 </div>
@@ -70,7 +70,7 @@
                 <div class="detail-item">
                   <i class="pi pi-phone"></i>
                   <div class="detail-content">
-                    <label>Phone:</label>
+                    <label>{{ $t('invitation.phone') }}:</label>
                     <span>{{ invitation.phone }}</span>
                   </div>
                 </div>
@@ -78,7 +78,7 @@
                 <div class="detail-item">
                   <i class="pi pi-user"></i>
                   <div class="detail-content">
-                    <label>Invited by:</label>
+                    <label>{{ $t('invitation.invitedBy') }}:</label>
                     <span>{{ invitation.invitedBy }}</span>
                   </div>
                 </div>
@@ -86,7 +86,7 @@
                 <div class="detail-item expiry">
                   <i class="pi pi-clock"></i>
                   <div class="detail-content">
-                    <label>Expires:</label>
+                    <label>{{ $t('invitation.expires') }}:</label>
                     <span>{{ formatDate(invitation.expiresAt) }}</span>
                   </div>
                 </div>
@@ -98,20 +98,20 @@
             <template #header>
               <div class="form-header">
                 <i class="pi pi-user-edit"></i>
-                <span>Create Your Account</span>
+                <span>{{ $t('invitation.createYourAccount') }}</span>
               </div>
             </template>
             <template #content>
               <form @submit.prevent="handleAccept" class="accept-form">
                 <div class="form-row">
                   <div class="form-group">
-                    <label for="firstName">First Name</label>
+                    <label for="firstName">{{ $t('invitation.firstName') }}</label>
                     <IconField>
                       <InputIcon class="pi pi-user" />
                       <InputText 
                         id="firstName"
                         v-model="acceptForm.firstName" 
-                        placeholder="Enter first name"
+                        :placeholder="$t('invitation.enterFirstName')"
                         required 
                         :disabled="submitting"
                       />
@@ -119,13 +119,13 @@
                   </div>
                   
                   <div class="form-group">
-                    <label for="lastName">Last Name</label>
+                    <label for="lastName">{{ $t('invitation.lastName') }}</label>
                     <IconField>
                       <InputIcon class="pi pi-user" />
                       <InputText 
                         id="lastName"
                         v-model="acceptForm.lastName" 
-                        placeholder="Enter last name"
+                        :placeholder="$t('invitation.enterLastName')"
                         required 
                         :disabled="submitting"
                       />
@@ -134,13 +134,13 @@
                 </div>
                 
                 <div class="form-group">
-                  <label for="password">Password</label>
+                  <label for="password">{{ $t('invitation.password') }}</label>
                   <IconField>
                     <InputIcon class="pi pi-lock" />
                     <Password 
                       id="password"
                       v-model="acceptForm.password" 
-                      placeholder="Enter password"
+                      :placeholder="$t('invitation.enterPassword')"
                       :feedback="false"
                       toggleMask
                       required 
@@ -149,18 +149,18 @@
                   </IconField>
                   <small class="help-text">
                     <i class="pi pi-info-circle"></i>
-                    Minimum 6 characters
+                    {{ $t('invitation.minimumCharacters') }}
                   </small>
                 </div>
                 
                 <div class="form-group">
-                  <label for="confirmPassword">Confirm Password</label>
+                  <label for="confirmPassword">{{ $t('invitation.confirmPassword') }}</label>
                   <IconField>
                     <InputIcon class="pi pi-lock" />
                     <Password 
                       id="confirmPassword"
                       v-model="confirmPassword" 
-                      placeholder="Confirm password"
+                      :placeholder="$t('invitation.confirmPasswordPlaceholder')"
                       :feedback="false"
                       toggleMask
                       required 
@@ -169,7 +169,7 @@
                   </IconField>
                   <div v-if="!passwordsMatch && confirmPassword" class="field-error">
                     <i class="pi pi-exclamation-triangle"></i>
-                    Passwords do not match
+                    {{ $t('invitation.passwordsDoNotMatch') }}
                   </div>
                 </div>
                 
@@ -178,7 +178,7 @@
                   class="submit-button"
                   :loading="submitting"
                   loadingIcon="pi pi-spin pi-spinner"
-                  :label="submitting ? 'Creating Account...' : 'Create Account'"
+                  :label="submitting ? $t('invitation.creatingAccount') : $t('invitation.createAccount')"
                   icon="pi pi-check"
                   severity="success"
                   :disabled="submitting || !passwordsMatch"
@@ -207,6 +207,7 @@
 <script>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import apiService from '../services/api'
 
 export default {
@@ -214,6 +215,7 @@ export default {
   setup() {
     const route = useRoute()
     const router = useRouter()
+    const { t } = useI18n()
     
     const loading = ref(true)
     const submitting = ref(false)
@@ -240,7 +242,7 @@ export default {
         
         const token = route.query.token
         if (!token) {
-          error.value = 'Invalid invitation link'
+          error.value = t('invitation.invalidInvitationLink')
           return
         }
         
@@ -248,7 +250,7 @@ export default {
         invitation.value = response.invitation
         
       } catch (err) {
-        error.value = err.response?.data?.message || 'Failed to load invitation'
+        error.value = err.response?.data?.message || t('invitation.failedToLoadInvitation')
       } finally {
         loading.value = false
       }
@@ -256,7 +258,7 @@ export default {
     
     const handleAccept = async () => {
       if (!passwordsMatch.value) {
-        acceptError.value = 'Passwords do not match'
+        acceptError.value = t('invitation.passwordsDoNotMatch')
         return
       }
       
@@ -270,11 +272,11 @@ export default {
         // Redirect to login with success message
         router.push({
           path: '/login',
-          query: { message: 'Account created successfully! Please login.' }
+          query: { message: t('invitation.accountCreatedSuccessfully') }
         })
         
       } catch (err) {
-        acceptError.value = err.response?.data?.message || 'Failed to create account'
+        acceptError.value = err.response?.data?.message || t('invitation.failedToCreateAccount')
       } finally {
         submitting.value = false
       }
@@ -304,7 +306,8 @@ export default {
       confirmPassword,
       passwordsMatch,
       handleAccept,
-      formatDate
+      formatDate,
+      t
     }
   }
 }
