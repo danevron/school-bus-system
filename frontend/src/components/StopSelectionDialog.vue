@@ -2,13 +2,13 @@
   <div v-if="isOpen" class="modal-overlay" @click.self="close">
     <div class="modal-content">
       <div class="modal-header">
-        <h3>{{ student && student._isEditing ? 'Edit Pickup & Dropoff Stops' : 'Select Pickup & Dropoff Stops' }}</h3>
+        <h3>{{ student && student._isEditing ? $t('stopSelection.editTitle') : $t('stopSelection.selectTitle') }}</h3>
         <button @click="close" class="close-button">×</button>
       </div>
 
       <div class="modal-body">
         <div v-if="student" class="student-info">
-          <h4>Assigning stops for:</h4>
+          <h4>{{ $t('stopSelection.assigningFor') }}:</h4>
           <div class="student-details">
             <strong>{{ student.firstName }} {{ student.lastName }}</strong>
             <span class="student-contact">{{ student.phone }}</span>
@@ -17,15 +17,15 @@
 
         <div v-if="!hasStops" class="no-stops-message">
           <div class="warning-icon">⚠️</div>
-          <h4>No Stops Available</h4>
-          <p>This route has no stops defined yet. You can still add the student to the line, but you'll need to add stops to the route first before assigning pickup and dropoff locations.</p>
+          <h4>{{ $t('stopSelection.noStopsTitle') }}</h4>
+          <p>{{ $t('stopSelection.noStopsMessage') }}</p>
         </div>
 
         <div v-else class="stop-selection">
           <!-- Pickup Stop Selection -->
           <div class="stop-section">
-            <h4>🚏 Pickup Stop</h4>
-            <p class="section-description">Select where {{ student?.firstName }} will be picked up</p>
+            <h4>🚏 {{ $t('stopSelection.pickupStop') }}</h4>
+            <p class="section-description">{{ $t('stopSelection.pickupDescription', { name: student?.firstName }) }}</p>
             
             <div class="stops-grid">
               <div
@@ -53,8 +53,8 @@
 
           <!-- Dropoff Stop Selection -->
           <div class="stop-section">
-            <h4>🏁 Dropoff Stop</h4>
-            <p class="section-description">Select where {{ student?.firstName }} will be dropped off</p>
+            <h4>🏁 {{ $t('stopSelection.dropoffStop') }}</h4>
+            <p class="section-description">{{ $t('stopSelection.dropoffDescription', { name: student?.firstName }) }}</p>
             
             <div class="stops-grid">
               <div
@@ -84,20 +84,20 @@
             <label class="skip-checkbox">
               <input v-model="skipStopSelection" type="checkbox">
               <span class="checkmark"></span>
-              Skip stop selection for now (can be set later)
+              {{ $t('stopSelection.skipSelection') }}
             </label>
           </div>
         </div>
       </div>
 
       <div class="modal-footer">
-        <button @click="close" class="cancel-button">Cancel</button>
+        <button @click="close" class="cancel-button">{{ $t('common.cancel') }}</button>
         <button 
           @click="saveAssignment" 
           :disabled="!canSave"
           class="save-button"
         >
-          {{ student && student._isEditing ? 'Update Assignment' : (hasStops ? 'Add Student' : 'Add Student (No Stops)') }}
+          {{ student && student._isEditing ? $t('stopSelection.updateAssignment') : (hasStops ? $t('stopSelection.addStudent') : $t('stopSelection.addStudentNoStops')) }}
         </button>
       </div>
     </div>
@@ -106,6 +106,7 @@
 
 <script>
 import { ref, computed, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 export default {
   name: 'StopSelectionDialog',
@@ -125,6 +126,8 @@ export default {
   },
   emits: ['close', 'save'],
   setup(props, { emit }) {
+    const { t } = useI18n()
+    
     const selectedPickupStop = ref(null)
     const selectedDropoffStop = ref(null)
     const skipStopSelection = ref(false)

@@ -41,7 +41,10 @@
     "errorLoadingRides": "Error loading rides",
     "paginatorTemplate": "Showing {first} to {last} of {totalRecords} entries",
     "notSet": "Not set",
-    "failedToLoadRides": "Failed to load rides"
+    "failedToLoadRides": "Failed to load rides",
+    "min": "min",
+    "km": "km",
+    "m": "m"
   },
   "navigation": {
     "dashboard": "Dashboard",
@@ -50,6 +53,15 @@
     "rideManagement": "Ride Management",
     "userManagement": "User Management",
     "backToDashboard": "Back to Dashboard"
+  },
+  "appLayout": {
+    "title": "School Bus System",
+    "userRole": {
+      "admin": "Admin",
+      "driver": "Driver",
+      "parent": "Parent",
+      "student": "Student"
+    }
   },
   "login": {
     "title": "Welcome to School Bus System!",
@@ -546,6 +558,60 @@
       "scheduleDaysRequired": "Please select at least one day",
       "rideStartTimeRequired": "Ride start time is required"
     }
+  },
+  "routeMap": {
+    "pickupStop": "Pickup Stop",
+    "dropoffStop": "Dropoff Stop",
+    "drivingRoute": "Driving Route",
+    "drivingInstructions": "Driving Instructions",
+    "showInstructions": "Show Instructions",
+    "hideInstructions": "Hide Instructions"
+  },
+  "stopCreation": {
+    "title": "Add New Stop",
+    "findLocation": "Find Location",
+    "searchInstructions": "Search for an address or click on the map to place a marker",
+    "addressPlaceholder": "Enter address (e.g., Rothschild Blvd 1, Ramat Gan)",
+    "lookingUpAddress": "Looking up address...",
+    "couldNotFindAddress": "Could not find address",
+    "selectedLocation": "Selected Location",
+    "stopName": "Stop Name",
+    "stopNamePlaceholder": "Enter stop name",
+    "address": "Address",
+    "loadingAddress": "Loading address...",
+    "addressAutoFillHint": "Address will be auto-filled or enter manually",
+    "addressHint": "Address is automatically filled from map location but can be edited",
+    "stopType": "Stop Type",
+    "selectType": "Select type",
+    "pickup": "Pickup",
+    "dropoff": "Dropoff",
+    "addStop": "Add Stop"
+  },
+  "studentSelection": {
+    "title": "Add Student to Line",
+    "loading": "Loading students...",
+    "searchPlaceholder": "Search students by name...",
+    "noStudents": "No available students found.",
+    "noEmail": "No email",
+    "alreadyAssigned": "Already Assigned",
+    "available": "Available",
+    "addStudent": "Add Student",
+    "errorLoading": "Failed to load students. Please try again."
+  },
+  "stopSelection": {
+    "editTitle": "Edit Pickup & Dropoff Stops",
+    "selectTitle": "Select Pickup & Dropoff Stops",
+    "assigningFor": "Assigning stops for",
+    "noStopsTitle": "No Stops Available",
+    "noStopsMessage": "This route has no stops defined yet. You can still add the student to the line, but you'll need to add stops to the route first before assigning pickup and dropoff locations.",
+    "pickupStop": "Pickup Stop",
+    "pickupDescription": "Select where {name} will be picked up",
+    "dropoffStop": "Dropoff Stop",
+    "dropoffDescription": "Select where {name} will be dropped off",
+    "skipSelection": "Skip stop selection for now (can be set later)",
+    "updateAssignment": "Update Assignment",
+    "addStudent": "Add Student",
+    "addStudentNoStops": "Add Student (No Stops)"
   },
   "messages": {
     "studentCreated": "Student created successfully!",

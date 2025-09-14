@@ -7,24 +7,24 @@
     <div class="map-legend">
       <div class="legend-item">
         <div class="legend-marker pickup"></div>
-        <span>Pickup Stop</span>
+        <span>{{ $t('routeMap.pickupStop') }}</span>
       </div>
       <div class="legend-item">
         <div class="legend-marker dropoff"></div>
-        <span>Dropoff Stop</span>
+        <span>{{ $t('routeMap.dropoffStop') }}</span>
       </div>
       <div class="legend-item">
         <div class="legend-line"></div>
-        <span>Driving Route</span>
+        <span>{{ $t('routeMap.drivingRoute') }}</span>
       </div>
     </div>
     
     <!-- Driving Instructions (only show if enabled and instructions exist) -->
     <div v-if="showDrivingInstructions && drivingInstructions.length > 0" class="map-driving-instructions">
       <div class="instructions-header">
-        <h3>Driving Instructions</h3>
+        <h3>{{ $t('routeMap.drivingInstructions') }}</h3>
         <button @click="toggleInstructions" class="toggle-instructions-button">
-          {{ showInstructions ? 'Hide Instructions' : 'Show Instructions' }}
+          {{ showInstructions ? $t('routeMap.hideInstructions') : $t('routeMap.showInstructions') }}
           <span class="toggle-arrow" :class="{ 'expanded': showInstructions }">▼</span>
         </button>
       </div>
@@ -44,6 +44,7 @@
 
 <script>
 import { ref, onMounted, onUnmounted, watch, nextTick, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet-routing-machine'
@@ -87,6 +88,8 @@ export default {
   },
   emits: ['route-updated'],
   setup(props, { emit }) {
+    const { t } = useI18n()
+    
     const map = ref(null)
     const mapMarkers = ref([])
     const routingControl = ref(null)

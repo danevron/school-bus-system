@@ -47,7 +47,7 @@
               <div class="stat-card">
                 <div class="stat-icon"><i class="pi pi-compass"></i></div>
                 <div class="stat-info">
-                  <div class="stat-value">{{ routeData.totalDistance }} km</div>
+                  <div class="stat-value">{{ routeData.totalDistance }} {{ $t('common.km') }}</div>
                   <div class="stat-label">{{ $t('routeManager.totalDistance') }}</div>
                 </div>
               </div>
@@ -119,7 +119,7 @@
                   <div class="stop-actions">
                     <div class="stop-badges">
                       <span class="type-badge" :class="stop.type">
-                        {{ stop.type }}
+                        {{ $t(`lineView.${stop.type}`) }}
                       </span>
                       <span class="time-badge">
                         {{ formatTime(stop.estimatedTime) }}
@@ -471,7 +471,7 @@ export default {
     
     const formatDuration = (minutes) => {
       if (minutes < 60) {
-        return `${minutes} min`
+        return `${minutes} ${t('common.min')}`
       }
       const hours = Math.floor(minutes / 60)
       const remainingMinutes = minutes % 60
@@ -623,9 +623,9 @@ export default {
     
     const formatDistance = (distanceInMeters) => {
       if (distanceInMeters < 1000) {
-        return `${Math.round(distanceInMeters)} m`
+        return `${Math.round(distanceInMeters)} ${t('common.m')}`
       } else {
-        return `${(distanceInMeters / 1000).toFixed(1)} km`
+        return `${(distanceInMeters / 1000).toFixed(1)} ${t('common.km')}`
       }
     }
     

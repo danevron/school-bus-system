@@ -1,28 +1,26 @@
 <template>
-  <div class="line-create-container">
-    <header class="header">
-      <div class="header-content">
-        <h1>{{ $t('lineCreate.title') }}</h1>
-        <div class="header-actions">
-          <Button 
-            @click="goBack" 
-            icon="pi pi-arrow-left"
-            :label="$t('lines.backToLines')"
-            severity="secondary"
-            outlined
-          />
-          <Button 
-            @click="handleSave" 
-            icon="pi pi-check"
-            :label="$t('lineCreate.createLine')"
-            severity="success"
-            :disabled="!isFormValid"
-          />
-        </div>
-      </div>
-    </header>
+  <AppLayout 
+    :page-title="$t('lineCreate.title')"
+    :breadcrumbs="breadcrumbs"
+  >
+    <template #actions>
+      <Button 
+        @click="goBack" 
+        icon="pi pi-arrow-left"
+        :label="$t('lines.backToLines')"
+        severity="secondary"
+        outlined
+      />
+      <Button 
+        @click="handleSave" 
+        icon="pi pi-check"
+        :label="$t('lineCreate.createLine')"
+        severity="success"
+        :disabled="!isFormValid"
+      />
+    </template>
 
-    <main class="main-content">
+    <div class="content-wrapper">
       <Card class="form-card">
         <template #content>
           <!-- Form Content -->
@@ -222,8 +220,8 @@
           </div>
         </template>
       </Card>
-    </main>
-  </div>
+    </div>
+  </AppLayout>
 </template>
 
 <script>
@@ -231,9 +229,13 @@ import { ref, inject, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import apiService from '../services/api'
+import AppLayout from '../components/AppLayout.vue'
 
 export default {
   name: 'LineCreate',
+  components: {
+    AppLayout
+  },
   setup() {
     const authStore = inject('authStore')
     const router = useRouter()
@@ -269,6 +271,12 @@ export default {
     
     // Computed properties for PrimeVue components
     const todayDate = computed(() => new Date())
+
+    const breadcrumbs = computed(() => [
+      { label: t('navigation.dashboard'), path: '/home' },
+      { label: t('lines.title'), path: '/lines' },
+      { label: t('lineCreate.title') }
+    ])
     
     const fetchAvailableDrivers = async () => {
       try {
@@ -539,6 +547,7 @@ export default {
       loadingVehicles,
       weekDays,
       todayDate,
+      breadcrumbs,
       isFormValid,
       validateField,
       clearFieldError,
@@ -561,41 +570,11 @@ export default {
 </script>
 
 <style scoped>
-.line-create-container {
-  min-height: 100vh;
-  background-color: var(--p-surface-ground);
-}
-
-.header {
-  background-color: var(--p-primary-color);
-  color: white;
-  padding: 1rem 0;
-  box-shadow: var(--p-card-shadow);
-}
-
-.header-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
+/* Content wrapper for AppLayout */
+.content-wrapper {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.header h1 {
-  margin: 0;
-  font-size: 1.8rem;
-}
-
-.header-actions {
-  display: flex;
-  gap: 15px;
-}
-
-.main-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 30px 20px;
+  flex-direction: column;
+  gap: 20px;
 }
 
 
@@ -820,16 +799,6 @@ export default {
 }
 
 @media (max-width: 768px) {
-  .header-content {
-    flex-direction: column;
-    gap: 15px;
-    text-align: center;
-  }
-  
-  .header-actions {
-    justify-content: center;
-  }
-  
   .form-content {
     grid-template-columns: 1fr;
     gap: 20px;

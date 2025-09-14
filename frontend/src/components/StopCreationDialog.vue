@@ -2,7 +2,7 @@
   <div v-if="isOpen" class="dialog-overlay" @click="handleOverlayClick">
     <div class="dialog-container" @click.stop>
       <div class="dialog-header">
-        <h3>Add New Stop</h3>
+        <h3>{{ $t('stopCreation.title') }}</h3>
         <button @click="closeDialog" class="close-button">×</button>
       </div>
       
@@ -10,15 +10,15 @@
         <!-- Address Search Section -->
         <div class="address-search-section">
           <div class="search-header">
-            <h4>Find Location</h4>
-            <p>Search for an address or click on the map to place a marker</p>
+            <h4>{{ $t('stopCreation.findLocation') }}</h4>
+            <p>{{ $t('stopCreation.searchInstructions') }}</p>
           </div>
           <div class="search-form">
             <div class="search-input-group">
               <input 
                 v-model="addressSearch"
                 type="text" 
-                placeholder="Enter address (e.g., Rothschild Blvd 1, Ramat Gan)"
+                :placeholder="$t('stopCreation.addressPlaceholder')"
                 class="address-search-input"
                 @keyup.enter="searchAddress"
               />
@@ -42,17 +42,17 @@
         <div class="map-section">
           <div class="map-instructions">
             <div v-if="selectedCoordinates" class="coordinates-display">
-              <span class="coord-label">Selected Location:</span>
+              <span class="coord-label">{{ $t('stopCreation.selectedLocation') }}:</span>
               <span class="coordinates">
                 {{ selectedCoordinates.lat.toFixed(6) }}, {{ selectedCoordinates.lng.toFixed(6) }}
               </span>
               <div v-if="addressLoading" class="address-loading">
                 <span class="loading-spinner"></span>
-                <span>Looking up address...</span>
+                <span>{{ $t('stopCreation.lookingUpAddress') }}</span>
               </div>
               <div v-else-if="lookupError" class="address-error">
                 <span class="error-icon">⚠️</span>
-                <span>Could not find address</span>
+                <span>{{ $t('stopCreation.couldNotFindAddress') }}</span>
               </div>
             </div>
           </div>
@@ -62,36 +62,36 @@
         <!-- Stop Details Form -->
         <div v-if="selectedCoordinates" class="stop-form-section">
           <div class="form-group">
-            <label for="stop-name">Stop Name *</label>
+            <label for="stop-name">{{ $t('stopCreation.stopName') }} *</label>
             <input 
               id="stop-name"
               v-model="stopForm.name" 
               type="text" 
-              placeholder="Enter stop name"
+              :placeholder="$t('stopCreation.stopNamePlaceholder')"
               required
             />
           </div>
           
           <div class="form-group">
-            <label for="stop-address">Address</label>
+            <label for="stop-address">{{ $t('stopCreation.address') }}</label>
             <input 
               id="stop-address"
               v-model="stopForm.address" 
               type="text" 
-              :placeholder="addressLoading ? 'Loading address...' : 'Address will be auto-filled or enter manually'"
+              :placeholder="addressLoading ? $t('stopCreation.loadingAddress') : $t('stopCreation.addressAutoFillHint')"
               :readonly="addressLoading"
             />
             <div class="address-hint">
-              Address is automatically filled from map location but can be edited
+              {{ $t('stopCreation.addressHint') }}
             </div>
           </div>
           
           <div class="form-group">
-            <label for="stop-type">Stop Type *</label>
+            <label for="stop-type">{{ $t('stopCreation.stopType') }} *</label>
             <select id="stop-type" v-model="stopForm.type" required>
-              <option value="">Select type</option>
-              <option value="pickup">Pickup</option>
-              <option value="dropoff">Dropoff</option>
+              <option value="">{{ $t('stopCreation.selectType') }}</option>
+              <option value="pickup">{{ $t('stopCreation.pickup') }}</option>
+              <option value="dropoff">{{ $t('stopCreation.dropoff') }}</option>
             </select>
           </div>
           
@@ -99,13 +99,13 @@
       </div>
       
       <div class="dialog-actions">
-        <button @click="closeDialog" class="cancel-button">Cancel</button>
+        <button @click="closeDialog" class="cancel-button">{{ $t('common.cancel') }}</button>
         <button 
           @click="saveStop" 
           :disabled="!canSave"
           class="save-button"
         >
-          Add Stop
+          {{ $t('stopCreation.addStop') }}
         </button>
       </div>
     </div>
@@ -114,6 +114,7 @@
 
 <script>
 import { ref, computed, watch, nextTick } from 'vue'
+import { useI18n } from 'vue-i18n'
 import L from 'leaflet'
 
 export default {
@@ -126,6 +127,8 @@ export default {
   },
   emits: ['close', 'save'],
   setup(props, { emit }) {
+    const { t } = useI18n()
+    
     const map = ref(null)
     const selectedMarker = ref(null)
     const selectedCoordinates = ref(null)

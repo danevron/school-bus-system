@@ -45,7 +45,7 @@
                 {{ crumb.label }}
               </router-link>
               <span v-else>{{ crumb.label }}</span>
-              <i v-if="index < breadcrumbs.length - 1" class="pi pi-chevron-right breadcrumb-separator"></i>
+              <i v-if="index < breadcrumbs.length - 1" :class="['breadcrumb-separator', isRTL ? 'pi pi-chevron-left' : 'pi pi-chevron-right']"></i>
             </span>
           </div>
           <h1 class="page-title">{{ pageTitle }}</h1>
@@ -91,7 +91,7 @@ export default {
   setup() {
     const authStore = inject('authStore')
     const router = useRouter()
-    const { initializeLanguage } = useLanguage()
+    const { initializeLanguage, isRTL } = useLanguage()
     
     const userRole = computed(() => {
       const user = authStore.user
@@ -124,7 +124,8 @@ export default {
       userRole,
       userInitials,
       roleClass,
-      handleLogout
+      handleLogout,
+      isRTL
     }
   }
 }
@@ -355,10 +356,11 @@ export default {
 
 [dir="rtl"] .breadcrumb {
   direction: rtl;
+  flex-direction: row-reverse;
 }
 
 [dir="rtl"] .breadcrumb-item {
-  flex-direction: row-reverse;
+  flex-direction: row;
 }
 
 [dir="rtl"] .page-actions {

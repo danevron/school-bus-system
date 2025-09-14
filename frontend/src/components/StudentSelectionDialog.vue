@@ -2,19 +2,19 @@
   <div v-if="isOpen" class="modal-overlay" @click.self="close">
     <div class="modal-content">
       <div class="modal-header">
-        <h3>Add Student to Line</h3>
+        <h3>{{ $t('studentSelection.title') }}</h3>
         <button @click="close" class="close-button">×</button>
       </div>
 
       <div class="modal-body">
         <div v-if="loading" class="loading-state">
           <div class="loading-spinner"></div>
-          <p>Loading students...</p>
+          <p>{{ $t('studentSelection.loading') }}</p>
         </div>
 
         <div v-else-if="error" class="error-state">
           <p class="error-message">{{ error }}</p>
-          <button @click="fetchStudents" class="retry-button">Try Again</button>
+          <button @click="fetchStudents" class="retry-button">{{ $t('common.retry') }}</button>
         </div>
 
         <div v-else class="student-selection">
@@ -22,13 +22,13 @@
             <input
               v-model="searchTerm"
               type="text"
-              placeholder="Search students by name..."
+              :placeholder="$t('studentSelection.searchPlaceholder')"
               class="search-input"
             >
           </div>
 
           <div v-if="filteredStudents.length === 0" class="no-students">
-            <p>No available students found.</p>
+            <p>{{ $t('studentSelection.noStudents') }}</p>
           </div>
 
           <div v-else class="students-list">
@@ -41,12 +41,12 @@
             >
               <div class="student-info">
                 <div class="student-name">{{ student.firstName }} {{ student.lastName }}</div>
-                <div class="student-email">{{ student.email || 'No email' }}</div>
+                <div class="student-email">{{ student.email || $t('studentSelection.noEmail') }}</div>
                 <div class="student-phone">{{ student.phone }}</div>
               </div>
               <div class="student-status">
-                <span v-if="student.isAssigned" class="assigned-badge">Already Assigned</span>
-                <span v-else class="available-badge">Available</span>
+                <span v-if="student.isAssigned" class="assigned-badge">{{ $t('studentSelection.alreadyAssigned') }}</span>
+                <span v-else class="available-badge">{{ $t('studentSelection.available') }}</span>
               </div>
             </div>
           </div>
@@ -54,13 +54,13 @@
       </div>
 
       <div class="modal-footer">
-        <button @click="close" class="cancel-button">Cancel</button>
+        <button @click="close" class="cancel-button">{{ $t('common.cancel') }}</button>
         <button 
           @click="addStudent" 
           :disabled="!selectedStudent || selectedStudent.isAssigned"
           class="add-button"
         >
-          Add Student
+          {{ $t('studentSelection.addStudent') }}
         </button>
       </div>
     </div>
@@ -69,6 +69,7 @@
 
 <script>
 import { ref, computed, watch, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import apiService from '../services/api'
 
 export default {
@@ -89,6 +90,8 @@ export default {
   },
   emits: ['close', 'student-selected'],
   setup(props, { emit }) {
+    const { t } = useI18n()
+    
     const loading = ref(false)
     const error = ref('')
     const students = ref([])
@@ -121,7 +124,7 @@ export default {
         
       } catch (err) {
         console.error('Failed to fetch students:', err)
-        error.value = 'Failed to load students. Please try again.'
+        error.value = t('studentSelection.errorLoading')
       } finally {
         loading.value = false
       }

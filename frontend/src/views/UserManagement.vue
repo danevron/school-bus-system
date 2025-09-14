@@ -27,12 +27,16 @@
                 <div class="form-group">
                   <label for="studentFirstName">{{ $t('login.firstName') }}</label>
                   <IconField>
-                    <InputIcon class="pi pi-user" />
+                    <InputIcon>
+                      <i class="pi pi-user" />
+                    </InputIcon>
                     <InputText 
                       id="studentFirstName"
+                      type="text"
                       v-model="studentForm.firstName" 
                       :placeholder="$t('login.placeholders.firstName')"
                       required 
+                      fluid
                       :disabled="loading"
                     />
                   </IconField>
@@ -841,7 +845,6 @@ export default {
 .form-group input,
 .form-group select {
   width: 100%;
-  padding: 10px;
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 14px;
@@ -1168,18 +1171,6 @@ export default {
   border-bottom: 1px solid var(--p-surface-border);
 }
 
-/* Fix input icon overlap with placeholders */
-.form-group :deep(.p-inputtext),
-.form-group :deep(.p-inputmask),
-.filter-group :deep(.p-inputtext) {
-  padding-left: 2.5rem;
-}
-
-.form-group :deep(.p-icon-field .p-input-icon),
-.filter-group :deep(.p-icon-field .p-input-icon) {
-  left: 0.75rem;
-  color: var(--p-text-muted-color);
-}
 
 /* Message container styling */
 .message-container {
