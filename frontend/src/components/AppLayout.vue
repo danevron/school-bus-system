@@ -5,7 +5,7 @@
       <div class="header-content">
         <div class="brand">
           <i class="pi pi-car brand-icon"></i>
-          <span class="brand-text">School Bus System</span>
+          <span class="brand-text">{{ $t('appLayout.title') }}</span>
         </div>
         <div class="user-info">
           <Avatar 
@@ -13,13 +13,17 @@
             shape="circle"
             class="user-avatar"
           />
-          <span class="role-badge" :class="roleClass">{{ userRole }}</span>
+          <span class="role-badge" :class="roleClass">{{ $t('appLayout.userRole.' + userRole) }}</span>
+
+          <!-- Language Switcher -->
+          <LanguageSwitcher />
+          
           <Button 
             @click="handleLogout" 
             icon="pi pi-sign-out"
             severity="secondary"
             variant="text"
-            aria-label="Logout"
+            :aria-label="$t('common.signOut')"
             class="logout-button"
           />
         </div>
@@ -60,11 +64,16 @@
 </template>
 
 <script>
-import { computed, inject } from 'vue'
+import { computed, inject, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useLanguage } from '../composables/useLanguage.js'
+import LanguageSwitcher from './LanguageSwitcher.vue'
 
 export default {
   name: 'AppLayout',
+  components: {
+    LanguageSwitcher
+  },
   props: {
     pageTitle: {
       type: String,
@@ -82,6 +91,7 @@ export default {
   setup() {
     const authStore = inject('authStore')
     const router = useRouter()
+    const { initializeLanguage } = useLanguage()
     
     const userRole = computed(() => {
       const user = authStore.user
@@ -104,6 +114,11 @@ export default {
       authStore.logout()
       router.push('/login')
     }
+    
+    onMounted(() => {
+      // Initialize language on component mount
+      initializeLanguage()
+    })
     
     return {
       userRole,
@@ -178,6 +193,7 @@ export default {
 .role-driver { background-color: var(--p-green-100); color: var(--p-green-700); }
 .role-parent { background-color: var(--p-yellow-100); color: var(--p-yellow-800); }
 .role-student { background-color: var(--p-blue-100); color: var(--p-blue-700); }
+
 
 .logout-button {
   color: white !important;
@@ -322,5 +338,30 @@ export default {
     flex-wrap: wrap;
     gap: 0.5rem;
   }
+}
+
+/* RTL Support */
+[dir="rtl"] .header-content {
+  direction: rtl;
+}
+
+[dir="rtl"] .user-info {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .action-bar-content {
+  direction: rtl;
+}
+
+[dir="rtl"] .breadcrumb {
+  direction: rtl;
+}
+
+[dir="rtl"] .breadcrumb-item {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .page-actions {
+  direction: rtl;
 }
 </style>

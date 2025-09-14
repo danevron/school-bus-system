@@ -1,16 +1,16 @@
 <template>
   <AppLayout 
-    :page-title="line ? line.name : 'Line Details'"
+    :page-title="line ? line.name : $t('lineView.lineDetails')"
     :breadcrumbs="breadcrumbs"
   >
     <template #actions>
       <div v-if="line" class="status-badge" :class="line.isActive ? 'active' : 'inactive'">
-        {{ line.isActive ? 'Active' : 'Inactive' }}
+        {{ line.isActive ? $t('lines.active') : $t('lines.inactive') }}
       </div>
       <Button 
         @click="goBack" 
         icon="pi pi-arrow-left"
-        label="Back to Lines"
+        :label="$t('lines.backToLines')"
         severity="secondary"
         outlined
       />
@@ -18,7 +18,7 @@
         v-if="canActivateLine"
         @click="activateLineAction" 
         icon="pi pi-play"
-        :label="activating ? 'Activating...' : 'Activate Line'"
+        :label="activating ? $t('lineView.activating') : $t('lineView.activateLine')"
         severity="warning"
         :loading="activating"
         :disabled="activating"
@@ -26,21 +26,21 @@
       <Button 
         @click="manageRoute" 
         icon="pi pi-cog"
-        label="Manage Stops and Students"
+        :label="$t('lineView.manageStopsAndStudents')"
         severity="success"
         :disabled="!line"
       />
     </template>
     
     <div v-if="loading" class="loading-container">
-        <div class="loading">Loading line details...</div>
+        <div class="loading">{{ $t('lineView.loadingLineDetails') }}</div>
       </div>
 
       <div v-else-if="error" class="error-container">
         <div class="error-message">
-          <h3>Error Loading Line</h3>
+          <h3>{{ $t('lineView.errorLoadingLine') }}</h3>
           <p>{{ error }}</p>
-          <Button @click="fetchLine" label="Try Again" icon="pi pi-refresh" severity="info" />
+          <Button @click="fetchLine" :label="$t('common.retry')" icon="pi pi-refresh" severity="info" />
         </div>
       </div>
 
@@ -58,10 +58,9 @@
           <div class="notice active-notice">
             <div class="notice-icon">⚠️</div>
             <div class="notice-content">
-              <h3>Active Line Notice</h3>
+              <h3>{{ $t('lineView.activeLineNotice') }}</h3>
               <p>
-                This line is currently <strong>active</strong> and providing scheduled transportation services. 
-                Changes to this line should be made carefully as they may affect ongoing schedules and student assignments.
+                {{ $t('lineView.activeLineNoticeDesc') }}
               </p>
             </div>
           </div>
@@ -71,27 +70,27 @@
         <Card class="info-section">
           <template #header>
             <div class="section-header-card">
-              <h2><i class="pi pi-info-circle"></i>Line Information</h2>
+              <h2><i class="pi pi-info-circle"></i>{{ $t('lineView.lineInformation') }}</h2>
             </div>
           </template>
           <template #content>
             <div class="info-grid">
               <div class="info-item">
-                <label>Line Name</label>
+                <label>{{ $t('lineView.lineName') }}</label>
                 <span>{{ line.name }}</span>
               </div>
               <div class="info-item">
-                <label>Status</label>
+                <label>{{ $t('common.status') }}</label>
                 <span class="status" :class="line.isActive ? 'active' : 'inactive'">
-                  {{ line.isActive ? 'Active' : 'Inactive' }}
+                  {{ line.isActive ? $t('lines.active') : $t('lines.inactive') }}
                 </span>
               </div>
               <div class="info-item">
-                <label>Created</label>
+                <label>{{ $t('lineView.created') }}</label>
                 <span>{{ formatDate(line.createdAt) }}</span>
               </div>
               <div class="info-item">
-                <label>Last Updated</label>
+                <label>{{ $t('lineView.lastUpdated') }}</label>
                 <span>{{ formatDate(line.updatedAt) }}</span>
               </div>
             </div>
@@ -102,7 +101,7 @@
         <Card class="assignment-section">
           <template #header>
             <div class="section-header-card">
-              <h2><i class="pi pi-users"></i>Assignments</h2>
+              <h2><i class="pi pi-users"></i>{{ $t('lineView.assignments') }}</h2>
             </div>
           </template>
           <template #content>
@@ -110,7 +109,7 @@
               <div class="assignment-item">
                 <div class="assignment-header">
                   <i class="pi pi-user assignment-icon"></i>
-                  <span class="assignment-label">Driver</span>
+                  <span class="assignment-label">{{ $t('lines.driver') }}</span>
                 </div>
                 <div class="assignment-value">
                   {{ getDriverName(line.driver) }}
@@ -120,7 +119,7 @@
               <div class="assignment-item">
                 <div class="assignment-header">
                   <i class="pi pi-car assignment-icon"></i>
-                  <span class="assignment-label">Vehicle</span>
+                  <span class="assignment-label">{{ $t('lines.vehicle') }}</span>
                 </div>
                 <div class="assignment-value">
                   {{ getVehicleName(line.vehicle) }}
@@ -130,10 +129,10 @@
               <div class="assignment-item">
                 <div class="assignment-header">
                   <i class="pi pi-users assignment-icon"></i>
-                  <span class="assignment-label">Students</span>
+                  <span class="assignment-label">{{ $t('lines.students') }}</span>
                 </div>
                 <div class="assignment-value">
-                  {{ line.students?.length || 0 }} assigned
+                  {{ line.students?.length || 0 }} {{ $t('lines.assigned') }}
                   <span v-if="line.maxCapacity" class="capacity">
                     ({{ line.students?.length || 0 }}/{{ line.maxCapacity }})
                   </span>
@@ -147,25 +146,25 @@
         <Card class="schedule-section">
           <template #header>
             <div class="section-header-card">
-              <h2><i class="pi pi-calendar"></i>Schedule</h2>
+              <h2><i class="pi pi-calendar"></i>{{ $t('lineView.schedule') }}</h2>
             </div>
           </template>
           <template #content>
             <div class="schedule-details">
               <div class="schedule-item">
-                <label><i class="pi pi-clock"></i> Ride Start Time</label>
+                <label><i class="pi pi-clock"></i> {{ $t('lineView.rideStartTime') }}</label>
                 <span class="start-time">{{ formatTime(line.rideStartTime) }}</span>
               </div>
               <div class="schedule-item">
-                <label><i class="pi pi-calendar-times"></i> Duration</label>
+                <label><i class="pi pi-calendar-times"></i> {{ $t('lines.duration') }}</label>
                 <span>{{ formatScheduleDuration(line.schedule) }}</span>
               </div>
               <div class="schedule-item">
-                <label><i class="pi pi-calendar-plus"></i> Operating Days</label>
+                <label><i class="pi pi-calendar-plus"></i> {{ $t('lines.operatingDays') }}</label>
                 <span class="operating-days">{{ formatScheduleDays(line.schedule) }}</span>
               </div>
               <div class="schedule-item">
-                <label><i class="pi pi-tags"></i> Schedule Type</label>
+                <label><i class="pi pi-tags"></i> {{ $t('lineView.scheduleType') }}</label>
                 <span class="schedule-type">{{ formatScheduleType(line.schedule?.type) }}</span>
               </div>
             </div>
@@ -176,7 +175,7 @@
         <Card class="route-section">
           <template #header>
             <div class="section-header-card">
-              <h2><i class="pi pi-map"></i>Route Management</h2>
+              <h2><i class="pi pi-map"></i>{{ $t('lineView.routeManagement') }}</h2>
             </div>
           </template>
           <template #content>
@@ -187,26 +186,26 @@
                     <span class="stat-icon">📍</span>
                     <div class="stat-info">
                       <span class="stat-value">{{ line.route.stops.length }}</span>
-                      <span class="stat-label">Stops</span>
+                      <span class="stat-label">{{ $t('lineView.stops') }}</span>
                     </div>
                   </div>
                   <div class="stat">
                     <span class="stat-icon">📏</span>
                     <div class="stat-info">
                       <span class="stat-value">{{ line.route.totalDistance || 0 }}km</span>
-                      <span class="stat-label">Distance</span>
+                      <span class="stat-label">{{ $t('lineView.distance') }}</span>
                     </div>
                   </div>
                   <div class="stat">
                     <span class="stat-icon">⏱️</span>
                     <div class="stat-info">
                       <span class="stat-value">{{ line.route.estimatedDuration || 0 }}min</span>
-                      <span class="stat-label">Duration</span>
+                      <span class="stat-label">{{ $t('lineView.duration') }}</span>
                     </div>
                   </div>
                 </div>
                 <div class="route-stops">
-                  <h4><i class="pi pi-map-marker"></i>Route Stops</h4>
+                  <h4><i class="pi pi-map-marker"></i>{{ $t('lineView.routeStops') }}</h4>
                   <div class="stops-timeline">
                     <div 
                       v-for="(stop, index) in line.route.stops" 
@@ -231,7 +230,7 @@
                           <div class="stop-actions">
                             <div class="stop-badges">
                               <span class="type-badge" :class="stop.type">
-                                {{ stop.type }}
+                                {{ $t('lineView.' + stop.type) }}
                               </span>
                               <span class="time-badge" v-if="stop.estimatedTime">
                                 {{ formatTime(stop.estimatedTime) }}
@@ -242,35 +241,35 @@
 
                         <div class="stop-details">
                           <div class="stop-address" v-if="stop.address">
-                            <strong>Address:</strong> {{ stop.address }}
+                            <strong>{{ $t('lineView.address') }}:</strong> {{ stop.address }}
                           </div>
                           <div class="stop-time" v-if="stop.estimatedTime">
-                            <strong>Estimated Time:</strong> {{ stop.estimatedTime }} minutes from start
+                            <strong>{{ $t('lineView.estimatedTime') }}:</strong> {{ stop.estimatedTime }} {{ $t('lineView.minutesFromStart') }}
                           </div>
                           <div v-if="getStopStudents(stop).pickup.length > 0 || getStopStudents(stop).dropoff.length > 0" class="stop-usage-info">
                             <div class="usage-indicator">
                               <span class="usage-icon">👥</span>
                               <span class="usage-text">
-                                {{ (getStopStudents(stop).pickup.length + getStopStudents(stop).dropoff.length) }} student{{ (getStopStudents(stop).pickup.length + getStopStudents(stop).dropoff.length) !== 1 ? 's' : '' }} assigned
+                                {{ (getStopStudents(stop).pickup.length + getStopStudents(stop).dropoff.length) }} {{ $t('lineView.studentAssigned', { count: getStopStudents(stop).pickup.length + getStopStudents(stop).dropoff.length }) }}
                               </span>
                               <span class="usage-details">
-                                ({{ getStopStudents(stop).pickup.length }} pickup, {{ getStopStudents(stop).dropoff.length }} dropoff)
+                                ({{ getStopStudents(stop).pickup.length }} {{ $t('lineView.pickup') }}, {{ getStopStudents(stop).dropoff.length }} {{ $t('lineView.dropoff') }})
                               </span>
                             </div>
                             <div class="assigned-students">
                               <div v-if="getStopStudents(stop).pickup.length > 0" class="student-group pickup">
-                                <span class="group-label">Pickup:</span>
+                                <span class="group-label">{{ $t('lineView.pickup') }}:</span>
                                 {{ getStopStudents(stop).pickup.map(s => `${s.firstName} ${s.lastName}`).join(', ') }}
                               </div>
                               <div v-if="getStopStudents(stop).dropoff.length > 0" class="student-group dropoff">
-                                <span class="group-label">Dropoff:</span>
+                                <span class="group-label">{{ $t('lineView.dropoff') }}:</span>
                                 {{ getStopStudents(stop).dropoff.map(s => `${s.firstName} ${s.lastName}`).join(', ') }}
                               </div>
                             </div>
                           </div>
                           <div v-else class="no-students-assigned">
                             <span class="usage-icon">👥</span>
-                            <span class="usage-text muted">No students assigned to this stop</span>
+                            <span class="usage-text muted">{{ $t('lineView.noStudentsAssignedToStop') }}</span>
                           </div>
                         </div>
                       </div>
@@ -281,10 +280,9 @@
               <div v-else class="empty-route">
                 <div class="empty-icon">🗺️</div>
                 <div class="empty-text">
-                  <h3>No Route Configured</h3>
+                  <h3>{{ $t('lineView.noRouteConfigured') }}</h3>
                   <p>
-                    This line doesn't have any stops configured yet. Click "Manage Route" 
-                    to add stops and configure the pickup and dropoff locations.
+                    {{ $t('lineView.noRouteConfiguredDesc') }}
                   </p>
                 </div>
               </div>
@@ -296,8 +294,8 @@
         <Card class="students-section">
           <template #header>
             <div class="section-header-card">
-              <h2><i class="pi pi-users"></i>Assigned Students</h2>
-              <span class="student-count">{{ studentAssignments.length }} students</span>
+              <h2><i class="pi pi-users"></i>{{ $t('lineView.assignedStudents') }}</h2>
+              <span class="student-count">{{ studentAssignments.length }} {{ $t('lines.students') }}</span>
             </div>
           </template>
           <template #content>
@@ -305,8 +303,8 @@
             <div v-if="studentAssignments.length === 0" class="no-students">
               <div class="empty-icon">👥</div>
               <div class="empty-text">
-                <h3>No Students Assigned</h3>
-                <p>No students are currently assigned to this line. Use the Route Manager to add students and configure their pickup/dropoff stops.</p>
+                <h3>{{ $t('lineView.noStudentsAssigned') }}</h3>
+                <p>{{ $t('lineView.noStudentsAssignedDesc') }}</p>
               </div>
             </div>
             
@@ -347,7 +345,7 @@
                     <div class="stop-assignment pickup">
                       <div class="stop-header">
                         <i class="pi pi-sign-in stop-icon pickup-icon"></i>
-                        <span class="stop-label">Pickup</span>
+                        <span class="stop-label">{{ $t('lineView.pickup') }}</span>
                       </div>
                       <div v-if="assignment.pickupStopDetails" class="stop-content">
                         <div class="stop-name">{{ assignment.pickupStopDetails.name }}</div>
@@ -357,14 +355,14 @@
                         </div>
                       </div>
                       <div v-else class="no-stop-assigned">
-                        <span class="not-assigned">Not assigned</span>
+                        <span class="not-assigned">{{ $t('lineView.notAssigned') }}</span>
                       </div>
                     </div>
 
                     <div class="stop-assignment dropoff">
                       <div class="stop-header">
                         <i class="pi pi-sign-out stop-icon dropoff-icon"></i>
-                        <span class="stop-label">Dropoff</span>
+                        <span class="stop-label">{{ $t('lineView.dropoff') }}</span>
                       </div>
                       <div v-if="assignment.dropoffStopDetails" class="stop-content">
                         <div class="stop-name">{{ assignment.dropoffStopDetails.name }}</div>
@@ -374,7 +372,7 @@
                         </div>
                       </div>
                       <div v-else class="no-stop-assigned">
-                        <span class="not-assigned">Not assigned</span>
+                        <span class="not-assigned">{{ $t('lineView.notAssigned') }}</span>
                       </div>
                     </div>
                   </div>
@@ -390,7 +388,7 @@
                 ></div>
               </div>
               <div class="capacity-text">
-                {{ studentAssignments.length }} / {{ line?.maxCapacity || 0 }} students assigned
+                {{ studentAssignments.length }} / {{ line?.maxCapacity || 0 }} {{ $t('lineView.studentsAssigned') }}
               </div>
             </div>
           </template>
@@ -400,7 +398,7 @@
         <Card v-if="line.route && line.route.stops && line.route.stops.length > 0" class="map-section">
           <template #header>
             <div class="section-header-card">
-              <h2><i class="pi pi-map-marker"></i>Route Map</h2>
+              <h2><i class="pi pi-map-marker"></i>{{ $t('lineView.routeMap') }}</h2>
             </div>
           </template>
           <template #content>
@@ -418,9 +416,9 @@
 
       <div v-else class="not-found-container">
         <div class="not-found">
-          <h3>Line Not Found</h3>
-          <p>The requested line could not be found.</p>
-          <Button @click="goBack" label="Back to Lines" icon="pi pi-arrow-left" severity="secondary" />
+          <h3>{{ $t('lineView.lineNotFound') }}</h3>
+          <p>{{ $t('lineView.lineNotFoundDesc') }}</p>
+          <Button @click="goBack" :label="$t('lines.backToLines')" icon="pi pi-arrow-left" severity="secondary" />
         </div>
       </div>
     </AppLayout>
@@ -429,6 +427,7 @@
 <script>
 import { ref, inject, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import apiService from '../services/api'
 import AppLayout from '../components/AppLayout.vue'
 import RouteMap from '../components/RouteMap.vue'
@@ -443,11 +442,12 @@ export default {
     const authStore = inject('authStore')
     const router = useRouter()
     const route = useRoute()
+    const { t } = useI18n()
     
     const breadcrumbs = ref([
-      { label: 'Dashboard', path: '/home' },
-      { label: 'Line Management', path: '/lines' },
-      { label: 'Line Details' }
+      { label: t('navigation.dashboard'), path: '/home' },
+      { label: t('navigation.lineManagement'), path: '/lines' },
+      { label: t('lineView.lineDetails') }
     ])
     
     const line = ref(null)
@@ -460,7 +460,7 @@ export default {
     const fetchLine = async () => {
       const lineId = route.params.id
       if (!lineId) {
-        error.value = 'No line ID provided'
+        error.value = t('lineView.noLineIdProvided')
         return
       }
       
@@ -476,7 +476,7 @@ export default {
         }
       } catch (err) {
         console.error('Failed to fetch line:', err)
-        error.value = err.response?.data?.message || 'Failed to load line details'
+        error.value = err.response?.data?.message || t('lineView.failedToLoadLineDetails')
       } finally {
         loading.value = false
       }
@@ -498,14 +498,14 @@ export default {
     
     const formatScheduleDuration = (schedule) => {
       if (!schedule || !schedule.startDate) {
-        return 'No schedule set'
+        return t('lines.noScheduleSet')
       }
       
       const start = new Date(schedule.startDate)
       const end = schedule.endDate ? new Date(schedule.endDate) : null
       
       if (!end) {
-        return `From ${start.toLocaleDateString()}`
+        return t('lineView.fromDate', { date: start.toLocaleDateString() })
       }
       
       return `${start.toLocaleDateString()} - ${end.toLocaleDateString()}`
@@ -513,27 +513,27 @@ export default {
     
     const formatScheduleDays = (schedule) => {
       if (!schedule || !schedule.daysOfWeek || schedule.daysOfWeek.length === 0) {
-        return 'No days selected'
+        return t('lines.noDaysSelected')
       }
       
-      const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+      const dayNames = [t('lineView.sun'), t('lineView.mon'), t('lineView.tue'), t('lineView.wed'), t('lineView.thu'), t('lineView.fri'), t('lineView.sat')]
       const selectedDays = schedule.daysOfWeek
         .sort((a, b) => a - b)
         .map(dayNum => dayNames[dayNum])
       
       if (selectedDays.length === 7) {
-        return 'Every day'
+        return t('lines.everyDay')
       } else if (selectedDays.length === 5 && 
                  schedule.daysOfWeek.includes(0) && 
                  schedule.daysOfWeek.includes(1) && 
                  schedule.daysOfWeek.includes(2) && 
                  schedule.daysOfWeek.includes(3) && 
                  schedule.daysOfWeek.includes(4)) {
-        return 'Sun-Thu (Weekdays)'
+        return t('lines.weekdays')
       } else if (selectedDays.length === 2 && 
                  schedule.daysOfWeek.includes(0) && 
                  schedule.daysOfWeek.includes(6)) {
-        return 'Sat-Sun (Weekends)'
+        return t('lines.weekends')
       } else {
         return selectedDays.join(', ')
       }
@@ -541,16 +541,16 @@ export default {
     
     const formatScheduleType = (type) => {
       const typeMap = {
-        daily: 'Daily',
-        weekdays: 'Weekdays',
-        weekends: 'Weekends',
-        custom: 'Custom'
+        daily: t('lineView.daily'),
+        weekdays: t('lineView.weekdays'),
+        weekends: t('lineView.weekends'),
+        custom: t('lineView.custom')
       }
-      return typeMap[type] || type || 'Not specified'
+      return typeMap[type] || type || t('lineView.notSpecified')
     }
     
     const formatTime = (timeInput) => {
-      if (!timeInput && timeInput !== 0) return 'N/A'
+      if (!timeInput && timeInput !== 0) return t('common.notSet')
       
       // If it's a string (HH:MM format like "07:30"), convert to 12-hour format
       if (typeof timeInput === 'string' && timeInput.includes(':')) {
@@ -567,15 +567,15 @@ export default {
     }
     
     const getDriverName = (driver) => {
-      if (!driver) return 'No driver assigned'
-      if (typeof driver === 'string') return 'Driver assigned'
-      return `${driver.firstName || ''} ${driver.lastName || ''}`.trim() || 'Driver assigned'
+      if (!driver) return t('lines.noDriver')
+      if (typeof driver === 'string') return t('lines.driverAssigned')
+      return `${driver.firstName || ''} ${driver.lastName || ''}`.trim() || t('lines.driverAssigned')
     }
     
     const getVehicleName = (vehicle) => {
-      if (!vehicle) return 'No vehicle assigned'
-      if (typeof vehicle === 'string') return 'Vehicle assigned'
-      return vehicle.licensePlate || 'Vehicle assigned'
+      if (!vehicle) return t('lines.noVehicle')
+      if (typeof vehicle === 'string') return t('lineView.vehicleAssigned')
+      return vehicle.licensePlate || t('lineView.vehicleAssigned')
     }
     
     const handleEdit = () => {
@@ -641,12 +641,12 @@ export default {
         await fetchLine()
         
         showSuccessMessage(
-          `Line activated successfully! Generated ${response.generatedRides} future rides.`
+          t('lineView.lineActivatedSuccess', { rides: response.generatedRides })
         )
       } catch (err) {
         console.error('Failed to activate line:', err)
-        const errorMessage = err.response?.data?.message || 'Failed to activate line'
-        alert(`Error: ${errorMessage}`)
+        const errorMessage = err.response?.data?.message || t('lineView.failedToActivateLine')
+        alert(`${t('common.error')}: ${errorMessage}`)
       } finally {
         activating.value = false
       }

@@ -1,13 +1,13 @@
 <template>
   <AppLayout 
-    page-title="User Management"
+    :page-title="$t('users.title')"
     :breadcrumbs="breadcrumbs"
   >
     <template #actions>
       <Button 
         @click="goBack" 
         icon="pi pi-arrow-left"
-        label="Back to Dashboard"
+        :label="$t('navigation.backToDashboard')"
         severity="secondary"
         outlined
       />
@@ -18,20 +18,20 @@
         <Card class="student-section">
           <template #header>
             <div class="section-header-card">
-              <h2><i class="pi pi-user-plus"></i>Create Student</h2>
+              <h2><i class="pi pi-user-plus"></i>{{ $t('users.createStudent') }}</h2>
             </div>
           </template>
           <template #content>
             <form @submit.prevent="handleCreateStudent" class="student-form">
               <div class="form-row">
                 <div class="form-group">
-                  <label for="studentFirstName">First Name</label>
+                  <label for="studentFirstName">{{ $t('login.firstName') }}</label>
                   <IconField>
                     <InputIcon class="pi pi-user" />
                     <InputText 
                       id="studentFirstName"
                       v-model="studentForm.firstName" 
-                      placeholder="Enter first name"
+                      :placeholder="$t('login.placeholders.firstName')"
                       required 
                       :disabled="loading"
                     />
@@ -39,13 +39,13 @@
                 </div>
                 
                 <div class="form-group">
-                  <label for="studentLastName">Last Name</label>
+                  <label for="studentLastName">{{ $t('login.lastName') }}</label>
                   <IconField>
                     <InputIcon class="pi pi-user" />
                     <InputText 
                       id="studentLastName"
                       v-model="studentForm.lastName" 
-                      placeholder="Enter last name"
+                      :placeholder="$t('login.placeholders.lastName')"
                       required 
                       :disabled="loading"
                     />
@@ -53,14 +53,14 @@
                 </div>
                 
                 <div class="form-group">
-                  <label for="studentPhone">Phone</label>
+                  <label for="studentPhone">{{ $t('login.phone') }}</label>
                   <IconField>
                     <InputIcon class="pi pi-phone" />
                     <InputMask 
                       id="studentPhone"
                       v-model="studentForm.phone" 
                       mask="(999) 999-9999"
-                      placeholder="(555) 123-4567"
+                      :placeholder="$t('login.placeholders.phone')"
                       required 
                       :disabled="loading"
                     />
@@ -72,7 +72,7 @@
                 type="submit" 
                 :loading="loading"
                 loadingIcon="pi pi-spin pi-spinner"
-                :label="loading ? 'Creating...' : 'Create Student'"
+                :label="loading ? $t('users.creating') : $t('users.createStudent')"
                 icon="pi pi-plus"
                 severity="info"
                 :disabled="loading"
@@ -96,21 +96,21 @@
         <Card class="parent-student-section">
           <template #header>
             <div class="section-header-card">
-              <h2><i class="pi pi-link"></i>Connect Student to Parents</h2>
+              <h2><i class="pi pi-link"></i>{{ $t('users.connectStudentToParents') }}</h2>
             </div>
           </template>
           <template #content>
             <form @submit.prevent="handleConnectStudentToParents" class="parent-student-form">
               <div class="form-row">
                 <div class="form-group">
-                  <label for="studentSelect">Student</label>
+                  <label for="studentSelect">{{ $t('users.student') }}</label>
                   <Select 
                     id="studentSelect"
                     v-model="parentStudentForm.studentId"
                     :options="availableStudents"
                     optionLabel="displayName"
                     optionValue="_id"
-                    placeholder="Select a student..."
+                    :placeholder="$t('users.selectStudent')"
                     :loading="loadingStudents"
                     :disabled="loading || loadingStudents"
                     showClear
@@ -118,14 +118,14 @@
                 </div>
                 
                 <div class="form-group">
-                  <label for="parentSelect1">Parent 1</label>
+                  <label for="parentSelect1">{{ $t('users.primaryParent') }}</label>
                   <Select 
                     id="parentSelect1"
                     v-model="parentStudentForm.parentId1"
                     :options="availableParents"
                     optionLabel="displayName"
                     optionValue="_id"
-                    placeholder="Select primary parent..."
+                    :placeholder="$t('users.selectPrimaryParent')"
                     :loading="loadingParents"
                     :disabled="loading || loadingParents"
                     showClear
@@ -133,14 +133,14 @@
                 </div>
                 
                 <div class="form-group">
-                  <label for="parentSelect2">Parent 2 (Optional)</label>
+                  <label for="parentSelect2">{{ $t('users.secondaryParent') }}</label>
                   <Select 
                     id="parentSelect2"
                     v-model="parentStudentForm.parentId2"
                     :options="filteredSecondaryParents"
                     optionLabel="displayName"
                     optionValue="_id"
-                    placeholder="Select secondary parent..."
+                    :placeholder="$t('users.selectSecondaryParent')"
                     :loading="loadingParents"
                     :disabled="loading || loadingParents"
                     showClear
@@ -152,7 +152,7 @@
                 type="submit" 
                 :loading="loading"
                 loadingIcon="pi pi-spin pi-spinner"
-                :label="loading ? 'Connecting...' : 'Connect Student to Parents'"
+                :label="loading ? $t('users.connecting') : $t('users.connectToParents')"
                 icon="pi pi-link"
                 severity="warning"
                 :disabled="loading || !parentStudentForm.studentId || !parentStudentForm.parentId1"
@@ -176,21 +176,21 @@
         <Card class="invite-section">
           <template #header>
             <div class="section-header-card">
-              <h2><i class="pi pi-send"></i>Invite New User</h2>
+              <h2><i class="pi pi-send"></i>{{ $t('users.inviteNewUser') }}</h2>
             </div>
           </template>
           <template #content>
             <form @submit.prevent="handleInvite" class="invite-form">
               <div class="form-row">
                 <div class="form-group">
-                  <label for="email">Email</label>
+                  <label for="email">{{ $t('login.email') }}</label>
                   <IconField>
                     <InputIcon class="pi pi-envelope" />
                     <InputText 
                       id="email"
                       type="email"
                       v-model="inviteForm.email" 
-                      placeholder="Enter email address"
+                      :placeholder="$t('login.placeholders.email')"
                       required 
                       :disabled="loading"
                     />
@@ -198,14 +198,14 @@
                 </div>
                 
                 <div class="form-group">
-                  <label for="phone">Phone</label>
+                  <label for="phone">{{ $t('login.phone') }}</label>
                   <IconField>
                     <InputIcon class="pi pi-phone" />
                     <InputMask 
                       id="phone"
                       v-model="inviteForm.phone" 
                       mask="(999) 999-9999"
-                      placeholder="(555) 123-4567"
+                      :placeholder="$t('login.placeholders.phone')"
                       required 
                       :disabled="loading"
                     />
@@ -213,14 +213,14 @@
                 </div>
                 
                 <div class="form-group">
-                  <label for="role">Role</label>
+                  <label for="role">{{ $t('users.role') }}</label>
                   <Select 
                     id="role"
                     v-model="inviteForm.role" 
                     :options="roleFilterOptions"
                     optionLabel="label"
                     optionValue="value"
-                    placeholder="Select role..."
+                    :placeholder="$t('users.selectRole')"
                     required 
                     :disabled="loading"
                   />
@@ -231,7 +231,7 @@
                 type="submit" 
                 :loading="loading"
                 loadingIcon="pi pi-spin pi-spinner"
-                :label="loading ? 'Sending...' : 'Send Invitation'"
+                :label="loading ? $t('users.sending') : $t('users.sendInvitation')"
                 icon="pi pi-send"
                 severity="success"
                 :disabled="loading"
@@ -255,45 +255,45 @@
         <Card class="users-section">
           <template #header>
             <div class="section-header-card">
-              <h2><i class="pi pi-users"></i>All Users</h2>
+              <h2><i class="pi pi-users"></i>{{ $t('users.allUsers') }}</h2>
             </div>
           </template>
           <template #content>
             <div class="table-filters">
               <div class="filter-row">
                 <div class="filter-group">
-                  <label for="searchUsers">Search</label>
+                  <label for="searchUsers">{{ $t('common.search') }}</label>
                   <IconField>
                     <InputIcon class="pi pi-search" />
                     <InputText 
                       id="searchUsers"
                       v-model="userSearchFilter" 
-                      placeholder="Search users..."
+                      :placeholder="searchUsersPlaceholder"
                     />
                   </IconField>
                 </div>
                 <div class="filter-group">
-                  <label for="roleFilter">Role</label>
+                  <label for="roleFilter">{{ $t('users.role') }}</label>
                   <Select 
                     id="roleFilter"
                     v-model="userFilter.role" 
                     :options="roleFilterOptions"
                     optionLabel="label"
                     optionValue="value"
-                    placeholder="All Roles"
+                    :placeholder="$t('users.allRoles')"
                     showClear
                     @change="fetchUsers"
                   />
                 </div>
                 <div class="filter-group">
-                  <label for="statusFilter">Status</label>
+                  <label for="statusFilter">{{ $t('common.status') }}</label>
                   <Select 
                     id="statusFilter"
                     v-model="userFilter.isActive" 
                     :options="statusFilterOptions"
                     optionLabel="label"
                     optionValue="value"
-                    placeholder="All Status"
+                    :placeholder="$t('users.allStatus')"
                     showClear
                     @change="fetchUsers"
                   />
@@ -308,7 +308,7 @@
               :rows="10" 
               :rowsPerPageOptions="[5, 10, 20, 50]"
               paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
-              currentPageReportTemplate="{first} to {last} of {totalRecords} users"
+              :currentPageReportTemplate="usersPageReportTemplate"
               stripedRows
               removableSort
               sortMode="multiple"
@@ -317,11 +317,11 @@
               <template #empty>
                 <div class="empty-state">
                   <i class="pi pi-users" style="font-size: 3rem; color: var(--p-text-muted-color);"></i>
-                  <p>No users found.</p>
+                  <p>{{ $t('users.noUsers') }}</p>
                 </div>
               </template>
               
-              <Column field="user" header="User" sortable>
+              <Column field="user" :header="$t('common.name')" sortable>
                 <template #body="slotProps">
                   <div class="user-info-cell">
                     <Avatar 
@@ -344,35 +344,35 @@
                 </template>
               </Column>
               
-              <Column field="role" header="Role" sortable>
+              <Column field="role" :header="$t('users.role')" sortable>
                 <template #body="slotProps">
                   <div class="role-cell">
                     <i :class="getRoleIcon(slotProps.data.role)"></i>
                     <span class="role-badge" :class="`role-${slotProps.data.role}`">
-                      {{ slotProps.data.role }}
+                      {{ $t('appLayout.userRole.' + slotProps.data.role) }}
                     </span>
                   </div>
                 </template>
               </Column>
               
-              <Column field="isActive" header="Status" sortable>
+              <Column field="isActive" :header="$t('common.status')" sortable>
                 <template #body="slotProps">
                   <div class="status-cell">
                     <i :class="slotProps.data.isActive ? 'pi pi-check-circle' : 'pi pi-times-circle'"></i>
                     <span class="status-badge" :class="slotProps.data.isActive ? 'active' : 'inactive'">
-                      {{ slotProps.data.isActive ? 'Active' : 'Inactive' }}
+                      {{ slotProps.data.isActive ? $t('lines.active') : $t('lines.inactive') }}
                     </span>
                   </div>
                 </template>
               </Column>
               
-              <Column field="relationships" header="Relationships">
+              <Column field="relationships" :header="$t('users.relationships')">
                 <template #body="slotProps">
                   <div class="relationships-cell">
                     <div v-if="slotProps.data.role === 'student' && slotProps.data.parents && slotProps.data.parents.length > 0">
                       <div class="relationship-header">
                         <i class="pi pi-users"></i>
-                        Parents
+                        {{ $t('users.parents') }}
                       </div>
                       <div v-for="parent in slotProps.data.parents" :key="parent._id" class="relationship-item">
                         {{ parent.firstName }} {{ parent.lastName }}
@@ -381,7 +381,7 @@
                     <div v-else-if="slotProps.data.role === 'parent' && slotProps.data.children && slotProps.data.children.length > 0">
                       <div class="relationship-header">
                         <i class="pi pi-user"></i>
-                        Children
+                        {{ $t('users.children') }}
                       </div>
                       <div v-for="child in slotProps.data.children" :key="child._id" class="relationship-item">
                         {{ child.firstName }} {{ child.lastName }}
@@ -392,7 +392,7 @@
                 </template>
               </Column>
               
-              <Column field="createdAt" header="Created" sortable>
+              <Column field="createdAt" :header="$t('lines.created')" sortable>
                 <template #body="slotProps">
                   <div class="date-cell">
                     <i class="pi pi-calendar"></i>
@@ -406,12 +406,12 @@
 
         <!-- Invitations Section -->
         <div class="invitations-section">
-          <h2>Pending Invitations</h2>
+          <h2>{{ $t('users.pendingInvitations') }}</h2>
           
-          <div v-if="loadingInvitations" class="loading">Loading invitations...</div>
+          <div v-if="loadingInvitations" class="loading">{{ loadingInvitationsText }}</div>
           
           <div v-else-if="invitations.length === 0" class="no-invitations">
-            No pending invitations.
+            {{ $t('users.noPendingInvitations') }}
           </div>
 
           <div v-else class="invitations-grid">
@@ -430,15 +430,15 @@
                   <span class="status-badge pending">{{ invitation.status }}</span>
                 </div>
                 <div class="invitation-details">
-                  <div>Invited by: {{ invitation.invitedBy.firstName }} {{ invitation.invitedBy.lastName }}</div>
-                  <div>Expires: {{ formatDate(invitation.expiresAt) }}</div>
+                  <div>{{ $t('users.invitedBy') }}: {{ invitation.invitedBy.firstName }} {{ invitation.invitedBy.lastName }}</div>
+                  <div>{{ $t('users.expires') }}: {{ formatDate(invitation.expiresAt) }}</div>
                 </div>
                 <button 
                   @click="deleteInvitation(invitation._id)" 
                   class="delete-button"
                   :disabled="loading"
                 >
-                  Delete
+                  {{ $t('common.delete') }}
                 </button>
               </div>
             </div>
@@ -451,6 +451,7 @@
 <script>
 import { ref, inject, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import apiService from '../services/api'
 import AppLayout from '../components/AppLayout.vue'
 
@@ -462,10 +463,11 @@ export default {
   setup() {
     const authStore = inject('authStore')
     const router = useRouter()
+    const { t } = useI18n()
     
     const breadcrumbs = ref([
-      { label: 'Dashboard', path: '/home' },
-      { label: 'User Management' }
+      { label: t('navigation.dashboard'), path: '/home' },
+      { label: t('users.title') }
     ])
     
     const loading = ref(false)
@@ -511,15 +513,15 @@ export default {
     const userSearchFilter = ref('')
     
     const roleFilterOptions = [
-      { label: 'Admin', value: 'admin' },
-      { label: 'Driver', value: 'driver' },
-      { label: 'Parent', value: 'parent' },
-      { label: 'Student', value: 'student' }
+      { label: t('users.admin'), value: 'admin' },
+      { label: t('users.driver'), value: 'driver' },
+      { label: t('users.parent'), value: 'parent' },
+      { label: t('users.student'), value: 'student' }
     ]
     
     const statusFilterOptions = [
-      { label: 'Active', value: 'true' },
-      { label: 'Inactive', value: 'false' }
+      { label: t('lines.active'), value: 'true' },
+      { label: t('lines.inactive'), value: 'false' }
     ]
     
     const handleCreateStudent = async () => {
@@ -529,7 +531,7 @@ export default {
         
         await apiService.post('/auth/students', studentForm.value)
         
-        studentMessage.value = 'Student created successfully!'
+        studentMessage.value = t('messages.studentCreated')
         studentMessageType.value = 'success'
         
         // Reset form
@@ -543,7 +545,7 @@ export default {
         await Promise.all([fetchUsers(), fetchAvailableStudents()])
         
       } catch (error) {
-        studentMessage.value = error.response?.data?.message || 'Failed to create student'
+        studentMessage.value = error.response?.data?.message || t('messages.failedToCreate')
         studentMessageType.value = 'error'
       } finally {
         loading.value = false
@@ -565,7 +567,7 @@ export default {
           parentIds
         })
         
-        parentStudentMessage.value = 'Student connected to parents successfully!'
+        parentStudentMessage.value = t('messages.studentConnected')
         parentStudentMessageType.value = 'success'
         
         // Reset form
@@ -579,7 +581,7 @@ export default {
         await Promise.all([fetchUsers(), fetchAvailableStudents()])
         
       } catch (error) {
-        parentStudentMessage.value = error.response?.data?.message || 'Failed to connect student to parents'
+        parentStudentMessage.value = error.response?.data?.message || t('messages.failedToConnect')
         parentStudentMessageType.value = 'error'
       } finally {
         loading.value = false
@@ -593,7 +595,7 @@ export default {
         
         await apiService.post('/invitations', inviteForm.value)
         
-        message.value = 'Invitation sent successfully!'
+        message.value = t('messages.invitationSent')
         messageType.value = 'success'
         
         // Reset form
@@ -607,7 +609,7 @@ export default {
         await fetchInvitations()
         
       } catch (error) {
-        message.value = error.response?.data?.message || 'Failed to send invitation'
+        message.value = error.response?.data?.message || t('messages.failedToSendInvitation')
         messageType.value = 'error'
       } finally {
         loading.value = false
@@ -676,16 +678,16 @@ export default {
     }
     
     const deleteInvitation = async (invitationId) => {
-      if (!confirm('Are you sure you want to delete this invitation?')) return
+      if (!confirm(t('messages.confirmDeleteInvitation'))) return
       
       try {
         await apiService.delete(`/invitations/${invitationId}`)
 
         await fetchInvitations() // Refresh list
-        message.value = 'Invitation deleted successfully'
+        message.value = t('messages.invitationDeleted')
         messageType.value = 'success'
       } catch (error) {
-        message.value = error.response?.data?.message || 'Failed to delete invitation'
+        message.value = error.response?.data?.message || t('messages.failedToDeleteInvitation')
         messageType.value = 'error'
       }
     }
@@ -737,6 +739,13 @@ export default {
       )
     })
     
+    // Computed properties for translated strings
+    const searchUsersPlaceholder = computed(() => t('common.search'))
+    const loadingInvitationsText = computed(() => t('common.loading'))
+    const usersPageReportTemplate = computed(() => 
+      t('common.paginatorTemplate').replace('{first}', '{first}').replace('{last}', '{last}').replace('{totalRecords}', '{totalRecords}')
+    )
+    
     onMounted(async () => {
       await Promise.all([
         fetchUsers(),
@@ -780,7 +789,10 @@ export default {
       roleFilterOptions,
       statusFilterOptions,
       filteredUsers,
-      filteredSecondaryParents
+      filteredSecondaryParents,
+      searchUsersPlaceholder,
+      loadingInvitationsText,
+      usersPageReportTemplate
     }
   }
 }
@@ -1059,7 +1071,6 @@ export default {
 .role-badge {
   padding: 2px 8px;
   border-radius: 12px;
-  font-size: 0.7rem;
   font-weight: bold;
   text-transform: uppercase;
 }

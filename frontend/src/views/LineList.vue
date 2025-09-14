@@ -1,20 +1,20 @@
 <template>
   <AppLayout 
-    page-title="Line Management"
+    :page-title="$t('lines.title')"
     :breadcrumbs="breadcrumbs"
   >
     <template #actions>
       <Button 
         @click="goBack" 
         icon="pi pi-arrow-left"
-        label="Back to Dashboard"
+        :label="$t('navigation.backToDashboard')"
         severity="secondary"
         outlined
       />
       <Button 
         @click="handleAddLine" 
         icon="pi pi-plus"
-        label="Add New Line"
+        :label="$t('lines.addNewLine')"
         severity="success"
       />
     </template>
@@ -23,16 +23,16 @@
         <!-- Lines List Section -->
         <Card class="lines-section">
           <template #content>
-            <div v-if="loading" class="loading">Loading lines...</div>
+            <div v-if="loading" class="loading">{{ $t('common.loading') }}</div>
             
             <div v-else-if="lines.length === 0" class="no-lines">
               <div class="empty-state">
-                <h3>No lines found</h3>
-                <p>Start by creating your first transportation line.</p>
+                <h3>{{ $t('lines.noLinesFound') }}</h3>
+                <p>{{ $t('lines.startCreateFirst') }}</p>
                 <Button 
                   @click="handleAddLine" 
                   icon="pi pi-plus"
-                  label="Create First Line"
+                  :label="$t('lines.createFirstLine')"
                   severity="success"
                   size="large"
                 />
@@ -55,7 +55,7 @@
                         :style="{ color: line.isActive ? 'var(--p-green-500)' : 'var(--p-red-500)' }"
                       ></i>
                       <span class="status-text" :class="line.isActive ? 'active' : 'inactive'">
-                        {{ line.isActive ? 'Active' : 'Inactive' }}
+                        {{ line.isActive ? $t('lines.active') : $t('lines.inactive') }}
                       </span>
                     </div>
                   </div>
@@ -65,15 +65,15 @@
                   <div class="line-info">
                     <div class="line-stats">
                       <div class="stat-item">
-                        <span class="stat-label">Route:</span>
-                        <span class="stat-value">{{ line.route?.name || 'No Route' }}</span>
+                        <span class="stat-label">{{ $t('lines.route') }}:</span>
+                        <span class="stat-value">{{ line.route?.name || $t('lines.noRoute') }}</span>
                       </div>
                       <div class="stat-item">
-                        <span class="stat-label">Vehicle:</span>
-                        <span class="stat-value">{{ line.vehicle?.licensePlate || 'No Vehicle' }}</span>
+                        <span class="stat-label">{{ $t('lines.vehicle') }}:</span>
+                        <span class="stat-value">{{ line.vehicle?.licensePlate || $t('lines.noVehicle') }}</span>
                       </div>
                       <div class="stat-item">
-                        <span class="stat-label">Driver:</span>
+                        <span class="stat-label">{{ $t('lines.driver') }}:</span>
                         <span class="stat-value">{{ getDriverName(line.driver) }}</span>
                       </div>
                     </div>
@@ -81,23 +81,23 @@
                     <div class="line-details">
                       <div class="detail-item">
                         <i class="pi pi-clock detail-icon"></i>
-                        <strong>Start Time:</strong>
+                        <strong>{{ $t('lines.startTime') }}:</strong>
                         <span class="start-time">{{ formatTime(line.rideStartTime) }}</span>
                       </div>
                       <div class="detail-item">
                         <i class="pi pi-calendar detail-icon"></i>
-                        <strong>Duration:</strong>
+                        <strong>{{ $t('lines.duration') }}:</strong>
                         <span class="schedule-duration">{{ formatScheduleDuration(line.schedule) }}</span>
                       </div>
                       <div class="detail-item">
                         <i class="pi pi-calendar-times detail-icon"></i>
-                        <strong>Operating Days:</strong>
+                        <strong>{{ $t('lines.operatingDays') }}:</strong>
                         <span class="schedule-days">{{ formatScheduleDays(line.schedule) }}</span>
                       </div>
                       <div class="detail-item">
                         <i class="pi pi-users detail-icon"></i>
-                        <strong>Students:</strong>
-                        <span class="student-count">{{ line.students?.length || 0 }} assigned</span>
+                        <strong>{{ $t('lines.students') }}:</strong>
+                        <span class="student-count">{{ line.students?.length || 0 }} {{ $t('lines.assigned') }}</span>
                       </div>
                     </div>
                   </div>
@@ -107,11 +107,11 @@
                   <div class="line-meta">
                     <div class="line-dates">
                       <i class="pi pi-info-circle"></i>
-                      Created: {{ formatDate(line.createdAt) }}
+                      {{ $t('lines.created') }}: {{ formatDate(line.createdAt) }}
                     </div>
                     <div class="line-capacity" v-if="line.vehicle">
                       <i class="pi pi-users"></i>
-                      Capacity: {{ line.students?.length || 0 }}/{{ line.vehicle.capacity }}
+                      {{ $t('lines.capacity') }}: {{ line.students?.length || 0 }}/{{ line.vehicle.capacity }}
                     </div>
                   </div>
                 </template>
@@ -125,6 +125,7 @@
 
 <script>
 import { ref, inject, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import apiService from '../services/api'
 import AppLayout from '../components/AppLayout.vue'
@@ -137,10 +138,11 @@ export default {
   setup() {
     const authStore = inject('authStore')
     const router = useRouter()
+    const { t } = useI18n()
     
     const breadcrumbs = ref([
-      { label: 'Dashboard', path: '/home' },
-      { label: 'Line Management' }
+      { label: t('navigation.dashboard'), path: '/home' },
+      { label: t('lines.title') }
     ])
     
     const loading = ref(false)
@@ -176,7 +178,7 @@ export default {
     }
     
     const formatTime = (timeString) => {
-      if (!timeString) return 'Not set'
+      if (!timeString) return t('lines.notSet')
       
       // Handle HH:MM format
       const [hours, minutes] = timeString.split(':')
@@ -196,21 +198,21 @@ export default {
     }
     
     const getDriverName = (driver) => {
-      if (!driver) return 'No Driver'
-      if (typeof driver === 'string') return 'Driver Assigned'
-      return `${driver.firstName || ''} ${driver.lastName || ''}`.trim() || 'Driver Assigned'
+      if (!driver) return t('lines.noDriver')
+      if (typeof driver === 'string') return t('lines.driverAssigned')
+      return `${driver.firstName || ''} ${driver.lastName || ''}`.trim() || t('lines.driverAssigned')
     }
     
     const formatScheduleDuration = (schedule) => {
       if (!schedule || !schedule.startDate) {
-        return 'No schedule set'
+        return t('lines.noScheduleSet')
       }
       
       const start = new Date(schedule.startDate)
       const end = schedule.endDate ? new Date(schedule.endDate) : null
       
       if (!end) {
-        return `From ${start.toLocaleDateString()}`
+        return `${start.toLocaleDateString()}`
       }
       
       const diffTime = Math.abs(end - start)
@@ -220,21 +222,21 @@ export default {
       const endStr = end.toLocaleDateString()
       
       if (diffDays === 1) {
-        return `${startStr} (1 day)`
+        return `${startStr} (1 ${t('common.day')})`
       } else if (diffDays < 30) {
-        return `${startStr} - ${endStr} (${diffDays} days)`
+        return `${startStr} - ${endStr} (${diffDays} ${t('lines.days')})`
       } else if (diffDays < 365) {
         const weeks = Math.floor(diffDays / 7)
-        return `${startStr} - ${endStr} (${weeks} week${weeks > 1 ? 's' : ''})`
+        return `${startStr} - ${endStr} (${weeks} ${weeks > 1 ? t('lines.weeks') : t('common.week')})`
       } else {
         const years = Math.floor(diffDays / 365)
-        return `${startStr} - ${endStr} (${years} year${years > 1 ? 's' : ''})`
+        return `${startStr} - ${endStr} (${years} ${years > 1 ? t('lines.years') : t('common.year')})`
       }
     }
     
     const formatScheduleDays = (schedule) => {
       if (!schedule || !schedule.daysOfWeek || schedule.daysOfWeek.length === 0) {
-        return 'No days selected'
+        return t('lines.noDaysSelected')
       }
       
       const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
@@ -244,18 +246,18 @@ export default {
       
       // Check for common patterns
       if (selectedDays.length === 7) {
-        return 'Every day'
+        return t('lines.everyDay')
       } else if (selectedDays.length === 5 && 
                  schedule.daysOfWeek.includes(0) && 
                  schedule.daysOfWeek.includes(1) && 
                  schedule.daysOfWeek.includes(2) && 
                  schedule.daysOfWeek.includes(3) && 
                  schedule.daysOfWeek.includes(4)) {
-        return 'Sun-Thu (Weekdays)'
+        return t('lines.weekdays')
       } else if (selectedDays.length === 2 && 
                  schedule.daysOfWeek.includes(0) && 
                  schedule.daysOfWeek.includes(6)) {
-        return 'Sat-Sun (Weekends)'
+        return t('lines.weekends')
       } else {
         return selectedDays.join(', ')
       }

@@ -7,9 +7,14 @@
           <div class="logo-container">
             <i class="pi pi-car" style="font-size: 3rem; color: var(--p-primary-color);"></i>
           </div>
-          <h1>Welcome to PrimeLand!</h1>
-          <p class="login-subtitle">Sign in to continue</p>
+          <h1>{{ $t('login.title') }}</h1>
+          <p class="login-subtitle">{{ $t('login.subtitle') }}</p>
         </div>
+        <!-- Language Selector -->
+        <div class="language-toggle">
+          <LanguageSwitcher />
+        </div>
+
         <!-- Toggle between Login and Signup -->
         <div class="form-toggle">
           <SelectButton 
@@ -20,12 +25,12 @@
           />
         </div>
 
-        <h2>{{ isSignup ? 'Create Account' : 'Login' }}</h2>
+        <h2>{{ isSignup ? $t('login.createAccount') : $t('login.loginButton') }}</h2>
       
       <!-- Login Form -->
       <form v-if="!isSignup" @submit.prevent="handleLogin" class="login-form">
         <div class="form-group">
-          <label for="email">Email:</label>
+          <label for="email">{{ $t('login.email') }}:</label>
           <IconField>
             <InputIcon>
               <i class="pi pi-envelope" />
@@ -37,20 +42,20 @@
               required 
               :disabled="authStore.loading"
               fluid
-              placeholder="Enter your email"
+              :placeholder="$t('login.placeholders.email')"
             />
           </IconField>
         </div>
         
         <div class="form-group">
-          <label for="password">Password:</label>
+          <label for="password">{{ $t('login.password') }}:</label>
           <Password 
             id="password"
             v-model="password" 
             required 
             :disabled="authStore.loading"
             fluid
-            placeholder="Enter your password"
+            :placeholder="$t('login.placeholders.password')"
             :feedback="false"
             toggleMask
           />
@@ -62,7 +67,7 @@
           :disabled="authStore.loading"
           :loading="authStore.loading"
         >
-          {{ authStore.loading ? 'Logging in...' : 'Login' }}
+          {{ authStore.loading ? $t('login.loggingIn') : $t('login.loginButton') }}
         </Button>
       </form>
 
@@ -70,7 +75,7 @@
       <form v-else @submit.prevent="handleSignup" class="signup-form">
         <div class="form-row">
           <div class="form-group">
-            <label for="signup-firstName">First Name:</label>
+            <label for="signup-firstName">{{ $t('login.firstName') }}:</label>
             <IconField>
               <InputIcon>
                   <i class="pi pi-user" />
@@ -81,12 +86,12 @@
                 required 
                 :disabled="authStore.loading"
                 fluid
-                placeholder="First name"
+                :placeholder="$t('login.placeholders.firstName')"
               />
             </IconField>
           </div>
           <div class="form-group">
-            <label for="signup-lastName">Last Name:</label>
+            <label for="signup-lastName">{{ $t('login.lastName') }}:</label>
             <IconField>
               <InputIcon>
                   <i class="pi pi-user" />
@@ -97,14 +102,14 @@
                 required 
                 :disabled="authStore.loading"
                 fluid
-                placeholder="Last name"
+                :placeholder="$t('login.placeholders.lastName')"
               />
             </IconField>
           </div>
         </div>
 
         <div class="form-group">
-          <label for="signup-email">Email:</label>
+          <label for="signup-email">{{ $t('login.email') }}:</label>
           <IconField>
             <InputIcon>
               <i class="pi pi-envelope" />
@@ -116,13 +121,13 @@
               required 
               :disabled="authStore.loading"
               fluid
-              placeholder="Enter your email"
+              :placeholder="$t('login.placeholders.email')"
             />
           </IconField>
         </div>
 
         <div class="form-group">
-          <label for="signup-phone">Phone:</label>
+          <label for="signup-phone">{{ $t('login.phone') }}:</label>
 
           <IconField>
             <InputIcon>
@@ -135,35 +140,35 @@
               required 
               :disabled="authStore.loading"
               fluid
-              placeholder="+1234567890"
+              :placeholder="$t('login.placeholders.phone')"
             />
           </IconField>
         </div>
 
 
         <div class="form-group">
-          <label for="signup-password">Password:</label>
+          <label for="signup-password">{{ $t('login.password') }}:</label>
           <Password 
             id="signup-password"
             v-model="signupForm.password" 
             required 
             :disabled="authStore.loading"
             fluid
-            placeholder="Enter password (min 6 characters)"
+            :placeholder="$t('login.placeholders.signupPassword')"
             :feedback="true"
             toggleMask
           />
         </div>
 
         <div class="form-group">
-          <label for="signup-confirmPassword">Confirm Password:</label>
+          <label for="signup-confirmPassword">{{ $t('login.confirmPassword') }}:</label>
           <Password 
             id="signup-confirmPassword"
             v-model="signupForm.confirmPassword" 
             required 
             :disabled="authStore.loading"
             fluid
-            placeholder="Confirm your password"
+            :placeholder="$t('login.placeholders.confirmPassword')"
             :feedback="false"
             toggleMask
           />
@@ -176,7 +181,7 @@
           :loading="authStore.loading"
           severity="success"
         >
-          {{ authStore.loading ? 'Creating Account...' : 'Create Account' }}
+          {{ authStore.loading ? $t('login.creatingAccount') : $t('login.createAccount') }}
         </Button>
       </form>
       
@@ -195,19 +200,27 @@
 <script>
 import { ref, inject, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+import LanguageSwitcher from '../components/LanguageSwitcher.vue'
 
 export default {
   name: 'Login',
+  components: {
+    LanguageSwitcher
+  },
   setup() {
     const authStore = inject('authStore')
     const router = useRouter()
     const route = useRoute()
+    const { t } = useI18n()
     
     const selectedMode = ref('login')
-    const modeOptions = ref([
-      { label: 'Login', value: 'login' },
-      { label: 'Sign Up', value: 'signup' }
+    
+    const modeOptions = computed(() => [
+      { label: t('login.loginTab'), value: 'login' },
+      { label: t('login.signupTab'), value: 'signup' }
     ])
+    
     const email = ref('')
     const password = ref('')
     const successMessage = ref('')
@@ -266,8 +279,6 @@ export default {
       }
     }
     
-    
-    
     onMounted(() => {
       if (route.query.message) {
         successMessage.value = route.query.message
@@ -305,6 +316,12 @@ export default {
   width: 100%;
   max-width: 450px;
   box-shadow: var(--p-card-shadow);
+}
+
+.language-toggle {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
 }
 
 .form-toggle {
@@ -387,5 +404,24 @@ label {
   background-color: var(--p-red-50);
   border: 1px solid var(--p-red-200);
   border-radius: var(--p-border-radius);
+}
+
+/* RTL Support */
+[dir="rtl"] .login-container {
+  text-align: right;
+}
+
+[dir="rtl"] .form-row {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] label {
+  text-align: right;
+}
+
+[dir="rtl"] .login-header h1,
+[dir="rtl"] .login-subtitle,
+[dir="rtl"] h2 {
+  text-align: center;
 }
 </style>

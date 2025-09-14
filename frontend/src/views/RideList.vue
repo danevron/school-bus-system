@@ -1,20 +1,20 @@
 <template>
   <AppLayout 
-    page-title="Ride Management"
+    :page-title="$t('rides.management')"
     :breadcrumbs="breadcrumbs"
   >
     <template #actions>
       <Button 
         @click="goBack" 
         icon="pi pi-arrow-left"
-        label="Back to Dashboard"
+        :label="$t('navigation.backToDashboard')"
         severity="secondary"
         outlined
       />
       <Button 
         @click="handleAddRide" 
         icon="pi pi-plus"
-        label="Add New Ride"
+        :label="$t('rides.addNewRide')"
         severity="success"
       />
     </template>
@@ -25,18 +25,18 @@
           <template #content>
             <div class="filters-section">
               <div class="filter-group">
-                <label for="status-filter">Status:</label>
+                <label for="status-filter">{{ $t('rides.status') }}:</label>
                 <Select 
                   id="status-filter" 
                   v-model="selectedStatus" 
                   :options="statusOptions"
                   optionLabel="label"
                   optionValue="value"
-                  placeholder="All Statuses"
+                  :placeholder="$t('rides.allStatuses')"
                 />
               </div>
               <div class="filter-group">
-                <label for="date-filter">Date:</label>
+                <label for="date-filter">{{ $t('common.date') }}:</label>
                 <Calendar 
                   id="date-filter" 
                   v-model="selectedDate"
@@ -45,7 +45,7 @@
               </div>
               <Button 
                 @click="clearFilters" 
-                label="Clear Filters"
+                :label="$t('common.clearFilters')"
                 severity="secondary"
                 outlined
               />
@@ -56,23 +56,23 @@
         <!-- Rides List Section -->
         <Card class="rides-card">
           <template #content>
-            <div v-if="loading" class="loading">Loading rides...</div>
+            <div v-if="loading" class="loading">{{ $t('common.loadingRides') }}</div>
             
             <div v-else-if="error" class="error">
-              <h3>Error loading rides</h3>
+              <h3>{{ $t('common.errorLoadingRides') }}</h3>
               <p>{{ error }}</p>
-              <Button @click="loadRides" label="Retry" />
+              <Button @click="loadRides" :label="$t('common.retry')" />
             </div>
             
             <div v-else-if="filteredRides.length === 0" class="no-rides">
               <div class="empty-state">
-                <h3>No rides found</h3>
-                <p v-if="hasActiveFilters">Try adjusting your filters or create a new ride.</p>
-                <p v-else>Start by creating your first ride.</p>
+                <h3>{{ $t('rides.noRidesFound') }}</h3>
+                <p v-if="hasActiveFilters">{{ $t('rides.tryAdjustingFilters') }}</p>
+                <p v-else>{{ $t('rides.startByCreatingFirstRide') }}</p>
                 <Button 
                   @click="handleAddRide" 
                   icon="pi pi-plus"
-                  label="Create First Ride"
+                  :label="$t('rides.createFirstRide')"
                   severity="success"
                   size="large"
                 />
@@ -86,64 +86,64 @@
               :rows="10"
               :rowsPerPageOptions="[5, 10, 25]"
               paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-              currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+              :currentPageReportTemplate="$t('common.paginatorTemplate')"
               class="rides-table"
               selectionMode="single"
               @row-click="onRowClick"
             >
-              <Column field="route" header="Route">
+              <Column field="route" :header="$t('rides.route')">
                 <template #body="slotProps">
                   <div class="route-cell">
-                    <strong>{{ slotProps.data.route?.name || 'Unnamed Route' }}</strong>
-                    <div class="route-stops">{{ slotProps.data.route?.stops?.length || 0 }} stops</div>
+                    <strong>{{ slotProps.data.route?.name || $t('rides.unnamedRoute') }}</strong>
+                    <div class="route-stops">{{ slotProps.data.route?.stops?.length || 0 }} {{ $t('rides.stops') }}</div>
                   </div>
                 </template>
               </Column>
               
-              <Column field="date" header="Date">
+              <Column field="date" :header="$t('common.date')">
                 <template #body="slotProps">
                   {{ formatDate(slotProps.data.date) }}
                 </template>
               </Column>
               
-              <Column field="startTime" header="Start Time">
+              <Column field="startTime" :header="$t('rides.startTime')">
                 <template #body="slotProps">
                   {{ formatTime(slotProps.data.startTime) }}
                 </template>
               </Column>
               
-              <Column field="driver" header="Driver">
+              <Column field="driver" :header="$t('rides.driver')">
                 <template #body="slotProps">
                   {{ getDriverName(slotProps.data.driver) }}
                 </template>
               </Column>
               
-              <Column field="seats" header="Seats" class="seats-column">
+              <Column field="seats" :header="$t('rides.seats')" class="seats-column">
                 <template #body="slotProps">
                   <span class="seats-info">{{ slotProps.data.availableSeats }}/{{ slotProps.data.maxCapacity }}</span>
                 </template>
               </Column>
               
-              <Column field="status" header="Status">
+              <Column field="status" :header="$t('rides.status')">
                 <template #body="slotProps">
                   <Tag :value="getStatusLabel(slotProps.data.status)" :severity="getStatusTagSeverity(slotProps.data.status)" />
                 </template>
               </Column>
               
-              <Column field="line" header="Line">
+              <Column field="line" :header="$t('rides.line')">
                 <template #body="slotProps">
                   <Button 
                     v-if="slotProps.data.lineId"
                     @click="viewLine(slotProps.data.lineId._id)"
                     :label="slotProps.data.lineId.name"
                     link
-                    :title="`View line: ${slotProps.data.lineId.name}`"
+                    :title="$t('rides.viewLine', { name: slotProps.data.lineId.name })"
                   />
                   <span v-else class="no-line">-</span>
                 </template>
               </Column>
               
-              <Column header="Actions" class="actions-column">
+              <Column :header="$t('common.actions')" class="actions-column">
                 <template #body="slotProps">
                   <div class="action-buttons">
                     <Button
@@ -154,7 +154,7 @@
                       icon="pi pi-play"
                       severity="success"
                       size="small"
-                      title="Start Ride"
+                      :title="$t('rides.startRide')"
                     />
                     <Button 
                       v-if="slotProps.data.status === 'in_progress'" 
@@ -164,7 +164,7 @@
                       icon="pi pi-stop"
                       severity="info"
                       size="small"
-                      title="End Ride"
+                      :title="$t('rides.endRide')"
                     />
                     <Button 
                       v-if="['scheduled', 'in_progress'].includes(slotProps.data.status)" 
@@ -174,7 +174,7 @@
                       icon="pi pi-times"
                       severity="danger"
                       size="small"
-                      title="Cancel Ride"
+                      :title="$t('rides.cancelRide')"
                     />
                   </div>
                 </template>
@@ -189,6 +189,7 @@
 <script>
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import apiService from '../services/api.js'
 import AppLayout from '../components/AppLayout.vue'
 
@@ -199,23 +200,24 @@ export default {
   },
   setup() {
     const router = useRouter()
+    const { t } = useI18n()
     const rides = ref([])
     const loading = ref(true)
     const error = ref('')
     const selectedStatus = ref('')
     const selectedDate = ref('')
     
-    const breadcrumbs = ref([
-      { label: 'Dashboard', path: '/home' },
-      { label: 'Ride Management' }
+    const breadcrumbs = computed(() => [
+      { label: t('navigation.dashboard'), path: '/home' },
+      { label: t('rides.management') }
     ])
     
-    const statusOptions = ref([
-      { label: 'All Statuses', value: '' },
-      { label: 'Scheduled', value: 'scheduled' },
-      { label: 'In Progress', value: 'in_progress' },
-      { label: 'Completed', value: 'completed' },
-      { label: 'Cancelled', value: 'cancelled' }
+    const statusOptions = computed(() => [
+      { label: t('rides.allStatuses'), value: '' },
+      { label: t('rides.statusScheduled'), value: 'scheduled' },
+      { label: t('rides.statusInProgress'), value: 'in_progress' },
+      { label: t('rides.statusCompleted'), value: 'completed' },
+      { label: t('rides.statusCancelled'), value: 'cancelled' }
     ])
 
     const filteredRides = computed(() => {
@@ -253,7 +255,7 @@ export default {
         rides.value = response.data.rides || []
       } catch (err) {
         console.error('Error loading rides:', err)
-        error.value = err.response?.data?.message || 'Failed to load rides'
+        error.value = err.response?.data?.message || t('common.failedToLoadRides')
       } finally {
         loading.value = false
       }
@@ -265,12 +267,12 @@ export default {
     }
 
     const formatDate = (dateString) => {
-      if (!dateString) return 'Not set'
+      if (!dateString) return t('common.notSet')
       return new Date(dateString).toLocaleDateString()
     }
 
     const formatTime = (timeString) => {
-      if (!timeString) return 'Not set'
+      if (!timeString) return t('common.notSet')
       return new Date(timeString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
 
@@ -286,10 +288,10 @@ export default {
 
     const getStatusLabel = (status) => {
       const labels = {
-        'scheduled': 'Scheduled',
-        'in_progress': 'In Progress',
-        'completed': 'Completed',
-        'cancelled': 'Cancelled'
+        'scheduled': t('rides.statusScheduled'),
+        'in_progress': t('rides.statusInProgress'),
+        'completed': t('rides.statusCompleted'),
+        'cancelled': t('rides.statusCancelled')
       }
       return labels[status] || status
     }
@@ -298,7 +300,7 @@ export default {
       if (typeof driver === 'object' && driver) {
         return `${driver.firstName} ${driver.lastName}`
       }
-      return 'Loading...'
+      return t('common.loading')
     }
 
 
@@ -308,7 +310,7 @@ export default {
 
     const handleAddRide = () => {
       // TODO: Navigate to ride creation page when implemented
-      alert('Ride creation page not yet implemented')
+      alert(t('rides.rideCreationNotImplemented'))
     }
 
     const viewRide = (rideId) => {
@@ -320,7 +322,7 @@ export default {
         await apiService.post(`/rides/${rideId}/start`)
         await loadRides() // Reload data
       } catch (err) {
-        alert('Error starting ride: ' + (err.response?.data?.message || err.message))
+        alert(t('rides.errorStartingRide') + ': ' + (err.response?.data?.message || err.message))
       }
     }
 
@@ -329,18 +331,18 @@ export default {
         await apiService.post(`/rides/${rideId}/end`)
         await loadRides() // Reload data
       } catch (err) {
-        alert('Error ending ride: ' + (err.response?.data?.message || err.message))
+        alert(t('rides.errorEndingRide') + ': ' + (err.response?.data?.message || err.message))
       }
     }
 
     const cancelRide = async (rideId) => {
-      if (!confirm('Are you sure you want to cancel this ride?')) return
+      if (!confirm(t('rides.confirmCancelRide'))) return
       
       try {
         await apiService.delete(`/rides/${rideId}`)
         await loadRides() // Reload data
       } catch (err) {
-        alert('Error cancelling ride: ' + (err.response?.data?.message || err.message))
+        alert(t('rides.errorCancellingRide') + ': ' + (err.response?.data?.message || err.message))
       }
     }
 

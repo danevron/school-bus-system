@@ -1,12 +1,12 @@
 <template>
   <AppLayout 
-    page-title="Dashboard" 
+    :page-title="$t('navigation.dashboard')" 
     :show-action-bar="false"
   >
       <Card class="dashboard">
         <template #content>
           <div class="welcome-section">
-            <h2>Welcome to the School Bus Management System</h2>
+            <h2>{{ $t('home.welcome') }}</h2>
           </div>
 
           <div class="role-specific-content">
@@ -15,36 +15,36 @@
               <div class="dashboard-cards">
                 <Card class="dashboard-card">
                   <template #title>
-                    <h4>Lines Management</h4>
+                    <h4>{{ $t('home.admin.linesManagement.title') }}</h4>
                   </template>
                   <template #content>
-                    <p>Create and manage transportation lines with routes</p>
+                    <p>{{ $t('home.admin.linesManagement.description') }}</p>
                     <Button @click="goToLineManagement" class="w-full">
-                      Manage Lines
+                      {{ $t('home.admin.linesManagement.button') }}
                     </Button>
                   </template>
                 </Card>
                 
                 <Card class="dashboard-card">
                   <template #title>
-                    <h4>Users Management</h4>
+                    <h4>{{ $t('home.admin.usersManagement.title') }}</h4>
                   </template>
                   <template #content>
-                    <p>Manage drivers, parents, and students</p>
+                    <p>{{ $t('home.admin.usersManagement.description') }}</p>
                     <Button @click="goToUserManagement" class="w-full">
-                      Manage Users
+                      {{ $t('home.admin.usersManagement.button') }}
                     </Button>
                   </template>
                 </Card>
                 
                 <Card class="dashboard-card">
                   <template #title>
-                    <h4>Ride Management</h4>
+                    <h4>{{ $t('home.admin.rideManagement.title') }}</h4>
                   </template>
                   <template #content>
-                    <p>Create and manage individual rides</p>
+                    <p>{{ $t('home.admin.rideManagement.description') }}</p>
                     <Button @click="goToRideManagement" class="w-full">
-                      Manage Rides
+                      {{ $t('home.admin.rideManagement.button') }}
                     </Button>
                   </template>
                 </Card>
@@ -53,40 +53,40 @@
 
             <!-- Driver View -->
             <div v-if="userRole === 'driver'" class="driver-dashboard">
-              <h3>Driver Dashboard</h3>
+              <h3>{{ $t('home.driver.title') }}</h3>
               <div class="dashboard-cards">
                 <Card class="dashboard-card">
                   <template #title>
-                    <h4>My Lines</h4>
+                    <h4>{{ $t('home.driver.myLines.title') }}</h4>
                   </template>
                   <template #content>
-                    <p>View and manage your assigned transportation lines</p>
+                    <p>{{ $t('home.driver.myLines.description') }}</p>
                     <Button disabled class="w-full" severity="secondary">
-                      View Lines
+                      {{ $t('home.driver.myLines.button') }}
                     </Button>
                   </template>
                 </Card>
                 
                 <Card class="dashboard-card">
                   <template #title>
-                    <h4>Today's Schedule</h4>
+                    <h4>{{ $t('home.driver.todaySchedule.title') }}</h4>
                   </template>
                   <template #content>
-                    <p>Check today's transportation schedule</p>
+                    <p>{{ $t('home.driver.todaySchedule.description') }}</p>
                     <Button disabled class="w-full" severity="secondary">
-                      View Schedule
+                      {{ $t('home.driver.todaySchedule.button') }}
                     </Button>
                   </template>
                 </Card>
                 
                 <Card class="dashboard-card">
                   <template #title>
-                    <h4>Student Status</h4>
+                    <h4>{{ $t('home.driver.studentStatus.title') }}</h4>
                   </template>
                   <template #content>
-                    <p>Update student pickup/dropoff status</p>
+                    <p>{{ $t('home.driver.studentStatus.description') }}</p>
                     <Button disabled class="w-full" severity="secondary">
-                      Update Status
+                      {{ $t('home.driver.studentStatus.button') }}
                     </Button>
                   </template>
                 </Card>
@@ -95,28 +95,28 @@
 
             <!-- Parent View -->
             <div v-if="userRole === 'parent'" class="parent-dashboard">
-              <h3>Parent Dashboard</h3>
+              <h3>{{ $t('home.parent.title') }}</h3>
               <div class="dashboard-cards">
                 <Card class="dashboard-card">
                   <template #title>
-                    <h4>My Children's Transportation</h4>
+                    <h4>{{ $t('home.parent.childrenTransportation.title') }}</h4>
                   </template>
                   <template #content>
-                    <p>View your children's transportation schedules</p>
+                    <p>{{ $t('home.parent.childrenTransportation.description') }}</p>
                     <Button disabled class="w-full" severity="secondary">
-                      View Transportation
+                      {{ $t('home.parent.childrenTransportation.button') }}
                     </Button>
                   </template>
                 </Card>
                 
                 <Card class="dashboard-card">
                   <template #title>
-                    <h4>Transportation Status</h4>
+                    <h4>{{ $t('home.parent.transportationStatus.title') }}</h4>
                   </template>
                   <template #content>
-                    <p>View your children's current transportation assignments</p>
+                    <p>{{ $t('home.parent.transportationStatus.description') }}</p>
                     <Button disabled class="w-full" severity="secondary">
-                      View Assignments
+                      {{ $t('home.parent.transportationStatus.button') }}
                     </Button>
                   </template>
                 </Card>
@@ -125,40 +125,40 @@
 
             <!-- Student View -->
             <div v-if="userRole === 'student'" class="student-dashboard">
-              <h3>Student Dashboard</h3>
+              <h3>{{ $t('home.student.title') }}</h3>
               <div class="dashboard-cards">
                 <Card class="dashboard-card">
                   <template #title>
-                    <h4>My Transportation</h4>
+                    <h4>{{ $t('home.student.myTransportation.title') }}</h4>
                   </template>
                   <template #content>
-                    <p>View your assigned transportation lines</p>
+                    <p>{{ $t('home.student.myTransportation.description') }}</p>
                     <Button disabled class="w-full" severity="secondary">
-                      View Transportation
+                      {{ $t('home.student.myTransportation.button') }}
                     </Button>
                   </template>
                 </Card>
                 
                 <Card class="dashboard-card">
                   <template #title>
-                    <h4>Today's Schedule</h4>
+                    <h4>{{ $t('home.student.todaySchedule.title') }}</h4>
                   </template>
                   <template #content>
-                    <p>Check today's transportation information</p>
+                    <p>{{ $t('home.student.todaySchedule.description') }}</p>
                     <Button disabled class="w-full" severity="secondary">
-                      Today's Info
+                      {{ $t('home.student.todaySchedule.button') }}
                     </Button>
                   </template>
                 </Card>
                 
                 <Card class="dashboard-card">
                   <template #title>
-                    <h4>Route Information</h4>
+                    <h4>{{ $t('home.student.routeInformation.title') }}</h4>
                   </template>
                   <template #content>
-                    <p>View your route details</p>
+                    <p>{{ $t('home.student.routeInformation.description') }}</p>
                     <Button disabled class="w-full" severity="secondary">
-                      View Route
+                      {{ $t('home.student.routeInformation.button') }}
                     </Button>
                   </template>
                 </Card>

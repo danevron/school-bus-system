@@ -1,13 +1,13 @@
 <template>
   <AppLayout 
-    :page-title="ride?.route?.name || 'Ride Details'"
+    :page-title="ride?.route?.name || $t('rideView.rideDetails')"
     :breadcrumbs="breadcrumbs"
   >
     <template #actions>
       <Button 
         @click="goBack" 
         icon="pi pi-arrow-left"
-        label="Back to Rides"
+        :label="$t('rideView.backToRides')"
         severity="secondary"
         outlined
       />
@@ -15,28 +15,28 @@
         v-if="canBookRide" 
         @click="openBookingModal" 
         icon="pi pi-calendar-plus"
-        label="Book Ride"
+        :label="$t('rideView.bookRide')"
         severity="success"
       />
       <Button 
         v-if="ride && ride.status === 'scheduled'" 
         @click="startRide" 
         icon="pi pi-play"
-        label="Start Ride"
+        :label="$t('rideView.startRide')"
         severity="success"
       />
       <Button 
         v-if="ride && ride.status === 'in_progress'" 
         @click="openLiveTracking" 
         icon="pi pi-map-marker"
-        label="Track on Map"
+        :label="$t('rideView.trackOnMap')"
         severity="warning"
       />
       <Button 
         v-if="ride && ride.status === 'in_progress'" 
         @click="endRide" 
         icon="pi pi-stop"
-        label="End Ride"
+        :label="$t('rideView.endRide')"
         severity="info"
       />
     </template>
@@ -46,8 +46,8 @@
         <template #content>
           <div class="loading-content">
             <i class="pi pi-spin pi-spinner loading-icon"></i>
-            <h3>Loading ride details...</h3>
-            <p>Please wait while we fetch the ride information.</p>
+            <h3>{{ $t('rideView.loadingRideDetails') }}</h3>
+            <p>{{ $t('rideView.pleaseWaitFetchingRideInfo') }}</p>
           </div>
         </template>
       </Card>
@@ -58,12 +58,12 @@
           <template #content>
             <div class="error-content">
               <i class="pi pi-exclamation-triangle error-icon"></i>
-              <h3>Error Loading Ride</h3>
+              <h3>{{ $t('rideView.errorLoadingRide') }}</h3>
               <p>{{ error }}</p>
               <Button 
                 @click="fetchRide" 
                 icon="pi pi-refresh"
-                label="Try Again"
+                :label="$t('common.retry')"
                 severity="info"
               />
             </div>
@@ -91,11 +91,10 @@
               <div class="notice-content">
                 <div class="notice-header">
                   <i class="pi pi-car notice-icon"></i>
-                  <h3>Ride In Progress</h3>
+                  <h3>{{ $t('rideView.rideInProgress') }}</h3>
                 </div>
                 <p>
-                  This ride is currently <strong>in progress</strong>. 
-                  The driver has started the route and may be picking up or dropping off passengers.
+                  {{ $t('rideView.rideInProgressDesc') }}
                 </p>
               </div>
             </template>
@@ -106,31 +105,31 @@
         <Card class="info-section">
           <template #header>
             <div class="section-header-card">
-              <h2><i class="pi pi-info-circle"></i>Ride Information</h2>
+              <h2><i class="pi pi-info-circle"></i>{{ $t('rideView.rideInformation') }}</h2>
             </div>
           </template>
           <template #content>
           <div class="info-grid">
             <div class="info-group">
-              <h4>Basic Details</h4>
+              <h4>{{ $t('rideView.basicDetails') }}</h4>
               <div class="info-item">
-                <span class="info-label">Date:</span>
+                <span class="info-label">{{ $t('common.date') }}:</span>
                 <span class="info-value">{{ formatDate(ride.date) }}</span>
               </div>
               <div class="info-item">
-                <span class="info-label">Scheduled Start:</span>
+                <span class="info-label">{{ $t('rideView.scheduledStart') }}:</span>
                 <span class="info-value">{{ formatTime(ride.startTime) }}</span>
               </div>
               <div v-if="ride.actualStartTime" class="info-item">
-                <span class="info-label">Actual Start:</span>
+                <span class="info-label">{{ $t('rideView.actualStart') }}:</span>
                 <span class="info-value">{{ formatTime(ride.actualStartTime) }}</span>
               </div>
               <div v-if="ride.actualEndTime" class="info-item">
-                <span class="info-label">Actual End:</span>
+                <span class="info-label">{{ $t('rideView.actualEnd') }}:</span>
                 <span class="info-value">{{ formatTime(ride.actualEndTime) }}</span>
               </div>
               <div class="info-item">
-                <span class="info-label">Status:</span>
+                <span class="info-label">{{ $t('common.status') }}:</span>
                 <span class="info-value">
                   <Tag :value="getStatusLabel(ride.status)" :severity="getStatusTagSeverity(ride.status)" />
                 </span>
@@ -138,17 +137,17 @@
             </div>
 
             <div class="info-group">
-              <h4>Assignment</h4>
+              <h4>{{ $t('rideView.assignment') }}</h4>
               <div class="info-item">
-                <span class="info-label">Driver:</span>
+                <span class="info-label">{{ $t('rideView.driver') }}:</span>
                 <span class="info-value">{{ getDriverName(ride.driver) }}</span>
               </div>
               <div class="info-item">
-                <span class="info-label">Vehicle:</span>
+                <span class="info-label">{{ $t('rideView.vehicle') }}:</span>
                 <span class="info-value">{{ getVehicleName(ride.vehicle) }}</span>
               </div>
               <div v-if="ride.lineId" class="info-item">
-                <span class="info-label">Line:</span>
+                <span class="info-label">{{ $t('rideView.line') }}:</span>
                 <span class="info-value">
                   <button 
                     @click="viewLine(ride.lineId._id)"
@@ -161,28 +160,28 @@
             </div>
 
             <div class="info-group">
-              <h4>Capacity</h4>
+              <h4>{{ $t('rideView.capacity') }}</h4>
               <div class="info-item">
-                <span class="info-label">Max Capacity:</span>
-                <span class="info-value">{{ ride.maxCapacity }} seats</span>
+                <span class="info-label">{{ $t('rideView.maxCapacity') }}:</span>
+                <span class="info-value">{{ ride.maxCapacity }} {{ $t('rideView.seats') }}</span>
               </div>
               <div class="info-item">
-                <span class="info-label">Available Seats:</span>
-                <span class="info-value">{{ ride.availableSeats }} seats</span>
+                <span class="info-label">{{ $t('rideView.availableSeats') }}:</span>
+                <span class="info-value">{{ ride.availableSeats }} {{ $t('rideView.seats') }}</span>
               </div>
               <div class="info-item">
-                <span class="info-label">Booked Seats:</span>
-                <span class="info-value">{{ ride.maxCapacity - ride.availableSeats }} seats</span>
+                <span class="info-label">{{ $t('rideView.bookedSeats') }}:</span>
+                <span class="info-value">{{ ride.maxCapacity - ride.availableSeats }} {{ $t('rideView.seats') }}</span>
               </div>
               <div class="info-item">
-                <span class="info-label">Waiting List:</span>
-                <span class="info-value">{{ waitingListCount }} seats</span>
+                <span class="info-label">{{ $t('rideView.waitingList') }}:</span>
+                <span class="info-value">{{ waitingListCount }} {{ $t('rideView.seats') }}</span>
               </div>
             </div>
           </div>
 
             <div v-if="ride.notes" class="notes-section">
-              <h4><i class="pi pi-file-edit"></i>Notes</h4>
+              <h4><i class="pi pi-file-edit"></i>{{ $t('rideView.notes') }}</h4>
               <div class="notes-content">{{ ride.notes }}</div>
             </div>
           </template>
@@ -192,7 +191,7 @@
         <Card class="route-section">
           <template #header>
             <div class="section-header-card">
-              <h2><i class="pi pi-map"></i>Route Details</h2>
+              <h2><i class="pi pi-map"></i>{{ $t('rideView.routeDetails') }}</h2>
             </div>
           </template>
           <template #content>
@@ -202,26 +201,26 @@
                 <i class="pi pi-map-marker stat-icon"></i>
                 <div class="stat-info">
                   <span class="stat-value">{{ ride.route.stops.length }}</span>
-                  <span class="stat-label">Stops</span>
+                  <span class="stat-label">{{ $t('rideView.stops') }}</span>
                 </div>
               </div>
               <div class="stat">
                 <i class="pi pi-globe stat-icon"></i>
                 <div class="stat-info">
                   <span class="stat-value">{{ ride.route.totalDistance || 0 }}km</span>
-                  <span class="stat-label">Distance</span>
+                  <span class="stat-label">{{ $t('rideView.distance') }}</span>
                 </div>
               </div>
               <div class="stat">
                 <i class="pi pi-clock stat-icon"></i>
                 <div class="stat-info">
                   <span class="stat-value">{{ ride.route.estimatedDuration || 0 }}min</span>
-                  <span class="stat-label">Duration</span>
+                  <span class="stat-label">{{ $t('rideView.duration') }}</span>
                 </div>
               </div>
             </div>
             <div class="route-stops">
-              <h4>Route Stops</h4>
+              <h4>{{ $t('rideView.routeStops') }}</h4>
               <div class="stops-list">
                 <div v-for="(stop, index) in ride.route.stops" :key="index" class="stop-item">
                   <span class="stop-number">{{ index + 1 }}</span>
@@ -232,11 +231,11 @@
                     </div>
                     <div class="stop-address">{{ stop.address }}</div>
                     <div v-if="stop.estimatedArrivalTime" class="stop-time">
-                      <span class="time-label">Estimated:</span>
+                      <span class="time-label">{{ $t('rideView.estimated') }}:</span>
                       <span class="time-value">{{ formatTime(stop.estimatedArrivalTime) }}</span>
                     </div>
                     <div v-if="stop.actualArrivalTime" class="stop-time">
-                      <span class="time-label">Actual:</span>
+                      <span class="time-label">{{ $t('rideView.actual') }}:</span>
                       <span class="time-value">{{ formatTime(stop.actualArrivalTime) }}</span>
                     </div>
                   </div>
@@ -246,8 +245,8 @@
           </div>
           <div v-else class="empty-route">
             <i class="pi pi-map empty-icon"></i>
-            <h3>No Route Defined</h3>
-            <p>This ride doesn't have a route with stops defined yet.</p>
+            <h3>{{ $t('rideView.noRouteDefined') }}</h3>
+            <p>{{ $t('rideView.noRouteDefinedDesc') }}</p>
           </div>
           </template>
         </Card>
@@ -256,7 +255,7 @@
         <Card class="bookings-section">
           <template #header>
             <div class="section-header-card">
-              <h2><i class="pi pi-users"></i>Passenger Bookings</h2>
+              <h2><i class="pi pi-users"></i>{{ $t('rideView.passengerBookings') }}</h2>
               <div class="header-controls">
                 <div class="show-cancelled-toggle">
                   <Checkbox 
@@ -264,12 +263,12 @@
                     inputId="show-cancelled"
                     binary
                   />
-                  <label for="show-cancelled" class="toggle-text">Show Cancelled</label>
+                  <label for="show-cancelled" class="toggle-text">{{ $t('rideView.showCancelled') }}</label>
                 </div>
                 <Button 
                   @click="loadBookings" 
                   icon="pi pi-refresh"
-                  label="Refresh"
+                  :label="$t('common.refresh')"
                   severity="secondary"
                   size="small"
                   outlined
@@ -281,14 +280,14 @@
           
             <div v-if="bookingsLoading" class="bookings-loading">
               <i class="pi pi-spin pi-spinner"></i>
-              <span>Loading bookings...</span>
+              <span>{{ $t('rideView.loadingBookings') }}</span>
             </div>
             
             <div v-else-if="filteredBookings.length === 0" class="empty-bookings">
               <i class="pi pi-calendar-times empty-icon"></i>
-              <h3>No Bookings</h3>
-              <p v-if="!showCancelled && bookings.length > 0">All bookings are cancelled. Toggle "Show Cancelled" to view them.</p>
-              <p v-else>No passengers have booked this ride yet.</p>
+              <h3>{{ $t('rideView.noBookings') }}</h3>
+              <p v-if="!showCancelled && bookings.length > 0">{{ $t('rideView.allBookingsCancelled') }}</p>
+              <p v-else>{{ $t('rideView.noPassengersBooked') }}</p>
             </div>
           
           <div v-else class="bookings-list">
@@ -319,14 +318,14 @@
                     <Button 
                       @click="admitWaitingListBooking(booking._id)"
                       icon="pi pi-check"
-                      label="Admit"
+                      :label="$t('rideView.admit')"
                       severity="success"
                       size="small"
                     />
                     <Button 
                       @click="cancelBooking(booking._id)"
                       icon="pi pi-times"
-                      label="Cancel"
+                      :label="$t('common.cancel')"
                       severity="danger"
                       size="small"
                       outlined
@@ -338,14 +337,14 @@
                     <Button 
                       @click="confirmBooking(booking._id)"
                       icon="pi pi-check"
-                      label="Confirm"
+                      :label="$t('common.confirm')"
                       severity="info"
                       size="small"
                     />
                     <Button 
                       @click="cancelBooking(booking._id)"
                       icon="pi pi-times"
-                      label="Cancel"
+                      :label="$t('common.cancel')"
                       severity="danger"
                       size="small"
                       outlined
@@ -357,7 +356,7 @@
                     <Button 
                       @click="cancelBooking(booking._id)"
                       icon="pi pi-times"
-                      label="Cancel"
+                      :label="$t('common.cancel')"
                       severity="danger"
                       size="small"
                       outlined
@@ -369,7 +368,7 @@
                     <Button 
                       @click="checkInPassenger(booking._id)"
                       icon="pi pi-sign-in"
-                      label="Check In"
+                      :label="$t('rideView.checkIn')"
                       severity="info"
                       size="small"
                     />
@@ -380,7 +379,7 @@
                     <Button 
                       @click="dropOffPassenger(booking._id)"
                       icon="pi pi-sign-out"
-                      label="Drop Off"
+                      :label="$t('rideView.dropOff')"
                       severity="success"
                       size="small"
                     />
@@ -393,7 +392,7 @@
                   <div class="stop-assignment pickup">
                     <div class="stop-header">
                       <i class="pi pi-sign-in stop-icon pickup-icon"></i>
-                      <span class="stop-label">Pickup</span>
+                      <span class="stop-label">{{ $t('rideView.pickup') }}</span>
                     </div>
                     <div class="stop-content">
                       <div class="stop-name">{{ booking.pickupStop.name }}</div>
@@ -408,13 +407,13 @@
                   <div class="stop-assignment dropoff">
                     <div class="stop-header">
                       <i class="pi pi-sign-out stop-icon dropoff-icon"></i>
-                      <span class="stop-label">Dropoff</span>
+                      <span class="stop-label">{{ $t('rideView.dropoff') }}</span>
                     </div>
                     <div v-if="booking.dropoffStop" class="stop-content">
                       <div class="stop-name">{{ booking.dropoffStop.name }}</div>
                     </div>
                     <div v-else class="no-stop-assigned">
-                      <span class="not-assigned">Not specified</span>
+                      <span class="not-assigned">{{ $t('rideView.notSpecified') }}</span>
                     </div>
                   </div>
                 </div>
@@ -428,7 +427,7 @@
         <Card v-if="ride.route && ride.route.stops && ride.route.stops.length > 0" class="map-section">
           <template #header>
             <div class="section-header-card">
-              <h2><i class="pi pi-map"></i>Interactive Route Map</h2>
+              <h2><i class="pi pi-map"></i>{{ $t('rideView.interactiveRouteMap') }}</h2>
             </div>
           </template>
           <template #content>
@@ -449,12 +448,12 @@
           <template #content>
             <div class="not-found-message">
               <i class="pi pi-exclamation-triangle not-found-icon"></i>
-              <h2>Ride Not Found</h2>
-              <p>The ride you're looking for doesn't exist or may have been deleted.</p>
+              <h2>{{ $t('rideView.rideNotFound') }}</h2>
+              <p>{{ $t('rideView.rideNotFoundDesc') }}</p>
               <Button 
                 @click="goBack" 
                 icon="pi pi-arrow-left"
-                label="Back to Rides"
+                :label="$t('rideView.backToRides')"
                 severity="secondary"
               />
             </div>
@@ -466,26 +465,26 @@
     <div v-if="showBookingModal" class="modal-overlay" @click="closeBookingModal">
       <div class="modal-content" @click.stop>
         <div class="modal-header">
-          <h3>Book Ride</h3>
+          <h3>{{ $t('rideView.bookRide') }}</h3>
           <button @click="closeBookingModal" class="close-button">×</button>
         </div>
         
         <div class="modal-body">
           <div v-if="bookingFormLoading" class="loading-text">
-            Loading users and stops...
+            {{ $t('rideView.loadingUsersAndStops') }}
           </div>
           
           <form v-else @submit.prevent="submitBooking" class="booking-form">
             <!-- Passenger Selection -->
             <div class="form-group">
-              <label for="passenger">Select Passenger:</label>
+              <label for="passenger">{{ $t('rideView.selectPassenger') }}:</label>
               <select 
                 id="passenger" 
                 v-model="bookingForm.passengerId" 
                 required 
                 class="form-control"
               >
-                <option value="">Choose a passenger...</option>
+                <option value="">{{ $t('rideView.choosePassenger') }}</option>
                 <option 
                   v-for="user in users" 
                   :key="user._id" 
@@ -498,14 +497,14 @@
 
             <!-- Pickup Stop Selection -->
             <div class="form-group">
-              <label for="pickupStop">Pickup Stop:</label>
+              <label for="pickupStop">{{ $t('rideView.pickupStop') }}:</label>
               <select 
                 id="pickupStop" 
                 v-model="bookingForm.pickupStopId" 
                 required 
                 class="form-control"
               >
-                <option value="">Choose pickup stop...</option>
+                <option value="">{{ $t('rideView.choosePickupStop') }}</option>
                 <option 
                   v-for="stop in pickupStops" 
                   :key="stop.stopId" 
@@ -518,14 +517,14 @@
 
             <!-- Dropoff Stop Selection -->
             <div class="form-group">
-              <label for="dropoffStop">Dropoff Stop:</label>
+              <label for="dropoffStop">{{ $t('rideView.dropoffStop') }}:</label>
               <select 
                 id="dropoffStop" 
                 v-model="bookingForm.dropoffStopId" 
                 required
                 class="form-control"
               >
-                <option value="">Choose dropoff stop...</option>
+                <option value="">{{ $t('rideView.chooseDropoffStop') }}</option>
                 <option 
                   v-for="stop in dropoffStops" 
                   :key="stop.stopId" 
@@ -538,13 +537,13 @@
 
             <!-- Notes -->
             <div class="form-group">
-              <label for="notes">Notes (Optional):</label>
+              <label for="notes">{{ $t('rideView.notesOptional') }}:</label>
               <textarea 
                 id="notes" 
                 v-model="bookingForm.notes" 
                 class="form-control"
                 rows="3"
-                placeholder="Any special requirements or notes..."
+                :placeholder="$t('rideView.specialRequirementsPlaceholder')"
               ></textarea>
             </div>
 
@@ -555,14 +554,14 @@
                 @click="closeBookingModal" 
                 class="cancel-button"
               >
-                Cancel
+                {{ $t('common.cancel') }}
               </button>
               <button 
                 type="submit" 
                 :disabled="bookingSubmitting || !isBookingFormValid"
                 class="submit-button"
               >
-                {{ bookingSubmitting ? 'Creating...' : 'Create Booking' }}
+                {{ bookingSubmitting ? $t('rideView.creating') : $t('rideView.createBooking') }}
               </button>
             </div>
           </form>
@@ -574,37 +573,37 @@
     <div v-if="showLiveTrackingModal" class="modal-overlay" @click="closeLiveTracking">
       <div class="modal-content live-tracking-modal" @click.stop>
         <div class="modal-header">
-          <h3>🚌 Live Ride Tracking</h3>
+          <h3>🚌 {{ $t('rideView.liveRideTracking') }}</h3>
           <div class="tracking-status">
-            <span v-if="trackingActive" class="status-indicator active">● Live</span>
-            <span v-else class="status-indicator inactive">● Disconnected</span>
+            <span v-if="trackingActive" class="status-indicator active">● {{ $t('rideView.live') }}</span>
+            <span v-else class="status-indicator inactive">● {{ $t('rideView.disconnected') }}</span>
           </div>
           <button @click="closeLiveTracking" class="close-button">×</button>
         </div>
         
         <div class="modal-body tracking-body">
           <div v-if="trackingLoading" class="loading-text">
-            Loading ride tracking data...
+            {{ $t('rideView.loadingRideTrackingData') }}
           </div>
           
           <div v-else-if="trackingError" class="error-text">
             <p>{{ trackingError }}</p>
-            <button @click="startTracking" class="retry-button">Retry</button>
+            <button @click="startTracking" class="retry-button">{{ $t('common.retry') }}</button>
           </div>
           
           <div v-else class="tracking-container">
             <!-- Tracking Info Header -->
             <div class="tracking-info">
               <div class="info-item">
-                <span class="info-label">Last Update:</span>
-                <span class="info-value">{{ lastUpdateTime || 'No data yet' }}</span>
+                <span class="info-label">{{ $t('rideView.lastUpdate') }}:</span>
+                <span class="info-value">{{ lastUpdateTime || $t('rideView.noDataYet') }}</span>
               </div>
               <div v-if="rideProgress" class="info-item">
-                <span class="info-label">Status:</span>
+                <span class="info-label">{{ $t('common.status') }}:</span>
                 <span class="info-value">{{ rideProgress.status }}</span>
               </div>
               <div v-if="rideProgress && rideProgress.totalDistance" class="info-item">
-                <span class="info-label">Distance Traveled:</span>
+                <span class="info-label">{{ $t('rideView.distanceTraveled') }}:</span>
                 <span class="info-value">{{ Math.round(rideProgress.totalDistance * 100) / 100 }} km</span>
               </div>
             </div>
@@ -628,6 +627,7 @@
 <script>
 import { ref, onMounted, computed, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import apiService from '../services/api.js'
 import AppLayout from '../components/AppLayout.vue'
 import RouteMap from '../components/RouteMap.vue'
@@ -643,12 +643,13 @@ export default {
   setup() {
     const router = useRouter()
     const route = useRoute()
+    const { t: $t } = useI18n()
     const rideId = route.params.id
 
     const breadcrumbs = ref([
-      { label: 'Dashboard', path: '/home' },
-      { label: 'Ride Management', path: '/rides' },
-      { label: 'Ride Details' }
+      { label: $t('navigation.dashboard'), path: '/home' },
+      { label: $t('navigation.rideManagement'), path: '/rides' },
+      { label: $t('rideView.rideDetails') }
     ])
 
     const ride = ref(null)
@@ -745,12 +746,12 @@ export default {
     }
 
     const formatDate = (dateString) => {
-      if (!dateString) return 'Not set'
+      if (!dateString) return $t('common.notSet')
       return new Date(dateString).toLocaleDateString()
     }
 
     const formatTime = (timeString) => {
-      if (!timeString) return 'Not set'
+      if (!timeString) return $t('common.notSet')
       return new Date(timeString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
 
@@ -766,10 +767,10 @@ export default {
 
     const getStatusLabel = (status) => {
       const labels = {
-        'scheduled': 'Scheduled',
-        'in_progress': 'In Progress',
-        'completed': 'Completed',
-        'cancelled': 'Cancelled'
+        'scheduled': $t('rides.scheduled'),
+        'in_progress': $t('rides.inProgress'),
+        'completed': $t('rides.completed'),
+        'cancelled': $t('rides.cancelled')
       }
       return labels[status] || status
     }
@@ -780,12 +781,12 @@ export default {
 
     const getBookingStatusLabel = (status) => {
       const labels = {
-        'unconfirmed': 'Unconfirmed',
-        'confirmed': 'Confirmed',
-        'cancelled': 'Cancelled',
-        'checked_in': 'Checked In',
-        'completed': 'Completed',
-        'waiting_list': 'Waiting List'
+        'unconfirmed': $t('rideView.unconfirmed'),
+        'confirmed': $t('rideView.confirmed'),
+        'cancelled': $t('rideView.cancelled'),
+        'checked_in': $t('rideView.checkedIn'),
+        'completed': $t('rideView.completed'),
+        'waiting_list': $t('rideView.waitingList')
       }
       return labels[status] || status
     }
@@ -806,21 +807,21 @@ export default {
       if (typeof driver === 'object' && driver) {
         return `${driver.firstName} ${driver.lastName}`
       }
-      return 'Loading...'
+      return $t('common.loading')
     }
 
     const getVehicleName = (vehicle) => {
       if (typeof vehicle === 'object' && vehicle) {
         return `${vehicle.make} ${vehicle.vehicleModel} (${vehicle.licensePlate})`
       }
-      return 'Loading...'
+      return $t('common.loading')
     }
 
     const getPassengerName = (passenger) => {
       if (typeof passenger === 'object' && passenger) {
         return `${passenger.firstName} ${passenger.lastName}`
       }
-      return 'Loading...'
+      return $t('common.loading')
     }
 
     const goBack = () => {
@@ -836,7 +837,7 @@ export default {
         await apiService.post(`/rides/${rideId}/start`)
         await fetchRide() // Reload ride data
       } catch (err) {
-        alert('Error starting ride: ' + (err.response?.data?.message || err.message))
+        alert($t('rideView.errorStartingRide') + ': ' + (err.response?.data?.message || err.message))
       }
     }
 
@@ -845,7 +846,7 @@ export default {
         await apiService.post(`/rides/${rideId}/end`)
         await fetchRide() // Reload ride data
       } catch (err) {
-        alert('Error ending ride: ' + (err.response?.data?.message || err.message))
+        alert($t('rideView.errorEndingRide') + ': ' + (err.response?.data?.message || err.message))
       }
     }
 
@@ -872,7 +873,7 @@ export default {
         await apiService.post(`/bookings/${bookingId}/confirm`)
         await loadBookings() // Reload bookings
         await fetchRide() // Reload ride to update available seats
-        showSuccessMessage('Booking confirmed successfully!')
+        showSuccessMessage($t('rideView.bookingConfirmedSuccess'))
       } catch (err) {
         alert('Error confirming booking: ' + (err.response?.data?.message || err.message))
       }
@@ -883,7 +884,7 @@ export default {
         await apiService.post(`/bookings/${bookingId}/cancel`, {})
         await loadBookings() // Reload bookings
         await fetchRide() // Reload ride to update available seats
-        showSuccessMessage('Booking cancelled successfully!')
+        showSuccessMessage($t('rideView.bookingCancelledSuccess'))
       } catch (err) {
         alert('Error cancelling booking: ' + (err.response?.data?.message || err.message))
       }
@@ -894,7 +895,7 @@ export default {
         await apiService.post(`/bookings/${bookingId}/admit`)
         await loadBookings() // Reload bookings
         await fetchRide() // Reload ride to update available seats
-        showSuccessMessage('Waiting list booking admitted successfully!')
+        showSuccessMessage($t('rideView.waitingListBookingAdmittedSuccess'))
       } catch (err) {
         alert('Error admitting waiting list booking: ' + (err.response?.data?.message || err.message))
       }
@@ -1028,14 +1029,14 @@ export default {
         
         // Check if booking went to waiting list by checking available seats
         if (ride.value.availableSeats <= 0) {
-          showSuccessMessage('Booking added to waiting list - no available seats currently!')
+          showSuccessMessage($t('rideView.bookingAddedToWaitingList'))
         } else {
-          showSuccessMessage('Booking created successfully!')
+          showSuccessMessage($t('rideView.bookingCreatedSuccess'))
         }
         
       } catch (err) {
         console.error('Error creating booking:', err)
-        alert('Error creating booking: ' + (err.response?.data?.message || err.message))
+        alert($t('rideView.errorCreatingBooking') + ': ' + (err.response?.data?.message || err.message))
       } finally {
         bookingSubmitting.value = false
       }
@@ -1058,6 +1059,7 @@ export default {
     })
 
     return {
+      $t,
       ride,
       bookings,
       loading,
