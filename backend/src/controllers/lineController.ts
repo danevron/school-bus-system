@@ -949,9 +949,12 @@ export const activateLine = async (req: Request, res: Response): Promise<void> =
     // Activate the line
     const activatedLine = await line.activate();
 
-    // Generate future rides for this line
+    // Generate future rides for this line (next 7 days)
     try {
-      const generatedRides = await generateRidesForLine(activatedLine);
+      const sevenDaysFromNow = new Date();
+      sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
+      
+      const generatedRides = await generateRidesForLine(activatedLine, sevenDaysFromNow);
       
       const populatedLine = await Line.findById(id).populate([
         { path: 'driver', select: 'firstName lastName email phone' },

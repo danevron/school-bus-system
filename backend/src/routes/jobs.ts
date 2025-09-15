@@ -7,13 +7,10 @@ const router = express.Router();
 // Health check for jobs API (no auth required for GitHub Actions)
 router.get('/health', jobsController.healthCheck);
 
-// Test job for GitHub Actions (no auth required for now - we'll add API key later)
-router.post('/test', jobsController.testJob);
-
-// Generate daily rides (admin only for now)
-router.post('/generate-daily-rides', authenticate, requireAdmin, jobsController.generateDailyRides);
+// Generate weekly rides (admin only for now)
+router.post('/generate-weekly-rides', authenticate, requireAdmin, jobsController.generateWeeklyRides);
 
 // Alternative endpoint without auth for GitHub Actions (we'll secure this with API key)
-router.post('/scheduled/generate-daily-rides', jobsController.generateDailyRides);
+router.post('/scheduled/generate-weekly-rides', jobsController.generateWeeklyRides);
 
 export default router;

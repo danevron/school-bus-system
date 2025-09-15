@@ -235,6 +235,7 @@
     "driver": "Driver",
     "seats": "Seats",
     "line": "Line",
+    "searchLines": "Search by line name...",
     "startRide": "Start Ride",
     "endRide": "End Ride",
     "cancelRide": "Cancel Ride",

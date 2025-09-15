@@ -1,71 +1,44 @@
 import { Request, Response } from 'express';
 import { log } from '../utils/logger';
+import { generateRidesForLine } from '../services/rideGenerationService';
+import Line from '../models/Line';
 
 class JobsController {
-  // Test job for GitHub Actions
-  async testJob(req: Request, res: Response) {
+  // Generate weekly rides (placeholder for now)
+  async generateWeeklyRides(req: Request, res: Response) {
     try {
+      const sevenDaysFromNow = new Date();
+      sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
       const timestamp = new Date().toISOString();
       
-      log.info('Test job executed via GitHub Actions', {
+      log.info('Generating weekly rides', {
         timestamp,
-        triggeredBy: 'github-actions',
-        userAgent: req.get('User-Agent')
-      });
-
-      // Simulate some work
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      res.status(200).json({
-        message: 'Test job completed successfully',
-        timestamp,
-        jobType: 'test-job',
-        duration: '2 seconds'
-      });
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      log.error('Test job failed', { error: errorMessage });
-      res.status(500).json({
-        message: 'Test job failed',
-        error: errorMessage
-      });
-    }
-  }
-
-  // Generate daily rides (placeholder for now)
-  async generateDailyRides(req: Request, res: Response) {
-    try {
-      const timestamp = new Date().toISOString();
-      const targetDate = req.body.date || new Date().toISOString().split('T')[0];
-      
-      log.info('Generating daily rides', {
-        timestamp,
-        targetDate,
+        targetDate: sevenDaysFromNow.toISOString(),
         triggeredBy: 'github-actions'
       });
 
-      // TODO: Implement actual ride generation logic
-      // This would:
-      // 1. Find all active lines
-      // 2. Generate rides for the target date
-      // 3. Handle scheduling conflicts
-      // 4. Notify relevant parties
-      
-      // Placeholder implementation
+      const activeLines = await Line.find({ isActive: true });
+    
+      let generatedRides = []
+      for (const line of activeLines) {
+        const rides = await generateRidesForLine(line, sevenDaysFromNow);
+        generatedRides.push(...rides);
+      }
+
       const ridesGenerated = Math.floor(Math.random() * 10) + 1;
       
       res.status(200).json({
-        message: 'Daily rides generated successfully',
+        message: 'weekly rides generated successfully',
         timestamp,
-        targetDate,
-        ridesGenerated,
-        jobType: 'generate-daily-rides'
+        targetDate: sevenDaysFromNow.toISOString(),
+        generatedRides: generatedRides?.length, 
+        jobType: 'generate-weekly-rides'
       });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      log.error('Failed to generate daily rides', { error: errorMessage });
+      log.error('Failed to generate weekly rides', { error: errorMessage });
       res.status(500).json({
-        message: 'Failed to generate daily rides',
+        message: 'Failed to generate weekly rides',
         error: errorMessage
       });
     }

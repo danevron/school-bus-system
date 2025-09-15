@@ -36,6 +36,14 @@
                 />
               </div>
               <div class="filter-group">
+                <label for="line-filter">{{ $t('rides.line') }}:</label>
+                <InputText 
+                  id="line-filter" 
+                  v-model="lineSearchText"
+                  :placeholder="$t('rides.searchLines')"
+                />
+              </div>
+              <div class="filter-group">
                 <label for="date-filter">{{ $t('common.date') }}:</label>
                 <Calendar 
                   id="date-filter" 
@@ -206,6 +214,7 @@ export default {
     const error = ref('')
     const selectedStatus = ref('')
     const selectedDate = ref('')
+    const lineSearchText = ref('')
     
     const breadcrumbs = computed(() => [
       { label: t('navigation.dashboard'), path: '/home' },
@@ -227,6 +236,14 @@ export default {
         filtered = filtered.filter(ride => ride.status === selectedStatus.value)
       }
       
+      if (lineSearchText.value.trim()) {
+        const searchTerm = lineSearchText.value.toLowerCase().trim()
+        filtered = filtered.filter(ride => {
+          const lineName = ride.lineId?.name || ''
+          return lineName.toLowerCase().includes(searchTerm)
+        })
+      }
+      
       if (selectedDate.value) {
         filtered = filtered.filter(ride => {
           const rideDate = new Date(ride.date).toISOString().split('T')[0]
@@ -244,7 +261,7 @@ export default {
     })
 
     const hasActiveFilters = computed(() => {
-      return selectedStatus.value || selectedDate.value
+      return selectedStatus.value || selectedDate.value || lineSearchText.value.trim()
     })
 
     const loadRides = async () => {
@@ -264,6 +281,7 @@ export default {
     const clearFilters = () => {
       selectedStatus.value = ''
       selectedDate.value = ''
+      lineSearchText.value = ''
     }
 
     const formatDate = (dateString) => {
@@ -365,6 +383,7 @@ export default {
       error,
       selectedStatus,
       selectedDate,
+      lineSearchText,
       statusOptions,
       filteredRides,
       hasActiveFilters,

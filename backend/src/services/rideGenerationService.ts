@@ -6,8 +6,10 @@ import { ILine, ScheduleType } from '../models/Line';
 /**
  * Generate rides for an activated line based on its schedule
  * Only generates future rides, not past ones
+ * @param line - The line to generate rides for
+ * @param limitDate - Optional date to limit ride generation (defaults to line's end date or 1 year from now)
  */
-export const generateRidesForLine = async (line: ILine): Promise<any[]> => {
+export const generateRidesForLine = async (line: ILine, limitDate?: Date): Promise<any[]> => {
   if (!line.route || !line.route.stops || line.route.stops.length === 0) {
     throw new Error('Line must have a route with stops to generate rides');
   }
@@ -20,7 +22,14 @@ export const generateRidesForLine = async (line: ILine): Promise<any[]> => {
   today.setHours(0, 0, 0, 0); // Start of today
   
   const schedule = line.schedule;
-  const endDate = schedule.endDate || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000); // 1 year from now if no end date
+  
+  // Determine the end date: use the earliest of limitDate, line's end date, or 1 year from now
+  let endDate = schedule.endDate || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000); // 1 year from now if no line end date
+  
+  if (limitDate) {
+    // Use the earlier date between limitDate and the line's end date
+    endDate = limitDate < endDate ? limitDate : endDate;
+  }
   
   const rideDates = generateRideDates(schedule, today, endDate);
   const generatedRides: any[] = [];
@@ -34,11 +43,16 @@ export const generateRidesForLine = async (line: ILine): Promise<any[]> => {
   for (const rideDate of rideDates) {
     try {
       // Check if a ride already exists for this line and date
+      const startOfDay = new Date(rideDate);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(rideDate);
+      endOfDay.setHours(23, 59, 59, 999);
+      
       const existingRide = await Ride.findOne({
         lineId: line._id,
         date: {
-          $gte: new Date(rideDate.setHours(0, 0, 0, 0)),
-          $lt: new Date(rideDate.setHours(23, 59, 59, 999))
+          $gte: startOfDay,
+          $lt: endOfDay
         }
       });
 

@@ -2,8 +2,8 @@ name: Scheduled Jobs
 
 on:
   schedule:
-    # Runs every 10 minutes
-    - cron: '*/10 * * * *'
+    # Runs every day at 8 PM UTC
+    - cron: '0 20 * * *'
   
   # Allow manual triggering from GitHub UI
   workflow_dispatch:
@@ -30,18 +30,18 @@ jobs:
     steps:
       - name: Trigger Scheduled Job
         run: |
-          echo "🚌 Triggering test job via API..."
+          echo "🚌 Triggering ride generation job via API..."
 
-          response=$(curl -s -X POST "${{ secrets.API_BASE_URL }}/api/jobs/test" \
+          response=$(curl -s -X POST "${{ secrets.API_BASE_URL }}/api/jobs/generate-weekly-rides" \
             -H "Content-Type: application/json" \
             -H "Accept: application/json")
           
           echo "API Response: $response"
           
           # Check if the response indicates success
-          if echo "$response" | grep -q "Test job completed successfully"; then
-            echo "✅ Test job completed successfully!"
+          if echo "$response" | grep -q "weekly rides generated successfully"; then
+            echo "✅ Ride generation job completed successfully!"
           else
-            echo "❌ Test job failed!"
+            echo "❌ Ride generation job failed!"
             exit 1
           fi

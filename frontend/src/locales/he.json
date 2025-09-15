@@ -248,6 +248,7 @@
     "driver": "נהג",
     "seats": "מושבים",
     "line": "קו",
+    "searchLines": "חיפוש לפי שם קו...",
     "startRide": "התחל נסיעה",
     "endRide": "סיים נסיעה",
     "cancelRide": "בטל נסיעה",
