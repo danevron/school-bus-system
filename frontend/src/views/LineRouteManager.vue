@@ -247,6 +247,10 @@
                   <div class="student-name">
                     <i class="pi pi-user"></i>
                     {{ assignment.student.firstName }} {{ assignment.student.lastName }}
+                    <span v-if="assignment.daysOfWeek && assignment.daysOfWeek.length > 0" class="partial-assignment-badge">
+                      <i class="pi pi-calendar"></i>
+                      {{ $t('routeManager.partialAssignment') }}
+                    </span>
                   </div>
                   <div class="student-contact">
                     <span class="contact-item phone">
@@ -714,20 +718,20 @@ export default {
     const handleStopAssignmentSave = async (assignment) => {
       showStopSelectionDialog.value = false
       
-      const { student, pickupStop, dropoffStop, skipStops } = assignment
+      const { student, pickupStop, dropoffStop, skipStops, daysOfWeek } = assignment
       
       if (student._isEditing) {
         // Update existing assignment
-        await updateStudentAssignment(student._assignmentId, pickupStop, dropoffStop, skipStops)
+        await updateStudentAssignment(student._assignmentId, pickupStop, dropoffStop, skipStops, daysOfWeek)
       } else {
         // Create new assignment
-        await assignStudentToLine(student, pickupStop, dropoffStop, skipStops)
+        await assignStudentToLine(student, pickupStop, dropoffStop, skipStops, daysOfWeek)
       }
       
       selectedStudentForStops.value = null
     }
 
-    const assignStudentToLine = async (student, pickupStop, dropoffStop, skipStops) => {
+    const assignStudentToLine = async (student, pickupStop, dropoffStop, skipStops, daysOfWeek) => {
       const lineId = route.params.id
       if (!lineId) return
 
@@ -737,7 +741,8 @@ export default {
         const requestData = {
           studentId: student._id,
           pickupStop: skipStops ? undefined : pickupStop?.stopId,
-          dropoffStop: skipStops ? undefined : dropoffStop?.stopId
+          dropoffStop: skipStops ? undefined : dropoffStop?.stopId,
+          daysOfWeek: daysOfWeek
         }
 
         await apiService.post(`/lines/${lineId}/student-assignments`, requestData)
@@ -753,7 +758,7 @@ export default {
       }
     }
 
-    const updateStudentAssignment = async (assignmentId, pickupStop, dropoffStop, skipStops) => {
+    const updateStudentAssignment = async (assignmentId, pickupStop, dropoffStop, skipStops, daysOfWeek) => {
       const lineId = route.params.id
       if (!lineId) return
 
@@ -762,7 +767,8 @@ export default {
         
         const requestData = {
           pickupStop: skipStops ? undefined : pickupStop?.stopId,
-          dropoffStop: skipStops ? undefined : dropoffStop?.stopId
+          dropoffStop: skipStops ? undefined : dropoffStop?.stopId,
+          daysOfWeek: daysOfWeek
         }
 
         await apiService.put(`/lines/${lineId}/student-assignments/${assignmentId}`, requestData)
@@ -784,7 +790,8 @@ export default {
         _isEditing: true,
         _assignmentId: assignment._id,
         _currentPickupStop: assignment.pickupStop,
-        _currentDropoffStop: assignment.dropoffStop
+        _currentDropoffStop: assignment.dropoffStop,
+        _currentDaysOfWeek: assignment.daysOfWeek
       }
       showStopSelectionDialog.value = true
     }
@@ -1452,6 +1459,25 @@ export default {
 .student-name i {
   color: var(--p-primary-color);
   font-size: 0.9rem;
+}
+
+.partial-assignment-badge {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  background-color: var(--p-orange-100);
+  color: var(--p-orange-700);
+  border-radius: 12px;
+  border: 1px solid var(--p-orange-200);
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.partial-assignment-badge i {
+  font-size: 0.7rem;
 }
 
 .student-contact {

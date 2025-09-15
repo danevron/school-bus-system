@@ -256,13 +256,13 @@ export default {
     const loadingVehicles = ref(false)
     
     const weekDays = computed(() => [
-      { value: 'sunday', short: t('lineView.sun'), full: t('lineCreate.days.sunday') },
-      { value: 'monday', short: t('lineView.mon'), full: t('lineCreate.days.monday') },
-      { value: 'tuesday', short: t('lineView.tue'), full: t('lineCreate.days.tuesday') },
-      { value: 'wednesday', short: t('lineView.wed'), full: t('lineCreate.days.wednesday') },
-      { value: 'thursday', short: t('lineView.thu'), full: t('lineCreate.days.thursday') },
-      { value: 'friday', short: t('lineView.fri'), full: t('lineCreate.days.friday') },
-      { value: 'saturday', short: t('lineView.sat'), full: t('lineCreate.days.saturday') }
+      { value: 'sunday', short: t('lineView.sun'), full: t('common.days.sunday') },
+      { value: 'monday', short: t('lineView.mon'), full: t('common.days.monday') },
+      { value: 'tuesday', short: t('lineView.tue'), full: t('common.days.tuesday') },
+      { value: 'wednesday', short: t('lineView.wed'), full: t('common.days.wednesday') },
+      { value: 'thursday', short: t('lineView.thu'), full: t('common.days.thursday') },
+      { value: 'friday', short: t('lineView.fri'), full: t('common.days.friday') },
+      { value: 'saturday', short: t('lineView.sat'), full: t('common.days.saturday') }
     ])
     
     // Computed properties for PrimeVue components

@@ -137,8 +137,6 @@ export const lineValidation = {
   })
 };
 
-
-
 export const invitationValidation = {
   invite: Joi.object({
     email: Joi.string().email().required(),
@@ -243,7 +241,26 @@ export const parentStudentValidation = {
   })
 };
 
+export const studentAssignmentValidation = {
+  assignToLine: Joi.object({
+    studentId: Joi.string().hex().length(24).required(),
+    pickupStop: Joi.string().optional(),
+    dropoffStop: Joi.string().optional(),
+    daysOfWeek: Joi.array().items(Joi.number().min(0).max(6)).unique().optional(),
+    notes: Joi.string().optional()
+  }),
+
+  updateAssignment: Joi.object({
+    pickupStop: Joi.string().optional(),
+    dropoffStop: Joi.string().optional(),
+    daysOfWeek: Joi.array().items(Joi.number().min(0).max(6)).unique().optional(),
+    notes: Joi.string().optional()
+  })
+};
+
 // Export individual validation functions for convenience
 export const validateInviteUser = (data: any) => invitationValidation.invite.validate(data);
 export const validateAcceptInvitation = (data: any) => invitationValidation.accept.validate(data);
-export const validateConnectStudentToParents = (data: any) => parentStudentValidation.connectStudentToParents.validate(data); 
+export const validateConnectStudentToParents = (data: any) => parentStudentValidation.connectStudentToParents.validate(data);
+export const validateAssignStudentToLine = (data: any) => studentAssignmentValidation.assignToLine.validate(data);
+export const validateUpdateStudentAssignment = (data: any) => studentAssignmentValidation.updateAssignment.validate(data); 

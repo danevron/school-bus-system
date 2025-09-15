@@ -45,7 +45,16 @@
     "failedToLoadRides": "נכשל בטעינת הנסיעות",
     "min": "דק'",
     "km": "ק\"מ",
-    "m": "מ'"
+    "m": "מ'",
+    "days": {
+      "sunday": "ראשון",
+      "monday": "שני",
+      "tuesday": "שלישי",
+      "wednesday": "רביעי",
+      "thursday": "חמישי",
+      "friday": "שישי",
+      "saturday": "שבת"
+    }
   },
   "navigation": {
     "dashboard": "דף הבית",
@@ -475,7 +484,8 @@
     "confirmRemoveStudent": "להסיר את {studentName} מהקו הזה?",
     "confirmRemoveStudentSimple": "האם אתה בטוח שברצונך להסיר את התלמיד מהקו?",
     "confirmRemoveStudentHeader": "הסר תלמיד",
-    "failedToRemoveStudent": "נכשל בהסרת התלמיד מהקו"
+    "failedToRemoveStudent": "נכשל בהסרת התלמיד מהקו",
+    "partialAssignment": "לתלמיד יש הקצאה חלקית של ימים"
   },
   "invitation": {
     "acceptInvitation": "אשר הזמנה",
@@ -549,15 +559,6 @@
     "note": "הערה",
     "noteText": "תוכל להגדיר מסלולים ולהקצות תלמידים לאחר יצירת הקו דרך ממשק ניהול הקווים.",
     "failedToCreateLine": "נכשל ביצירת הקו. אנא נסה שוב.",
-    "days": {
-      "sunday": "ראשון",
-      "monday": "שני",
-      "tuesday": "שלישי",
-      "wednesday": "רביעי",
-      "thursday": "חמישי",
-      "friday": "שישי",
-      "saturday": "שבת"
-    },
     "validation": {
       "nameRequired": "שם הקו נדרש",
       "nameMinLength": "שם הקו חייב להכיל לפחות 3 תווים",
@@ -625,6 +626,8 @@
     "dropoffStop": "תחנת הורדה",
     "dropoffDescription": "בחר איפה {name} יורד",
     "skipSelection": "דלג על בחירת תחנות לעת עתה (ניתן לקבוע מאוחר יותר)",
+    "partialDaysAssignment": "הקצה תלמיד לימים ספציפיים בלבד",
+    "selectDaysDescription": "בחר באילו ימים בשבוע התלמיד צריך לנסוע באוטובוס",
     "updateAssignment": "עדכן הקצאה",
     "addStudent": "הוסף תלמיד",
     "addStudentNoStops": "הוסף תלמיד (ללא תחנות)"

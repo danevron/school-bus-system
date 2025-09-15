@@ -323,6 +323,10 @@
                     <div class="student-name">
                       <i class="pi pi-user"></i>
                       {{ assignment.student.firstName }} {{ assignment.student.lastName }}
+                      <span v-if="assignment.daysOfWeek && assignment.daysOfWeek.length > 0" class="partial-assignment-badge">
+                        <i class="pi pi-calendar"></i>
+                        {{ $t('routeManager.partialAssignment') }}
+                      </span>
                     </div>
                     <div class="student-contact">
                       <span class="contact-item phone">
@@ -1719,6 +1723,25 @@ export default {
   color: var(--p-text-muted-color);
   font-style: italic;
   font-size: 0.875rem;
+}
+
+.partial-assignment-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  margin-left: 0.5rem;
+  background-color: var(--p-orange-100);
+  color: var(--p-orange-700);
+  border: 1px solid var(--p-orange-200);
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.partial-assignment-badge i {
+  font-size: 0.7rem;
 }
 
 </style>

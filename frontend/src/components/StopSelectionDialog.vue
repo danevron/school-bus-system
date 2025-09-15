@@ -80,6 +80,34 @@
             </div>
           </div>
 
+          <!-- Days of Week Selection -->
+          <div class="days-section">
+            <label class="days-checkbox">
+              <input v-model="hasPartialDaysAssignment" type="checkbox">
+              <span class="checkmark"></span>
+              {{ $t('stopSelection.partialDaysAssignment') }}
+            </label>
+            
+            <div v-if="hasPartialDaysAssignment" class="days-selection">
+              <p class="days-description">{{ $t('stopSelection.selectDaysDescription') }}</p>
+              <div class="days-grid">
+                <label 
+                  v-for="(day, index) in daysOfWeek" 
+                  :key="index"
+                  class="day-checkbox"
+                  :class="{ 'selected': selectedDays.includes(index) }"
+                >
+                  <input 
+                    type="checkbox" 
+                    :value="index" 
+                    v-model="selectedDays"
+                  >
+                  <span class="day-label">{{ $t(`common.days.${day}`) }}</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
           <div v-if="hasStops" class="skip-option">
             <label class="skip-checkbox">
               <input v-model="skipStopSelection" type="checkbox">
@@ -131,6 +159,10 @@ export default {
     const selectedPickupStop = ref(null)
     const selectedDropoffStop = ref(null)
     const skipStopSelection = ref(false)
+    const hasPartialDaysAssignment = ref(false)
+    const selectedDays = ref([])
+    
+    const daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
 
     const hasStops = computed(() => props.stops && props.stops.length > 0)
 
@@ -143,6 +175,11 @@ export default {
     )
 
     const canSave = computed(() => {
+      // Check if partial days assignment is enabled but no days selected
+      if (hasPartialDaysAssignment.value && selectedDays.value.length === 0) {
+        return false // Must select at least one day if partial assignment is enabled
+      }
+      
       if (!hasStops.value) return true // Can save if no stops available
       if (skipStopSelection.value) return true // Can save if skipping selection
       return selectedPickupStop.value && selectedDropoffStop.value // Must select both stops
@@ -167,7 +204,8 @@ export default {
         student: props.student,
         pickupStop: selectedPickupStop.value,
         dropoffStop: selectedDropoffStop.value,
-        skipStops: skipStopSelection.value || !hasStops.value
+        skipStops: skipStopSelection.value || !hasStops.value,
+        daysOfWeek: hasPartialDaysAssignment.value ? selectedDays.value : []
       }
       
       emit('save', assignment)
@@ -178,6 +216,8 @@ export default {
       selectedPickupStop.value = null
       selectedDropoffStop.value = null
       skipStopSelection.value = false
+      hasPartialDaysAssignment.value = false
+      selectedDays.value = []
       emit('close')
     }
 
@@ -187,11 +227,14 @@ export default {
         selectedPickupStop.value = null
         selectedDropoffStop.value = null
         skipStopSelection.value = false
+        hasPartialDaysAssignment.value = false
+        selectedDays.value = []
       } else {
-        // Pre-select current stops if editing
+        // Pre-select current stops and days if editing
         if (props.student && props.student._isEditing) {
           const currentPickupStopId = props.student._currentPickupStop
           const currentDropoffStopId = props.student._currentDropoffStop
+          const currentDaysOfWeek = props.student._currentDaysOfWeek
           
           if (currentPickupStopId) {
             const pickupStop = props.stops.find(stop => stop.stopId === currentPickupStopId && stop.type === 'pickup')
@@ -208,6 +251,12 @@ export default {
               selectedDropoffStop.value = { ...dropoffStop, index: pickupStops.value.length + dropoffIndex }
             }
           }
+          
+          // Pre-select days if they exist
+          if (currentDaysOfWeek && currentDaysOfWeek.length > 0) {
+            hasPartialDaysAssignment.value = true
+            selectedDays.value = [...currentDaysOfWeek]
+          }
         }
       }
     })
@@ -216,6 +265,9 @@ export default {
       selectedPickupStop,
       selectedDropoffStop,
       skipStopSelection,
+      hasPartialDaysAssignment,
+      selectedDays,
+      daysOfWeek,
       hasStops,
       pickupStops,
       dropoffStops,
@@ -464,6 +516,124 @@ export default {
   color: #007bff;
   font-weight: 500;
   font-size: 0.85rem;
+}
+
+.days-section {
+  margin-top: 25px;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.days-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  color: #333;
+  font-weight: 500;
+  margin-bottom: 15px;
+}
+
+.days-checkbox input[type="checkbox"] {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #dee2e6;
+  border-radius: 3px;
+  background-color: white;
+  cursor: pointer;
+  position: relative;
+}
+
+.days-checkbox input[type="checkbox"]:checked {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+.days-checkbox input[type="checkbox"]:checked::after {
+  content: '✓';
+  position: absolute;
+  top: -2px;
+  left: 2px;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.days-selection {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #e9ecef;
+}
+
+.days-description {
+  color: #666;
+  font-size: 0.9rem;
+  margin: 0 0 15px 0;
+  line-height: 1.4;
+}
+
+.days-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+}
+
+.day-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 2px solid #e9ecef;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background-color: white;
+  font-size: 0.9rem;
+}
+
+.day-checkbox:hover {
+  border-color: #007bff;
+  background-color: #f8f9ff;
+}
+
+.day-checkbox.selected {
+  border-color: #007bff;
+  background-color: #e3f2fd;
+  box-shadow: 0 0 0 1px rgba(0, 123, 255, 0.2);
+}
+
+.day-checkbox input[type="checkbox"] {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #dee2e6;
+  border-radius: 3px;
+  background-color: white;
+  cursor: pointer;
+  position: relative;
+}
+
+.day-checkbox input[type="checkbox"]:checked {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+.day-checkbox input[type="checkbox"]:checked::after {
+  content: '✓';
+  position: absolute;
+  top: -2px;
+  left: 1px;
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.day-label {
+  font-weight: 500;
+  color: #333;
 }
 
 .skip-option {

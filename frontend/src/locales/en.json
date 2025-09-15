@@ -45,7 +45,16 @@
     "failedToLoadRides": "Failed to load rides",
     "min": "min",
     "km": "km",
-    "m": "m"
+    "m": "m",
+    "days": {
+      "sunday": "Sunday",
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday"
+    }
   },
   "navigation": {
     "dashboard": "Dashboard",
@@ -462,7 +471,8 @@
     "confirmRemoveStudent": "Remove {studentName} from this line?",
     "confirmRemoveStudentSimple": "Are you sure you want to remove this student from the line?",
     "confirmRemoveStudentHeader": "Remove Student",
-    "failedToRemoveStudent": "Failed to remove student from line"
+    "failedToRemoveStudent": "Failed to remove student from line",
+    "partialAssignment": "Student has partial day assignment"
   },
   "invitation": {
     "acceptInvitation": "Accept Invitation",
@@ -536,15 +546,6 @@
     "note": "Note",
     "noteText": "You can configure routes and assign students after creating the line through the line management interface.",
     "failedToCreateLine": "Failed to create line. Please try again.",
-    "days": {
-      "sunday": "Sunday",
-      "monday": "Monday",
-      "tuesday": "Tuesday",
-      "wednesday": "Wednesday",
-      "thursday": "Thursday",
-      "friday": "Friday",
-      "saturday": "Saturday"
-    },
     "validation": {
       "nameRequired": "Line name is required",
       "nameMinLength": "Line name must be at least 3 characters",
@@ -612,6 +613,8 @@
     "dropoffStop": "Dropoff Stop",
     "dropoffDescription": "Select where {name} will be dropped off",
     "skipSelection": "Skip stop selection for now (can be set later)",
+    "partialDaysAssignment": "Assign student for specific days only",
+    "selectDaysDescription": "Choose which days of the week this student should ride the bus",
     "updateAssignment": "Update Assignment",
     "addStudent": "Add Student",
     "addStudentNoStops": "Add Student (No Stops)"

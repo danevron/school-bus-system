@@ -67,7 +67,7 @@ export const generateRidesForLine = async (line: ILine): Promise<any[]> => {
         driver: line.driver,
         vehicle: line.vehicle,
         maxCapacity: line.maxCapacity,
-        availableSeats: Math.max(0, line.maxCapacity - studentAssignments.length), // Calculate based on assignments
+        availableSeats: line.maxCapacity, // Let booking system manage this dynamically
         lineId: line._id,
         notes: `Generated from line: ${line.name}`,
         createdBy: line.driver // Use driver as creator for generated rides
@@ -155,6 +155,14 @@ async function createBookingsForStudents(ride: any, studentAssignments: any[], l
 
       if (existingBooking) {
         return; // Skip if booking already exists
+      }
+
+      // Check if student is assigned for this day of the week
+      if (assignment.daysOfWeek && assignment.daysOfWeek.length > 0) {
+        const rideDayOfWeek = ride.date.getDay(); // 0 = Sunday, 1 = Monday, etc.
+        if (!assignment.daysOfWeek.includes(rideDayOfWeek)) {
+          return; // Skip if student is not assigned for this day
+        }
       }
 
       // Find pickup stop details

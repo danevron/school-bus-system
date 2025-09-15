@@ -5,6 +5,7 @@ export interface IStudentAssignment extends Document {
   line: Types.ObjectId;
   pickupStop?: string; // stopId from line.route.stops
   dropoffStop?: string; // stopId from line.route.stops
+  daysOfWeek?: number[]; // 0-6 (Sunday-Saturday), if empty/null uses line's schedule
   isActive: boolean;
   assignedAt: Date;
   notes?: string;
@@ -33,6 +34,13 @@ const studentAssignmentSchema = new Schema<IStudentAssignment>({
     required: false,
     // This references the stopId field in the line.route.stops array
   },
+  daysOfWeek: [{
+    type: Number,
+    min: 0,
+    max: 6,
+    required: false
+    // 0-6 (Sunday-Saturday), if empty/null uses line's schedule
+  }],
   isActive: {
     type: Boolean,
     default: true

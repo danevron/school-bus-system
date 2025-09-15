@@ -3,7 +3,7 @@ import Line from '../models/Line';
 import User from '../models/User';
 import Vehicle from '../models/Vehicle';
 import StudentAssignment from '../models/StudentAssignment';
-import { lineValidation } from '../utils/validation';
+import { lineValidation, validateAssignStudentToLine, validateUpdateStudentAssignment } from '../utils/validation';
 import { UserRole } from '../models/User';
 import { generateRidesForLine } from '../services/rideGenerationService';
 
@@ -593,12 +593,15 @@ export const deleteStopFromLineRoute = async (req: Request, res: Response): Prom
 export const assignStudentToLineWithStops = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const { studentId, pickupStop, dropoffStop, notes } = req.body;
-
-    if (!studentId) {
-      res.status(400).json({ message: 'Student ID is required' });
+    
+    // Validate request body
+    const { error, value } = validateAssignStudentToLine(req.body);
+    if (error) {
+      res.status(400).json({ message: 'Validation error', details: error.details });
       return;
     }
+
+    const { studentId, pickupStop, dropoffStop, notes, daysOfWeek } = value;
 
     // Verify student exists and is actually a student
     const student = await User.findOne({
@@ -674,6 +677,7 @@ export const assignStudentToLineWithStops = async (req: Request, res: Response):
       // Reactivate existing inactive assignment
       inactiveAssignment.pickupStop = pickupStop || undefined;
       inactiveAssignment.dropoffStop = dropoffStop || undefined;
+      inactiveAssignment.daysOfWeek = (daysOfWeek && daysOfWeek.length > 0) ? daysOfWeek : undefined;
       inactiveAssignment.notes = notes || undefined;
       inactiveAssignment.isActive = true;
       inactiveAssignment.assignedAt = new Date();
@@ -686,6 +690,7 @@ export const assignStudentToLineWithStops = async (req: Request, res: Response):
         line: id,
         pickupStop: pickupStop || undefined,
         dropoffStop: dropoffStop || undefined,
+        daysOfWeek: (daysOfWeek && daysOfWeek.length > 0) ? daysOfWeek : undefined,
         notes: notes || undefined
       });
 
@@ -761,7 +766,15 @@ export const getLineStudentAssignments = async (req: Request, res: Response): Pr
 export const updateStudentAssignment = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id, assignmentId } = req.params;
-    const { pickupStop, dropoffStop, notes } = req.body;
+    
+    // Validate request body
+    const { error, value } = validateUpdateStudentAssignment(req.body);
+    if (error) {
+      res.status(400).json({ message: 'Validation error', details: error.details });
+      return;
+    }
+
+    const { pickupStop, dropoffStop, daysOfWeek, notes } = value;
 
     const line = await Line.findById(id);
     if (!line) {
@@ -803,6 +816,7 @@ export const updateStudentAssignment = async (req: Request, res: Response): Prom
     // Update assignment
     assignment.pickupStop = pickupStop || assignment.pickupStop;
     assignment.dropoffStop = dropoffStop || assignment.dropoffStop;
+    assignment.daysOfWeek = daysOfWeek !== undefined ? ((daysOfWeek && daysOfWeek.length > 0) ? daysOfWeek : undefined) : assignment.daysOfWeek;
     assignment.notes = notes !== undefined ? notes : assignment.notes;
 
     await assignment.save();
