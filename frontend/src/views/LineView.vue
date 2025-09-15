@@ -309,74 +309,54 @@
               <div
                 v-for="assignment in studentAssignments"
                 :key="assignment._id"
-                class="student-assignment-card"
+                class="student-assignment-row"
               >
-                <div class="student-header">
+                <div class="student-basic-info">
                   <div class="student-avatar">
                     <Avatar 
                       :label="`${assignment.student.firstName[0]}${assignment.student.lastName[0]}`"
-                      size="large"
+                      size="normal"
                       shape="circle"
                     />
                   </div>
-                  <div class="student-info">
+                  <div class="student-details">
                     <div class="student-name">
-                      <i class="pi pi-user"></i>
                       {{ assignment.student.firstName }} {{ assignment.student.lastName }}
-                      <span v-if="assignment.daysOfWeek && assignment.daysOfWeek.length > 0" class="partial-assignment-badge">
-                        <i class="pi pi-calendar"></i>
-                        {{ $t('routeManager.partialAssignment') }}
-                      </span>
                     </div>
                     <div class="student-contact">
-                      <span class="contact-item phone">
-                        <i class="pi pi-phone"></i>
-                        {{ assignment.student.phone }}
-                      </span>
-                      <span v-if="assignment.student.email" class="contact-item email">
-                        <i class="pi pi-envelope"></i>
-                        {{ assignment.student.email }}
-                      </span>
+                      <i class="pi pi-phone"></i>
+                      {{ assignment.student.phone }}
                     </div>
                   </div>
                 </div>
 
-                <div class="assignment-details">
-                  <div class="stops-row">
-                    <div class="stop-assignment pickup">
-                      <div class="stop-header">
-                        <i class="pi pi-sign-in stop-icon pickup-icon"></i>
-                        <span class="stop-label">{{ $t('lineView.pickup') }}</span>
-                      </div>
-                      <div v-if="assignment.pickupStopDetails" class="stop-content">
-                        <div class="stop-name">{{ assignment.pickupStopDetails.name }}</div>
-                        <div class="stop-time">
-                          <i class="pi pi-clock"></i>
-                          {{ formatTime(assignment.pickupStopDetails.estimatedTime) }}
-                        </div>
-                      </div>
-                      <div v-else class="no-stop-assigned">
-                        <span class="not-assigned">{{ $t('lineView.notAssigned') }}</span>
-                      </div>
-                    </div>
-
-                    <div class="stop-assignment dropoff">
-                      <div class="stop-header">
-                        <i class="pi pi-sign-out stop-icon dropoff-icon"></i>
-                        <span class="stop-label">{{ $t('lineView.dropoff') }}</span>
-                      </div>
-                      <div v-if="assignment.dropoffStopDetails" class="stop-content">
-                        <div class="stop-name">{{ assignment.dropoffStopDetails.name }}</div>
-                        <div class="stop-time">
-                          <i class="pi pi-clock"></i>
-                          {{ formatTime(assignment.dropoffStopDetails.estimatedTime) }}
-                        </div>
-                      </div>
-                      <div v-else class="no-stop-assigned">
-                        <span class="not-assigned">{{ $t('lineView.notAssigned') }}</span>
-                      </div>
-                    </div>
+                <div class="stop-info-inline">
+                  <div class="stop-item pickup">
+                    <i class="pi pi-sign-in stop-icon pickup-icon"></i>
+                    <span class="stop-label">{{ $t('lineView.pickup') }}:</span>
+                    <span v-if="assignment.pickupStopDetails" class="stop-details">
+                      {{ assignment.pickupStopDetails.name }}
+                      <span class="stop-time">({{ formatTime(assignment.pickupStopDetails.estimatedTime) }})</span>
+                    </span>
+                    <span v-else class="not-assigned">{{ $t('lineView.notAssigned') }}</span>
                   </div>
+                  
+                  <div class="stop-item dropoff">
+                    <i class="pi pi-sign-out stop-icon dropoff-icon"></i>
+                    <span class="stop-label">{{ $t('lineView.dropoff') }}:</span>
+                    <span v-if="assignment.dropoffStopDetails" class="stop-details">
+                      {{ assignment.dropoffStopDetails.name }}
+                      <span class="stop-time">({{ formatTime(assignment.dropoffStopDetails.estimatedTime) }})</span>
+                    </span>
+                    <span v-else class="not-assigned">{{ $t('lineView.notAssigned') }}</span>
+                  </div>
+                </div>
+
+                <div class="row-end-badges">
+                  <span v-if="assignment.daysOfWeek && assignment.daysOfWeek.length > 0" class="partial-assignment-badge">
+                    <i class="pi pi-calendar"></i>
+                    {{ $t('routeManager.partialAssignment') }}
+                  </span>
                 </div>
               </div>
             </div>
@@ -1067,8 +1047,6 @@ export default {
   position: relative;
   display: flex;
   align-items: flex-start;
-  margin-bottom: 30px;
-  padding-bottom: 20px;
 }
 
 .stop-marker {
@@ -1567,102 +1545,82 @@ export default {
   font-weight: 500;
 }
 
-/* Modern Student Card Styles */
-.student-assignment-card {
-  border: 1px solid var(--p-surface-border);
-  border-radius: var(--p-border-radius);
-  padding: 0;
-  background-color: var(--p-surface-0);
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.student-assignment-card:hover {
-  box-shadow: var(--p-card-shadow);
-  transform: translateY(-2px);
-}
-
-.student-header {
+/* Compact Student Row Styles */
+.student-assignment-row {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 1.25rem;
-  border-bottom: 1px solid var(--p-surface-border);
+  gap: 1.5rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--p-surface-border);
+  border-radius: var(--p-border-radius);
+  background-color: var(--p-surface-0);
+  transition: all 0.2s ease;
+}
+
+.student-assignment-row:hover {
+  box-shadow: var(--p-card-shadow);
+  background-color: var(--p-surface-50);
+}
+
+.student-basic-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 170px;
+  flex-shrink: 0;
 }
 
 .student-avatar {
   flex-shrink: 0;
 }
 
-.student-info {
-  flex: 1;
+.student-details {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.25rem;
 }
 
 .student-name {
   font-weight: 600;
   color: var(--p-text-color);
-  font-size: 1.1rem;
+  font-size: 1rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-}
-
-.student-name i {
-  color: var(--p-primary-color);
-  font-size: 0.9rem;
 }
 
 .student-contact {
   display: flex;
-  gap: 1rem;
-  font-size: 0.875rem;
-}
-
-.contact-item {
-  display: flex;
   align-items: center;
   gap: 0.25rem;
+  font-size: 0.8rem;
   color: var(--p-text-muted-color);
 }
 
-.contact-item i {
+.student-contact i {
   color: var(--p-primary-color);
-  font-size: 0.8rem;
+  font-size: 0.75rem;
 }
 
-.assignment-details {
-  padding: 1.25rem;
-}
-
-.stops-row {
+.stop-info-inline {
   display: flex;
-  align-items: stretch;
-  gap: 1rem;
-  min-height: 120px;
-}
-
-.stop-assignment {
+  gap: 2rem;
   flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
+  align-items: center;
 }
 
-.stop-header {
+.stop-item {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-bottom: 0.75rem;
-  flex-shrink: 0;
+  font-size: 0.85rem;
 }
 
 .stop-icon {
-  font-size: 1rem;
-  padding: 0.25rem;
+  font-size: 0.9rem;
+  padding: 0.2rem;
   border-radius: 50%;
+  flex-shrink: 0;
 }
 
 .pickup-icon {
@@ -1678,51 +1636,24 @@ export default {
 .stop-label {
   font-weight: 500;
   color: var(--p-text-color);
-  font-size: 0.875rem;
+  white-space: nowrap;
 }
 
-.stop-content {
-  background-color: var(--p-surface-50);
-  border-radius: var(--p-border-radius);
-  padding: 0.75rem;
-  border: 1px solid var(--p-surface-border);
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.stop-content .stop-name {
-  font-weight: 500;
+.stop-details {
   color: var(--p-text-color);
-  margin-bottom: 0.25rem;
+  font-weight: 500;
 }
 
-.stop-content .stop-time {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  font-size: 0.875rem;
+.stop-time {
   color: var(--p-text-muted-color);
-}
-
-.stop-content .stop-time i {
-  color: var(--p-primary-color);
-}
-
-.no-stop-assigned {
-  padding: 0.75rem;
-  text-align: center;
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  font-weight: 400;
+  font-size: 0.8rem;
 }
 
 .not-assigned {
   color: var(--p-text-muted-color);
   font-style: italic;
-  font-size: 0.875rem;
+  font-size: 0.8rem;
 }
 
 .partial-assignment-badge {
@@ -1742,6 +1673,13 @@ export default {
 
 .partial-assignment-badge i {
   font-size: 0.7rem;
+}
+
+.row-end-badges {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
 }
 
 </style>
