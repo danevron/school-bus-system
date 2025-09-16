@@ -208,7 +208,7 @@
                     <InputMask 
                       id="phone"
                       v-model="inviteForm.phone" 
-                      mask="(999) 999-9999"
+                      mask="999-9999999"
                       :placeholder="$t('login.placeholders.phone')"
                       required 
                       :disabled="loading"

@@ -133,53 +133,38 @@
         "button": "נהל נסיעות"
       }
     },
-    "driver": {
-      "title": "לוח בקרה נהג",
-      "myLines": {
-        "title": "הקווים שלי",
-        "description": "צפה ונהל את קווי התחבורה שהוקצו לך",
-        "button": "צפה בקווים"
-      },
-      "todaySchedule": {
-        "title": "לוח הזמנים להיום",
-        "description": "בדוק את לוח הזמנים שלך לנסיעות היום",
-        "button": "צפה בלוח זמנים"
-      },
-      "studentStatus": {
-        "title": "סטטוס תלמידים",
-        "description": "עדכן סטטוס איסוף והורדה של תלמידים",
-        "button": "עדכן סטטוס"
-      }
-    },
     "parent": {
       "title": "לוח בקרה הורה",
-      "childrenTransportation": {
-        "title": "תחבורה של הילדים שלי",
-        "description": "צפה בהקצאות התחבורה ולוחות הזמנים של הילדים שלך",
-        "button": "צפה בתחבורה"
+      "welcome": {
+        "greeting": "שלום, {name}! 👋",
+        "message": "ברוכים הבאים למרכז התחבורה המשפחתי שלכם. נהלו את הסעות הילדים שלכם לבית הספר בקלות והתעדכנו על המסעות היומיים שלהם."
       },
-      "transportationStatus": {
-        "title": "סטטוס תחבורה",
-        "description": "עקוב אחר הסטטוס בזמן אמת של נסיעות הילדים שלך",
-        "button": "צפה בהקצאות"
-      }
-    },
-    "student": {
-      "title": "לוח בקרה תלמיד",
-      "myTransportation": {
-        "title": "התחבורה שלי",
-        "description": "צפה בקו התחבורה ובמידע לוח הזמנים שלך",
-        "button": "צפה בתחבורה"
+      "myChildren": {
+        "title": "הילדים שלי",
+        "subtitle": "נהלו את הפרופילים של הילדים ואת צרכי התחבורה שלהם",
+        "addChild": "הוסף ילד",
+        "noChildren": "עדיין לא נוספו ילדים",
+        "noChildrenDescription": "התחלו בהוספת הילד הראשון שלכם כדי לנהל את צרכי התחבורה שלו ולהישאר מחוברים למסעותיו היומיים.",
+        "addFirstChild": "הוסיפו את הילד הראשון שלכם"
       },
-      "todaySchedule": {
-        "title": "לוח זמנים להיום",
-        "description": "בדוק את שעות האיסוף והורדה להיום",
-        "button": "מידע היום"
+      "addChild": {
+        "title": "הוסף ילד חדש",
+        "firstName": "שם פרטי",
+        "lastName": "שם משפחה",
+        "phone": "מספר טלפון",
+        "firstNamePlaceholder": "הכנס שם פרטי",
+        "lastNamePlaceholder": "הכנס שם משפחה",
+        "save": "הוסף ילד"
       },
-      "routeInformation": {
-        "title": "מידע מסלול",
-        "description": "צפה במידע מפורט על מסלול התחבורה שלך",
-        "button": "צפה במסלול"
+      "quickActions": {
+        "title": "פעולות מהירות",
+        "subtitle": "כל מה שאתם צריכים כדי לנהל בקשות הסעה",
+        "registerForTransport": "הרשמה להסעות",
+        "registerDescription": "עיינו בשירותי ההסעה הזמינים והגישו בקשות עבור הילדים שלכם",
+        "viewRegistrations": "צפו בהרשמות זמינות",
+        "myRequests": "הבקשות שלי",
+        "requestsDescription": "עקבו ונהלו את כל בקשות ההסעה שהגשתם במקום אחד",
+        "viewRequests": "צפו בבקשות שלי"
       }
     }
   },

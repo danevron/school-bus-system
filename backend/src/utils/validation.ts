@@ -1,5 +1,6 @@
 import Joi from 'joi';
 import { UserRole } from '../models/User';
+import { RegistrationType } from '../models/Registration';
 
 export const userValidation = {
   register: Joi.object({
@@ -258,9 +259,61 @@ export const studentAssignmentValidation = {
   })
 };
 
+export const registrationValidation = {
+  create: Joi.object({
+    title: Joi.string().min(3).max(100).required(),
+    description: Joi.string().max(500).optional(),
+    type: Joi.string().valid(...Object.values(RegistrationType)).required(),
+    stops: Joi.array().items(
+      Joi.object({
+        name: Joi.string().min(2).max(100).required(),
+        description: Joi.string().max(200).optional()
+      })
+    ).min(1).required()
+  }),
+
+  update: Joi.object({
+    title: Joi.string().min(3).max(100).optional(),
+    description: Joi.string().max(500).optional(),
+    type: Joi.string().valid(...Object.values(RegistrationType)).optional(),
+    stops: Joi.array().items(
+      Joi.object({
+        name: Joi.string().min(2).max(100).required(),
+        description: Joi.string().max(200).optional()
+      })
+    ).min(1).optional()
+  })
+};
+
+export const registrationRequestValidation = {
+  create: Joi.object({
+    student: Joi.string().hex().length(24).required(),
+    address: Joi.string().min(5).max(200).required(),
+    selectedStop: Joi.object({
+      name: Joi.string().min(2).max(100).required(),
+      description: Joi.string().max(200).optional()
+    }).required(),
+    comments: Joi.string().max(500).optional()
+  }),
+
+  update: Joi.object({
+    student: Joi.string().hex().length(24).optional(),
+    address: Joi.string().min(5).max(200).optional(),
+    selectedStop: Joi.object({
+      name: Joi.string().min(2).max(100).optional(),
+      description: Joi.string().max(200).optional()
+    }).optional(),
+    comments: Joi.string().max(500).optional()
+  })
+};
+
 // Export individual validation functions for convenience
 export const validateInviteUser = (data: any) => invitationValidation.invite.validate(data);
 export const validateAcceptInvitation = (data: any) => invitationValidation.accept.validate(data);
 export const validateConnectStudentToParents = (data: any) => parentStudentValidation.connectStudentToParents.validate(data);
 export const validateAssignStudentToLine = (data: any) => studentAssignmentValidation.assignToLine.validate(data);
-export const validateUpdateStudentAssignment = (data: any) => studentAssignmentValidation.updateAssignment.validate(data); 
+export const validateUpdateStudentAssignment = (data: any) => studentAssignmentValidation.updateAssignment.validate(data);
+export const validateCreateRegistration = (data: any) => registrationValidation.create.validate(data);
+export const validateUpdateRegistration = (data: any) => registrationValidation.update.validate(data);
+export const validateCreateRegistrationRequest = (data: any) => registrationRequestValidation.create.validate(data);
+export const validateUpdateRegistrationRequest = (data: any) => registrationRequestValidation.update.validate(data); 

@@ -16,6 +16,8 @@ import invitationRoutes from './routes/invitations';
 import rideRoutes from './routes/rides';
 import bookingRoutes from './routes/bookings';
 import jobsRoutes from './routes/jobs';
+import registrationRoutes from './routes/registrations';
+import registrationRequestRoutes from './routes/registrationRequests';
 
 // Load environment variables
 dotenv.config();
@@ -64,6 +66,8 @@ app.use('/api/invitations', invitationRoutes);
 app.use('/api/rides', rideRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/jobs', jobsRoutes);
+app.use('/api/registrations', registrationRoutes);
+app.use('/api/registration-requests', registrationRequestRoutes);
 
 // Serve static files from the frontend build
 const publicPath = path.join(__dirname, 'public');

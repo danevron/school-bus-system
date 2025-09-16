@@ -133,53 +133,38 @@
         "button": "Manage Rides"
       }
     },
-    "driver": {
-      "title": "Driver Dashboard",
-      "myLines": {
-        "title": "My Lines",
-        "description": "View and manage your assigned transportation lines",
-        "button": "View Lines"
-      },
-      "todaySchedule": {
-        "title": "Today's Schedule",
-        "description": "Check your schedule for today's rides",
-        "button": "View Schedule"
-      },
-      "studentStatus": {
-        "title": "Student Status",
-        "description": "Update student pickup and drop-off status",
-        "button": "Update Status"
-      }
-    },
     "parent": {
       "title": "Parent Dashboard",
-      "childrenTransportation": {
-        "title": "My Children's Transportation",
-        "description": "View your children's transportation assignments and schedules",
-        "button": "View Transportation"
+      "welcome": {
+        "greeting": "Hi, {name}! 👋",
+        "message": "Welcome to your family transportation hub. Manage your children's school transportation with ease and stay updated on their daily journeys."
       },
-      "transportationStatus": {
-        "title": "Transportation Status",
-        "description": "Track real-time status of your children's rides",
-        "button": "View Assignments"
-      }
-    },
-    "student": {
-      "title": "Student Dashboard",
-      "myTransportation": {
-        "title": "My Transportation",
-        "description": "View your transportation line and schedule information",
-        "button": "View Transportation"
+      "myChildren": {
+        "title": "My Children",
+        "subtitle": "Manage your children's profiles and transportation needs",
+        "addChild": "Add Child",
+        "noChildren": "No children added yet",
+        "noChildrenDescription": "Start by adding your first child to manage their transportation needs and stay connected with their daily journeys.",
+        "addFirstChild": "Add Your First Child"
       },
-      "todaySchedule": {
-        "title": "Today's Schedule",
-        "description": "Check today's pickup and drop-off times",
-        "button": "Today's Info"
+      "addChild": {
+        "title": "Add New Child",
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "phone": "Phone Number",
+        "firstNamePlaceholder": "Enter first name",
+        "lastNamePlaceholder": "Enter last name",
+        "save": "Add Child"
       },
-      "routeInformation": {
-        "title": "Route Information",
-        "description": "View detailed information about your transportation route",
-        "button": "View Route"
+      "quickActions": {
+        "title": "Quick Actions",
+        "subtitle": "Everything you need to manage transportation requests",
+        "registerForTransport": "Register for Transportation",
+        "registerDescription": "Browse available transportation services and submit requests for your children",
+        "viewRegistrations": "View Available Registrations",
+        "myRequests": "My Requests",
+        "requestsDescription": "Track and manage all your submitted transportation requests in one place",
+        "viewRequests": "View My Requests"
       }
     }
   },
