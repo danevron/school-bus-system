@@ -9,6 +9,11 @@ import LineView from './views/LineView.vue'
 import LineRouteManager from './views/LineRouteManager.vue'
 import RideList from './views/RideList.vue'
 import RideView from './views/RideView.vue'
+import Registrations from './views/Registrations.vue'
+import RegistrationCreate from './views/RegistrationCreate.vue'
+import RegistrationEdit from './views/RegistrationEdit.vue'
+import RegistrationRequestCreate from './views/RegistrationRequestCreate.vue'
+import RegistrationDetail from './views/RegistrationDetail.vue'
 import authStore from './stores/auth'
 
 const routes = [
@@ -75,6 +80,36 @@ const routes = [
     name: 'RideView',
     component: RideView,
     meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/registrations',
+    name: 'Registrations',
+    component: Registrations,
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/registrations/create',
+    name: 'RegistrationCreate',
+    component: RegistrationCreate,
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/registrations/:id/edit',
+    name: 'RegistrationEdit',
+    component: RegistrationEdit,
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/registrations/:id/detail',
+    name: 'RegistrationDetail',
+    component: RegistrationDetail,
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/registration-requests/create/:registrationId',
+    name: 'RegistrationRequestCreate',
+    component: RegistrationRequestCreate,
+    meta: { requiresAuth: true, requiresParent: true }
   }
 ]
 
@@ -92,6 +127,8 @@ router.beforeEach((to, from, next) => {
   } else if (to.meta.requiresGuest && isLoggedIn) {
     next('/home')
   } else if (to.meta.requiresAdmin && userRole !== 'admin') {
+    next('/home')
+  } else if (to.meta.requiresParent && userRole !== 'parent') {
     next('/home')
   } else {
     next()

@@ -3,6 +3,8 @@ import Registration, { RegistrationStatus } from '../models/Registration';
 import RegistrationRequest from '../models/RegistrationRequest';
 import { validateCreateRegistration, validateUpdateRegistration } from '../utils/validation';
 
+import { UserRole } from '../models/User';
+
 export const createRegistration = async (req: Request, res: Response): Promise<void> => {
   try {
     const { error } = validateCreateRegistration(req.body);
@@ -42,6 +44,11 @@ export const getAllRegistrations = async (req: Request, res: Response): Promise<
     if (status) filter.status = status;
     if (type) filter.type = type;
 
+    if (!req.user?.role || req.user.role !== UserRole.ADMIN) {
+      // Non-admin users only see active registrations
+      filter.status = RegistrationStatus.ACTIVE;
+    }
+
     const registrations = await Registration.find(filter)
       .populate('createdBy', 'firstName lastName email')
       .sort({ createdAt: -1 });
@@ -65,6 +72,31 @@ export const getRegistrationById = async (req: Request, res: Response): Promise<
 
     if (!registration) {
       res.status(404).json({ message: 'Registration not found' });
+      return;
+    }
+
+    res.status(200).json({
+      message: 'Registration retrieved successfully',
+      data: { registration }
+    });
+  } catch (error) {
+    console.error('Error fetching registration:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+export const getActiveRegistrationById = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    
+    // Parents can only access active registrations
+    const registration = await Registration.findOne({ 
+      _id: id, 
+      status: RegistrationStatus.ACTIVE 
+    }).populate('createdBy', 'firstName lastName email');
+
+    if (!registration) {
+      res.status(404).json({ message: 'Registration not found or not active' });
       return;
     }
 

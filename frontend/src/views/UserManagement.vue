@@ -83,16 +83,6 @@
               />
             </form>
             
-            <div v-if="studentMessage" class="message-container">
-              <Card :class="`message-card ${studentMessageType}`">
-                <template #content>
-                  <div class="message-content">
-                    <i :class="studentMessageType === 'success' ? 'pi pi-check-circle' : 'pi pi-exclamation-triangle'"></i>
-                    <span>{{ studentMessage }}</span>
-                  </div>
-                </template>
-              </Card>
-            </div>
           </template>
         </Card>
 
@@ -163,16 +153,6 @@
               />
             </form>
             
-            <div v-if="parentStudentMessage" class="message-container">
-              <Card :class="`message-card ${parentStudentMessageType}`">
-                <template #content>
-                  <div class="message-content">
-                    <i :class="parentStudentMessageType === 'success' ? 'pi pi-check-circle' : 'pi pi-exclamation-triangle'"></i>
-                    <span>{{ parentStudentMessage }}</span>
-                  </div>
-                </template>
-              </Card>
-            </div>
           </template>
         </Card>
 
@@ -242,16 +222,6 @@
               />
             </form>
             
-            <div v-if="message" class="message-container">
-              <Card :class="`message-card ${messageType}`">
-                <template #content>
-                  <div class="message-content">
-                    <i :class="messageType === 'success' ? 'pi pi-check-circle' : 'pi pi-exclamation-triangle'"></i>
-                    <span>{{ message }}</span>
-                  </div>
-                </template>
-              </Card>
-            </div>
           </template>
         </Card>
 
@@ -456,6 +426,7 @@
 import { ref, inject, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { useToast } from 'primevue/usetoast'
 import apiService from '../services/api'
 import AppLayout from '../components/AppLayout.vue'
 
@@ -468,6 +439,7 @@ export default {
     const authStore = inject('authStore')
     const router = useRouter()
     const { t } = useI18n()
+    const toast = useToast()
 
     const breadcrumbs = computed(() => [
       { label: t('navigation.dashboard'), path: '/home' },
@@ -479,12 +451,6 @@ export default {
     const loadingInvitations = ref(false)
     const loadingStudents = ref(false)
     const loadingParents = ref(false)
-    const message = ref('')
-    const messageType = ref('success')
-    const studentMessage = ref('')
-    const studentMessageType = ref('success')
-    const parentStudentMessage = ref('')
-    const parentStudentMessageType = ref('success')
     
     const inviteForm = ref({
       email: '',
@@ -531,12 +497,14 @@ export default {
     const handleCreateStudent = async () => {
       try {
         loading.value = true
-        studentMessage.value = ''
-        
         await apiService.post('/auth/students', studentForm.value)
         
-        studentMessage.value = t('messages.studentCreated')
-        studentMessageType.value = 'success'
+        toast.add({
+          severity: 'success',
+          summary: t('common.success'),
+          detail: t('messages.studentCreated'),
+          life: 3000
+        })
         
         // Reset form
         studentForm.value = {
@@ -549,8 +517,12 @@ export default {
         await Promise.all([fetchUsers(), fetchAvailableStudents()])
         
       } catch (error) {
-        studentMessage.value = error.response?.data?.message || t('messages.failedToCreate')
-        studentMessageType.value = 'error'
+        toast.add({
+          severity: 'error',
+          summary: t('common.error'),
+          detail: error.response?.data?.message || t('messages.failedToCreate'),
+          life: 5000
+        })
       } finally {
         loading.value = false
       }
@@ -559,8 +531,6 @@ export default {
     const handleConnectStudentToParents = async () => {
       try {
         loading.value = true
-        parentStudentMessage.value = ''
-        
         const parentIds = [parentStudentForm.value.parentId1]
         if (parentStudentForm.value.parentId2) {
           parentIds.push(parentStudentForm.value.parentId2)
@@ -571,8 +541,12 @@ export default {
           parentIds
         })
         
-        parentStudentMessage.value = t('messages.studentConnected')
-        parentStudentMessageType.value = 'success'
+        toast.add({
+          severity: 'success',
+          summary: t('common.success'),
+          detail: t('messages.studentConnected'),
+          life: 3000
+        })
         
         // Reset form
         parentStudentForm.value = {
@@ -585,8 +559,12 @@ export default {
         await Promise.all([fetchUsers(), fetchAvailableStudents()])
         
       } catch (error) {
-        parentStudentMessage.value = error.response?.data?.message || t('messages.failedToConnect')
-        parentStudentMessageType.value = 'error'
+        toast.add({
+          severity: 'error',
+          summary: t('common.error'),
+          detail: error.response?.data?.message || t('messages.failedToConnect'),
+          life: 5000
+        })
       } finally {
         loading.value = false
       }
@@ -595,12 +573,14 @@ export default {
     const handleInvite = async () => {
       try {
         loading.value = true
-        message.value = ''
-        
         await apiService.post('/invitations', inviteForm.value)
         
-        message.value = t('messages.invitationSent')
-        messageType.value = 'success'
+        toast.add({
+          severity: 'success',
+          summary: t('common.success'),
+          detail: t('messages.invitationSent'),
+          life: 3000
+        })
         
         // Reset form
         inviteForm.value = {
@@ -613,8 +593,12 @@ export default {
         await fetchInvitations()
         
       } catch (error) {
-        message.value = error.response?.data?.message || t('messages.failedToSendInvitation')
-        messageType.value = 'error'
+        toast.add({
+          severity: 'error',
+          summary: t('common.error'),
+          detail: error.response?.data?.message || t('messages.failedToSendInvitation'),
+          life: 5000
+        })
       } finally {
         loading.value = false
       }
@@ -688,11 +672,19 @@ export default {
         await apiService.delete(`/invitations/${invitationId}`)
 
         await fetchInvitations() // Refresh list
-        message.value = t('messages.invitationDeleted')
-        messageType.value = 'success'
+        toast.add({
+          severity: 'success',
+          summary: t('common.success'),
+          detail: t('messages.invitationDeleted'),
+          life: 3000
+        })
       } catch (error) {
-        message.value = error.response?.data?.message || t('messages.failedToDeleteInvitation')
-        messageType.value = 'error'
+        toast.add({
+          severity: 'error',
+          summary: t('common.error'),
+          detail: error.response?.data?.message || t('messages.failedToDeleteInvitation'),
+          life: 5000
+        })
       }
     }
     
@@ -766,12 +758,6 @@ export default {
       loadingInvitations,
       loadingStudents,
       loadingParents,
-      message,
-      messageType,
-      studentMessage,
-      studentMessageType,
-      parentStudentMessage,
-      parentStudentMessageType,
       inviteForm,
       studentForm,
       parentStudentForm,
@@ -1172,43 +1158,6 @@ export default {
 }
 
 
-/* Message container styling */
-.message-container {
-  margin-top: 15px;
-}
-
-.message-card {
-  border-radius: 6px;
-}
-
-.message-card.success {
-  border-left: 4px solid var(--p-green-500);
-  background: var(--p-green-50);
-}
-
-.message-card.error {
-  border-left: 4px solid var(--p-red-500);
-  background: var(--p-red-50);
-}
-
-.message-content {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-}
-
-.message-content i {
-  font-size: 1.25rem;
-}
-
-.message-card.success .message-content i {
-  color: var(--p-green-500);
-}
-
-.message-card.error .message-content i {
-  color: var(--p-red-500);
-}
 
 @media (max-width: 768px) {
   .form-row {

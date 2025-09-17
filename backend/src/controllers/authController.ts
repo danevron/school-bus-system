@@ -287,3 +287,87 @@ export const getStudentsWithParentInfo = async (req: Request, res: Response): Pr
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
+
+export const getMyStudents = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user?.userId) {
+      res.status(401).json({ message: 'User not authenticated' });
+      return;
+    }
+
+    // Get the current parent user with populated children
+    const parent = await User.findById(req.user.userId)
+      .populate('children', 'firstName lastName phone role')
+      .select('children');
+
+    if (!parent) {
+      res.status(404).json({ message: 'Parent not found' });
+      return;
+    }
+
+    res.json({
+      message: 'Children retrieved successfully',
+      data: { children: parent.children || [] }
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+export const createStudentForParent = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user?.userId) {
+      res.status(401).json({ message: 'User not authenticated' });
+      return;
+    }
+
+    const { error } = userValidation.createStudent.validate(req.body);
+    if (error) {
+      res.status(400).json({ message: error.details[0].message });
+      return;
+    }
+
+    const { firstName, lastName, phone } = req.body;
+
+    // Get the current parent
+    const parent = await User.findById(req.user.userId);
+    if (!parent) {
+      res.status(404).json({ message: 'Parent not found' });
+      return;
+    }
+
+    // Create new student user without email/password
+    const student = new User({
+      firstName,
+      lastName,
+      phone,
+      role: UserRole.STUDENT,
+      parents: [parent._id] // Connect to current parent
+    });
+
+    await student.save();
+
+    // Update parent's children array
+    if (!parent.children) {
+      parent.children = [];
+    }
+    parent.children.push(student._id as any);
+    await parent.save();
+
+    res.status(201).json({
+      message: 'Student created successfully',
+      data: {
+        student: {
+          _id: student._id,
+          id: student._id,
+          firstName: student.firstName,
+          lastName: student.lastName,
+          phone: student.phone,
+          role: student.role
+        }
+      }
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};

@@ -32,6 +32,7 @@
     "error": "Error",
     "warning": "Warning",
     "info": "Information",
+    "selected": "Selected",
     "day": "day",
     "week": "week", 
     "year": "year",
@@ -42,10 +43,12 @@
     "errorLoadingRides": "Error loading rides",
     "paginatorTemplate": "Showing {first} to {last} of {totalRecords} entries",
     "notSet": "Not set",
+    "notSelected": "Not selected",
     "failedToLoadRides": "Failed to load rides",
     "min": "min",
     "km": "km",
     "m": "m",
+    "created": "Created",
     "days": {
       "sunday": "Sunday",
       "monday": "Monday",
@@ -100,7 +103,7 @@
     "language": "Language"
   },
   "home": {
-    "title": "Dashboard",
+    "title": "Home",
     "welcome": "Welcome to School Bus Management System",
     "quickActions": "Quick Actions",
     "systemOverview": "System Overview",
@@ -131,6 +134,11 @@
         "title": "Ride Management",
         "description": "Monitor and manage ride operations",
         "button": "Manage Rides"
+      },
+      "registrationManagement": {
+        "title": "Registration Management",
+        "description": "Create and manage transportation registrations",
+        "button": "Manage Registrations"
       }
     },
     "parent": {
@@ -165,6 +173,19 @@
         "myRequests": "My Requests",
         "requestsDescription": "Track and manage all your submitted transportation requests in one place",
         "viewRequests": "View My Requests"
+      },
+      "availableRegistrations": {
+        "title": "Available Registrations",
+        "loading": "Loading available registrations...",
+        "noRegistrations": "No active registrations available",
+        "createRequest": "Create Request",
+        "editRequest": "Edit Request",
+        "hasRequest": "Request Submitted"
+      },
+      "registrationRequests": {
+        "title": "My Requests",
+        "request": "request",
+        "requests": "requests"
       }
     }
   },
@@ -501,6 +522,7 @@
     "lineName": "Line Name",
     "lineNamePlaceholder": "Enter line name (e.g., Downtown Elementary Route)",
     "lineNameHint": "Choose a descriptive name for easy identification",
+    "lineCreated": "Line created successfully",
     "assignedDriver": "Assigned Driver",
     "selectDriver": "Select a driver...",
     "loadingDrivers": "Loading available drivers...",
@@ -629,5 +651,106 @@
     "failedToSendInvitation": "Failed to send invitation",
     "failedToDeleteInvitation": "Failed to delete invitation",
     "confirmDeleteInvitation": "Are you sure you want to delete this invitation?"
+  },
+  "registrations": {
+    "title": "Registration Management",
+    "addNew": "Add New Registration",
+    "searchPlaceholder": "Search registrations...",
+    "allStatus": "All Status",
+    "allTypes": "All Types",
+    "type": "Type",
+    "description": "Description",
+    "stops": "Stops",
+    "noRegistrations": "No registrations found",
+    "noRegistrationsDescription": "No registrations have been created yet. Start by creating your first registration.",
+    "createFirst": "Create First Registration",
+    "loading": "Loading registrations...",
+    "activate": "Activate",
+    "types": {
+      "pickup": "Pickup",
+      "return": "Return"
+    },
+    "statuses": {
+      "draft": "Draft",
+      "active": "Active",
+      "closed": "Closed"
+    },
+    "create": {
+      "title": "Create New Registration",
+      "basicInfo": "Basic Information",
+      "titlePlaceholder": "Enter registration title",
+      "typePlaceholder": "Select registration type",
+      "stops": {
+        "name": "Stop Name",
+        "description": "Description"
+      },
+      "descriptionPlaceholder": "Enter optional description",
+      "stopsManagement": "Stops Management",
+      "stopsDescription": "Add and manage stops for this registration. Click on a row to edit the stop name and description.",
+      "addStop": "Add Stop",
+      "addFirstStop": "Add First Stop",
+      "noStops": "No stops added",
+      "noStopsDescription": "Start by adding your first stop.",
+      "stopNamePlaceholder": "Enter stop name",
+      "stopDescriptionPlaceholder": "Enter stop description (optional)",
+      "errors": {
+        "titleRequired": "Registration title is required",
+        "typeRequired": "Registration type is required"
+      }
+    },
+    "edit": {
+      "title": "Edit Registration",
+      "loading": "Loading registration..."
+    },
+    "detail": {
+      "title": "Registration Details",
+      "loading": "Loading registration details...",
+      "loadError": "Failed to load registration details",
+      "refreshed": "Data refreshed successfully",
+      "totalRequests": "Total Requests",
+      "requestsList": "Registration Requests",
+      "searchPlaceholder": "Search requests...",
+      "noRequests": "No registration requests found",
+      "noRequestsDescription": "There are no registration requests for this registration yet.",
+      "noComments": "No comments",
+      "columns": {
+        "student": "Student",
+        "parent": "Parent",
+        "selectedStop": "Selected Stop",
+        "comments": "Comments",
+        "createdAt": "Created"
+      },
+      "filters": {
+        "searchStudent": "Search by student name...",
+        "searchParent": "Search by parent name...",
+        "searchStop": "Search by stop name...",
+        "searchComments": "Search in comments..."
+      }
+    },
+    "activateDialog": {
+      "title": "Activate Registration",
+      "message": "Are you sure you want to activate this registration?",
+      "warning": "Once activated, parents will be able to start registering for this transportation service. This action cannot be undone.",
+      "confirm": "Activate Registration"
+    }
+  },
+  "registrationRequests": {
+    "title": "Registration Requests",
+    "create": {
+      "title": "Create Registration Request",
+      "submit": "Submit Request",
+      "loadingRegistration": "Loading registration details...",
+      "registrationNotFound": "Registration not found or is no longer available",
+      "registrationInfo": "Registration Information",
+      "requestDetails": "Request Details",
+      "student": "Student",
+      "selectStudent": "Select a student...",
+      "address": "Address",
+      "addressPlaceholder": "Enter student's address for pickup/dropoff",
+      "selectStop": "Select Stop",
+      "selectStopInstruction": "Choose one of the available stops below for pickup/dropoff",
+      "comments": "Comments (Optional)",
+      "commentsPlaceholder": "Add any additional comments or special requirements..."
+    }
   }
 }

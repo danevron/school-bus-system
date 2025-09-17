@@ -44,15 +44,7 @@
         </div>
       </div>
 
-      <!-- Success Message -->
-      <div v-if="successMessage" class="success-message-container">
-        <div class="success-message">
-          <div class="success-icon">✓</div>
-          <span>{{ successMessage }}</span>
-        </div>
-      </div>
-
-      <div v-else-if="line" class="content-grid">
+      <div v-if="line" class="content-grid">
         <!-- Active Line Notice -->
         <div v-if="line.isActive" class="notice-section">
           <div class="notice active-notice">
@@ -409,6 +401,7 @@
 import { ref, inject, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { useToast } from 'primevue/usetoast'
 import apiService from '../services/api'
 import AppLayout from '../components/AppLayout.vue'
 import RouteMap from '../components/RouteMap.vue'
@@ -424,6 +417,7 @@ export default {
     const router = useRouter()
     const route = useRoute()
     const { t } = useI18n()
+    const toast = useToast()
     
     const breadcrumbs = computed(() => [
       { label: t('navigation.dashboard'), path: '/home' },
@@ -436,7 +430,6 @@ export default {
     const error = ref(null)
     const studentAssignments = ref([])
     const activating = ref(false)
-    const successMessage = ref('')
     
     const fetchLine = async () => {
       const lineId = route.params.id
@@ -603,12 +596,6 @@ export default {
     })
 
     // Show success message with auto-hide
-    const showSuccessMessage = (message) => {
-      successMessage.value = message
-      setTimeout(() => {
-        successMessage.value = ''
-      }, 3000)
-    }
 
     // Activate line function
     const activateLineAction = async () => {
@@ -621,13 +608,21 @@ export default {
         // Refresh line data to show activated status
         await fetchLine()
         
-        showSuccessMessage(
-          t('lineView.lineActivatedSuccess', { rides: response.generatedRides })
-        )
+        toast.add({
+          severity: 'success',
+          summary: t('common.success'),
+          detail: t('lineView.lineActivatedSuccess', { rides: response.generatedRides }),
+          life: 5000
+        })
       } catch (err) {
         console.error('Failed to activate line:', err)
         const errorMessage = err.response?.data?.message || t('lineView.failedToActivateLine')
-        alert(`${t('common.error')}: ${errorMessage}`)
+        toast.add({
+          severity: 'error',
+          summary: t('common.error'),
+          detail: errorMessage,
+          life: 5000
+        })
       } finally {
         activating.value = false
       }
@@ -645,7 +640,6 @@ export default {
       error,
       studentAssignments,
       activating,
-      successMessage,
       route,
       fetchLine,
       formatDate,
@@ -739,49 +733,6 @@ export default {
   margin-bottom: 15px;
 }
 
-.success-message-container {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 1001;
-  animation: slideInRight 0.3s ease-out;
-}
-
-.success-message {
-  background: linear-gradient(135deg, var(--p-green-500) 0%, var(--p-green-400) 100%);
-  color: white;
-  padding: 15px 20px;
-  border-radius: var(--p-border-radius);
-  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 500;
-  max-width: 350px;
-}
-
-.success-icon {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  font-weight: bold;
-}
-
-@keyframes slideInRight {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
 
 .content-grid {
   display: grid;

@@ -71,19 +71,7 @@
         </Card>
     </div>
 
-    <!-- Success Message -->
-    <div v-if="successMessage" class="success-message-container">
-      <Card class="success-message-card">
-        <template #content>
-          <div class="success-message">
-            <i class="pi pi-check-circle success-icon"></i>
-            <span>{{ successMessage }}</span>
-          </div>
-        </template>
-      </Card>
-    </div>
-
-    <div v-else-if="ride" class="content-grid">
+    <div v-if="ride" class="content-grid">
         <!-- Status Notice Section -->
         <div v-if="ride.status === 'in_progress'" class="notice-section">
           <Card class="in-progress-notice-card">
@@ -628,6 +616,7 @@
 import { ref, onMounted, computed, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { useToast } from 'primevue/usetoast'
 import apiService from '../services/api.js'
 import AppLayout from '../components/AppLayout.vue'
 import RouteMap from '../components/RouteMap.vue'
@@ -644,6 +633,7 @@ export default {
     const router = useRouter()
     const route = useRoute()
     const { t: $t } = useI18n()
+    const toast = useToast()
     const rideId = route.params.id
 
     const breadcrumbs = computed(() => [
@@ -657,7 +647,6 @@ export default {
     const loading = ref(true)
     const bookingsLoading = ref(false)
     const error = ref('')
-    const successMessage = ref('')
     const showCancelled = ref(false)
     
     // Booking modal state
@@ -711,12 +700,6 @@ export default {
       return bookings.value.filter(booking => booking.status !== 'cancelled')
     })
 
-    const showSuccessMessage = (message) => {
-      successMessage.value = message
-      setTimeout(() => {
-        successMessage.value = ''
-      }, 3000) // Hide after 3 seconds
-    }
 
     const fetchRide = async () => {
       try {
@@ -837,7 +820,12 @@ export default {
         await apiService.post(`/rides/${rideId}/start`)
         await fetchRide() // Reload ride data
       } catch (err) {
-        alert($t('rideView.errorStartingRide') + ': ' + (err.response?.data?.message || err.message))
+        toast.add({
+          severity: 'error',
+          summary: $t('common.error'),
+          detail: $t('rideView.errorStartingRide') + ': ' + (err.response?.data?.message || err.message),
+          life: 5000
+        })
       }
     }
 
@@ -846,7 +834,12 @@ export default {
         await apiService.post(`/rides/${rideId}/end`)
         await fetchRide() // Reload ride data
       } catch (err) {
-        alert($t('rideView.errorEndingRide') + ': ' + (err.response?.data?.message || err.message))
+        toast.add({
+          severity: 'error',
+          summary: $t('common.error'),
+          detail: $t('rideView.errorEndingRide') + ': ' + (err.response?.data?.message || err.message),
+          life: 5000
+        })
       }
     }
 
@@ -855,7 +848,12 @@ export default {
         await apiService.post(`/bookings/${bookingId}/checkin`)
         await loadBookings() // Reload bookings
       } catch (err) {
-        alert('Error checking in passenger: ' + (err.response?.data?.message || err.message))
+        toast.add({
+          severity: 'error',
+          summary: $t('common.error'),
+          detail: 'Error checking in passenger: ' + (err.response?.data?.message || err.message),
+          life: 5000
+        })
       }
     }
 
@@ -864,7 +862,12 @@ export default {
         await apiService.post(`/bookings/${bookingId}/dropoff`)
         await loadBookings() // Reload bookings
       } catch (err) {
-        alert('Error dropping off passenger: ' + (err.response?.data?.message || err.message))
+        toast.add({
+          severity: 'error',
+          summary: $t('common.error'),
+          detail: 'Error dropping off passenger: ' + (err.response?.data?.message || err.message),
+          life: 5000
+        })
       }
     }
 
@@ -873,9 +876,19 @@ export default {
         await apiService.post(`/bookings/${bookingId}/confirm`)
         await loadBookings() // Reload bookings
         await fetchRide() // Reload ride to update available seats
-        showSuccessMessage($t('rideView.bookingConfirmedSuccess'))
+        toast.add({
+          severity: 'success',
+          summary: $t('common.success'),
+          detail: $t('rideView.bookingConfirmedSuccess'),
+          life: 3000
+        })
       } catch (err) {
-        alert('Error confirming booking: ' + (err.response?.data?.message || err.message))
+        toast.add({
+          severity: 'error',
+          summary: $t('common.error'),
+          detail: 'Error confirming booking: ' + (err.response?.data?.message || err.message),
+          life: 5000
+        })
       }
     }
 
@@ -884,9 +897,19 @@ export default {
         await apiService.post(`/bookings/${bookingId}/cancel`, {})
         await loadBookings() // Reload bookings
         await fetchRide() // Reload ride to update available seats
-        showSuccessMessage($t('rideView.bookingCancelledSuccess'))
+        toast.add({
+          severity: 'success',
+          summary: $t('common.success'),
+          detail: $t('rideView.bookingCancelledSuccess'),
+          life: 3000
+        })
       } catch (err) {
-        alert('Error cancelling booking: ' + (err.response?.data?.message || err.message))
+        toast.add({
+          severity: 'error',
+          summary: $t('common.error'),
+          detail: 'Error cancelling booking: ' + (err.response?.data?.message || err.message),
+          life: 5000
+        })
       }
     }
 
@@ -895,9 +918,19 @@ export default {
         await apiService.post(`/bookings/${bookingId}/admit`)
         await loadBookings() // Reload bookings
         await fetchRide() // Reload ride to update available seats
-        showSuccessMessage($t('rideView.waitingListBookingAdmittedSuccess'))
+        toast.add({
+          severity: 'success',
+          summary: $t('common.success'),
+          detail: $t('rideView.waitingListBookingAdmittedSuccess'),
+          life: 3000
+        })
       } catch (err) {
-        alert('Error admitting waiting list booking: ' + (err.response?.data?.message || err.message))
+        toast.add({
+          severity: 'error',
+          summary: $t('common.error'),
+          detail: 'Error admitting waiting list booking: ' + (err.response?.data?.message || err.message),
+          life: 5000
+        })
       }
     }
 
@@ -1029,14 +1062,29 @@ export default {
         
         // Check if booking went to waiting list by checking available seats
         if (ride.value.availableSeats <= 0) {
-          showSuccessMessage($t('rideView.bookingAddedToWaitingList'))
+          toast.add({
+            severity: 'info',
+            summary: $t('common.info'),
+            detail: $t('rideView.bookingAddedToWaitingList'),
+            life: 5000
+          })
         } else {
-          showSuccessMessage($t('rideView.bookingCreatedSuccess'))
+          toast.add({
+            severity: 'success',
+            summary: $t('common.success'),
+            detail: $t('rideView.bookingCreatedSuccess'),
+            life: 3000
+          })
         }
         
       } catch (err) {
         console.error('Error creating booking:', err)
-        alert($t('rideView.errorCreatingBooking') + ': ' + (err.response?.data?.message || err.message))
+        toast.add({
+          severity: 'error',
+          summary: $t('common.error'),
+          detail: $t('rideView.errorCreatingBooking') + ': ' + (err.response?.data?.message || err.message),
+          life: 5000
+        })
       } finally {
         bookingSubmitting.value = false
       }
@@ -1066,7 +1114,6 @@ export default {
       bookingsLoading,
       breadcrumbs,
       error,
-      successMessage,
       showCancelled,
       filteredBookings,
       fetchRide,
@@ -1185,25 +1232,6 @@ export default {
   margin-bottom: 1.5rem;
 }
 
-.success-message-card {
-  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
-  border: 1px solid var(--p-green-200);
-}
-
-.success-message {
-  background: linear-gradient(135deg, var(--p-green-500) 0%, var(--p-green-600) 100%);
-  color: white;
-  padding: 1rem;
-  border-radius: var(--p-border-radius);
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  font-weight: 500;
-}
-
-.success-icon {
-  font-size: 1.25rem;
-}
 
 .in-progress-notice-card {
   background: linear-gradient(135deg, var(--p-yellow-50) 0%, var(--p-yellow-100) 100%);
@@ -1496,49 +1524,6 @@ export default {
   margin-top: 15px;
 }
 
-.success-message-container {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 1001;
-  animation: slideInRight 0.3s ease-out;
-}
-
-.success-message {
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-  color: white;
-  padding: 15px 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 500;
-  max-width: 350px;
-}
-
-.success-icon {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  font-weight: bold;
-}
-
-@keyframes slideInRight {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
 
 .content-grid {
   display: grid;

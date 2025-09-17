@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import * as authController from '../controllers/authController';
-import { authenticate, requireAdmin } from '../middlewares/auth';
+import { authenticate, requireAdmin, requireParent } from '../middlewares/auth';
 
 const router = Router();
 
@@ -10,6 +10,10 @@ router.post('/login', authController.login);
 
 // Protected routes
 router.get('/profile', authenticate, authController.getProfile);
+
+// Parent routes
+router.get('/my-students', authenticate, requireParent, authController.getMyStudents);
+router.post('/my-students', authenticate, requireParent, authController.createStudentForParent);
 
 // Admin routes
 router.get('/users', authenticate, requireAdmin, authController.getAllUsers);

@@ -226,6 +226,7 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import apiService from '../services/api'
 import AppLayout from '../components/AppLayout.vue'
+import { useToast } from 'primevue/usetoast'
 
 export default {
   name: 'LineCreate',
@@ -233,10 +234,10 @@ export default {
     AppLayout
   },
   setup() {
-    const authStore = inject('authStore')
     const router = useRouter()
     const { t } = useI18n()
-    
+    const toast = useToast()
+
     const formData = ref({
       name: '',
       driverId: '',
@@ -412,8 +413,6 @@ export default {
       }
       
       try {
-        console.log('Creating line with data:', formData.value)
-        
         // Convert day names to numbers (0=Sunday, 1=Monday, etc.)
         const dayNameToNumber = {
           'sunday': 0,
@@ -442,14 +441,17 @@ export default {
         
         const lineId = response.line?._id || response.data?._id
         if (lineId) {
+          toast.add({
+            severity: 'success',
+            summary: t('lineCreate.lineCreated'),
+            detail: t('lineCreate.lineCreatedDetail', { lineId })
+          })
           router.push(`/lines/${lineId}`)
         } else {
           router.push('/lines')
         }
       } catch (error) {
-        console.error('Failed to create line:', error)
-        // TODO: Add proper error handling UI
-        alert(t('lineCreate.failedToCreateLine'))
+        toast.add({ severity: 'error', summary: t('lineCreate.failedToCreateLine') })
       }
     }
     

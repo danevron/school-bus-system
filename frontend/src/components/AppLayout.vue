@@ -59,6 +59,7 @@
 
     <!-- Main Content -->
     <main class="main-content" :class="{ 'with-action-bar': showActionBar }">
+      <Toast />
       <slot></slot>
     </main>
   </div>

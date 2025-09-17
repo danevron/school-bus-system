@@ -370,6 +370,7 @@ import StopCreationDialog from '../components/StopCreationDialog.vue'
 import StudentSelectionDialog from '../components/StudentSelectionDialog.vue'
 import StopSelectionDialog from '../components/StopSelectionDialog.vue'
 import RouteMap from '../components/RouteMap.vue'
+import { useToast } from 'primevue/usetoast'
 
 export default {
   name: 'LineRouteManager',
@@ -384,6 +385,7 @@ export default {
     const router = useRouter()
     const route = useRoute()
     const { t } = useI18n()
+    const toast = useToast()
     const confirm = useConfirm()
     const lineId = route.params.lineId
     
@@ -578,14 +580,19 @@ export default {
             await fetchLine()
             await fetchStopUsage()
           } catch (error) {
-            console.error('Failed to delete stop:', error)
-            
             // Handle detailed error from backend
             if (error.response?.data?.affectedStudents) {
               const details = error.response.data
-              alert(`${details.message}\n\n${details.details}\n\n${t('routeManager.removeStudentAssignmentsFirst')}`)
+              toast.add({
+                severity: 'error',
+                summary: details.message,
+                detail: `${details.details}\n\n${t('routeManager.removeStudentAssignmentsFirst')}`
+              })
             } else {
-              alert(error.response?.data?.message || t('routeManager.failedToDeleteStop'))
+              toast.add({
+                severity: 'error',
+                summary: error.response?.data?.message || t('routeManager.failedToDeleteStop')
+              })
             }
           } finally {
             loading.value = false

@@ -32,6 +32,7 @@
     "error": "שגיאה",
     "warning": "אזהרה",
     "info": "מידע",
+    "selected": "נבחר",
     "day": "יום",
     "week": "שבוע",
     "year": "שנה",
@@ -42,6 +43,7 @@
     "errorLoadingRides": "שגיאה בטעינת נסיעות",
     "paginatorTemplate": "מציג {first} עד {last} מתוך {totalRecords} רשומות",
     "notSet": "לא מוגדר",
+    "notSelected": "לא נבחר",
     "failedToLoadRides": "נכשל בטעינת הנסיעות",
     "min": "דק'",
     "km": "ק\"מ",
@@ -131,6 +133,11 @@
         "title": "ניהול נסיעות",
         "description": "עקוב ונהל פעילויות הנסיעות",
         "button": "נהל נסיעות"
+      },
+      "registrationManagement": {
+        "title": "ניהול הרשמות",
+        "description": "צור ונהל הרשמות להסעות",
+        "button": "נהל הרשמות"
       }
     },
     "parent": {
@@ -165,6 +172,19 @@
         "myRequests": "הבקשות שלי",
         "requestsDescription": "עקבו ונהלו את כל בקשות ההסעה שהגשתם במקום אחד",
         "viewRequests": "צפו בבקשות שלי"
+      },
+      "availableRegistrations": {
+        "title": "הרשמות זמינות",
+        "loading": "טוען הרשמות זמינות...",
+        "noRegistrations": "אין הרשמות פעילות זמינות",
+        "createRequest": "צור בקשה",
+        "editRequest": "ערוך בקשה",
+        "hasRequest": "בקשה הוגשה"
+      },
+      "registrationRequests": {
+        "title": "הבקשות שלי",
+        "request": "בקשה",
+        "requests": "בקשות"
       }
     }
   },
@@ -513,6 +533,7 @@
     "lineInformationDescription": "צור קו תחבורה חדש. תוכל להקצות תלמידים ולהגדיר מסלולים לאחר יצירת הקו.",
     "lineName": "שם הקו",
     "lineNamePlaceholder": "הכנס שם קו (למשל, מסלול בית ספר יסודי מרכז העיר)",
+    "lineCreated": "הקו נוצר בהצלחה!",
     "lineNameHint": "בחר שם תיאורי לזיהוי קל",
     "assignedDriver": "נהג מוקצה",
     "selectDriver": "בחר נהג...",
@@ -574,7 +595,7 @@
     "title": "הוסף תחנה חדשה",
     "findLocation": "מצא מיקום",
     "searchInstructions": "חפש כתובת או לחץ על המפה כדי למקם סמן",
-    "addressPlaceholder": "הזן כתובת (לדוגמה: שד' רוטשילד 1, רמת גן)",
+    "addressPlaceholder": " כתובת (לדוגמה: שד' רוטשילד 1, רמת גן)",
     "lookingUpAddress": "מחפש כתובת...",
     "couldNotFindAddress": "לא ניתן למצוא כתובת",
     "selectedLocation": "מיקום נבחר",
@@ -642,5 +663,106 @@
     "failedToSendInvitation": "נכשל בשליחת ההזמנה",
     "failedToDeleteInvitation": "נכשל במחיקת ההזמנה",
     "confirmDeleteInvitation": "האם אתה בטוח שברצונך למחוק הזמנה זו?"
+  },
+  "registrations": {
+    "title": "ניהול הרשמות",
+    "addNew": "הוסף הרשמה חדשה",
+    "searchPlaceholder": "חיפוש הרשמות...",
+    "allStatus": "כל הסטטוסים",
+    "allTypes": "כל הסוגים",
+    "type": "סוג",
+    "description": "תיאור",
+    "stops": "תחנות",
+    "noRegistrations": "לא נמצאו הרשמות",
+    "noRegistrationsDescription": "עדיין לא נוצרו הרשמות. התחל ביצירת הרישום הראשון שלך.",
+    "createFirst": "צור הרשמה ראשונה",
+    "loading": "טוען הרשמות...",
+    "activate": "הפעל",
+    "types": {
+      "pickup": "איסוף",
+      "return": "החזרה"
+    },
+    "statuses": {
+      "draft": "טיוטה",
+      "active": "פעיל",
+      "closed": "סגור"
+    },
+    "create": {
+      "title": "צור הרשמה חדשה",
+      "basicInfo": "מידע בסיסי",
+      "titlePlaceholder": "הזן כותרת ההרשמה",
+      "typePlaceholder": "בחר סוג הרשמה",
+      "descriptionPlaceholder": "הזן תיאור אופציונלי",
+      "stopsManagement": "ניהול תחנות",
+      "stopsDescription": "הוסף ונהל תחנות עבור הרשמה זו. לחץ על שורה כדי לערוך את שם התחנה והתיאור.",
+      "addStop": "הוסף תחנה",
+      "addFirstStop": "הוסף תחנה ראשונה",
+      "stops": {
+        "name": "שם התחנה",
+        "description": "תיאור"
+      },
+      "noStops": "לא נוספו תחנות",
+      "noStopsDescription": "התחל בהוספת התחנה הראשונה שלך.",
+      "stopNamePlaceholder": "הזן שם תחנה",
+      "stopDescriptionPlaceholder": "הזן תיאור תחנה (אופציונלי)",
+      "errors": {
+        "titleRequired": "כותרת ההרשמה נדרשת",
+        "typeRequired": "סוג ההרשמה נדרש"
+      }
+    },
+    "edit": {
+      "title": "ערוך הרשמה",
+      "loading": "טוען הרשמה..."
+    },
+    "detail": {
+      "title": "פרטי הרשמה",
+      "loading": "טוען פרטי הרשמה...",
+      "loadError": "נכשל בטעינת פרטי ההרשמה",
+      "refreshed": "הנתונים עודכנו בהצלחה",
+      "totalRequests": "סך הבקשות",
+      "requestsList": "בקשות הרשמה",
+      "searchPlaceholder": "חפש בקשות...",
+      "noRequests": "לא נמצאו בקשות הרשמה",
+      "noRequestsDescription": "אין עדיין בקשות הרשמה עבור הרשמה זו.",
+      "noComments": "אין הערות",
+      "columns": {
+        "student": "תלמיד",
+        "parent": "הורה",
+        "selectedStop": "תחנה נבחרת",
+        "comments": "הערות",
+        "createdAt": "נוצר"
+      },
+      "filters": {
+        "searchStudent": "חפש לפי שם תלמיד...",
+        "searchParent": "חפש לפי שם הורה...",
+        "searchStop": "חפש לפי שם תחנה...",
+        "searchComments": "חפש בהערות..."
+      }
+    },
+    "activateDialog": {
+      "title": "הפעל הרשמה",
+      "message": "האם אתה בטוח שברצונך להפעיל הרשמה זו?",
+      "warning": "לאחר ההפעלה, הורים יוכלו להתחיל להירשם לשירות התחבורה הזה. פעולה זו לא ניתנת לביטול.",
+      "confirm": "הפעל הרשמה"
+    }
+  },
+  "registrationRequests": {
+    "title": "בקשות הרשמה",
+    "create": {
+      "title": "צור בקשת הרשמה",
+      "submit": "הגש בקשה",
+      "loadingRegistration": "טוען פרטי הרשמה...",
+      "registrationNotFound": "ההרשמה לא נמצאה או לא זמין יותר",
+      "registrationInfo": "מיד ההרשמה",
+      "requestDetails": "פרטי הבקשה",
+      "student": "תלמיד",
+      "selectStudent": "בחר תלמיד...",
+      "address": "כתובת",
+      "addressPlaceholder": " כתובת התלמיד (למשל: שד' רוטשילד 1, רמת גן)",
+      "selectStop": "בחר תחנה",
+      "selectStopInstruction": "בחר אחת מהתחנות הזמינות",
+      "comments": "הערות (אופציונלי)",
+      "commentsPlaceholder": "הוסף כל הערות נוספות או דרישות מיוחדות..."
+    }
   }
 }
