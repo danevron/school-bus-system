@@ -136,8 +136,22 @@ export const bookingController = {
         }
       }
 
+      const user = await User.findById(currentUserId).populate('children');
+
+      console.log('Current User:', user);
+
+      let isCurrentUserChild = false;
+      // If current user is a parent, ensure the passenger is one of their children
+      if (currentUserRole === UserRole.PARENT && user?.children) {
+        isCurrentUserChild = user.children.some((child) => 
+          child._id.toString() === passengerId
+        );
+      }
+
+      console.log('Is Current User Child:', isCurrentUserChild);
+
       // Authorization check: Users can only book for themselves unless they're admin
-      if (currentUserRole !== UserRole.ADMIN && passengerId !== currentUserId) {
+      if (currentUserRole !== UserRole.ADMIN && (passengerId !== currentUserId && !isCurrentUserChild)) {
         return res.status(403).json({ message: 'You can only create bookings for yourself' });
       }
 

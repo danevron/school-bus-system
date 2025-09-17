@@ -208,33 +208,98 @@ class _BookRideScreenState extends State<BookRideScreen> {
           (stop) => stop['stopId'] == dropoffStopId,
         );
         
+        final dialogTheme = Theme.of(context);
+        final dialogColorScheme = dialogTheme.colorScheme;
+        
         return AlertDialog(
-          title: Text(localizations.confirmBooking),
+          title: Text(
+            localizations.confirmBooking,
+            style: dialogTheme.textTheme.headlineMedium?.copyWith(
+              color: dialogColorScheme.onSurface,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('${localizations.ride}: ${ride['route']['name']}'),
+              Text(
+                '${localizations.ride}: ${ride['route']['name']}',
+                style: dialogTheme.textTheme.bodyMedium?.copyWith(
+                  color: dialogColorScheme.onSurface,
+                ),
+              ),
               const SizedBox(height: 8),
-              Text('${localizations.passenger}: ${selectedPassenger['firstName']} ${selectedPassenger['lastName']}'),
+              Text(
+                '${localizations.passenger}: ${selectedPassenger['firstName']} ${selectedPassenger['lastName']}',
+                style: dialogTheme.textTheme.bodyMedium?.copyWith(
+                  color: dialogColorScheme.onSurface,
+                ),
+              ),
               const SizedBox(height: 8),
-              Text('${localizations.date}: ${_formatDate(ride['date'])}'),
+              Text(
+                '${localizations.date}: ${_formatDate(ride['date'])}',
+                style: dialogTheme.textTheme.bodyMedium?.copyWith(
+                  color: dialogColorScheme.onSurface,
+                ),
+              ),
               const SizedBox(height: 8),
-              Text('${localizations.time}: ${_formatTime(ride['startTime'] ?? '')}'),
+              Text(
+                '${localizations.time}: ${_formatTime(ride['startTime'] ?? '')}',
+                style: dialogTheme.textTheme.bodyMedium?.copyWith(
+                  color: dialogColorScheme.onSurface,
+                ),
+              ),
               const SizedBox(height: 12),
-              Text('${localizations.pickup}: ${pickupStop['name']}'),
+              Text(
+                '${localizations.pickup}: ${pickupStop['name']}',
+                style: dialogTheme.textTheme.bodyMedium?.copyWith(
+                  color: dialogColorScheme.onSurfaceVariant,
+                ),
+              ),
               const SizedBox(height: 4),
-              Text('${localizations.dropoff}: ${dropoffStop['name']}'),
+              Text(
+                '${localizations.dropoff}: ${dropoffStop['name']}',
+                style: dialogTheme.textTheme.bodyMedium?.copyWith(
+                  color: dialogColorScheme.onSurfaceVariant,
+                ),
+              ),
             ],
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: Text(localizations.cancel),
+              style: TextButton.styleFrom(
+                foregroundColor: dialogColorScheme.onSurfaceVariant,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ),
+              child: Text(
+                localizations.cancel,
+                style: dialogTheme.textTheme.bodyMedium?.copyWith(
+                  color: dialogColorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ),
-            FilledButton(
+            ElevatedButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: Text(localizations.bookThisRide),
+              style: ElevatedButton.styleFrom(
+                elevation: 0,
+                backgroundColor: dialogColorScheme.primary,
+                foregroundColor: dialogColorScheme.onPrimary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ),
+              child: Text(
+                localizations.bookThisRide,
+                style: dialogTheme.textTheme.bodyMedium?.copyWith(
+                  color: dialogColorScheme.onPrimary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ),
           ],
         );

@@ -316,7 +316,7 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back_ios,
-            color: const Color(0xFF111827),
+            color: colorScheme.onSurface,
             size: 20,
           ),
           onPressed: () => Navigator.of(context).pop(),
@@ -379,24 +379,24 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
     }
     
     // Status color and translated text
-    Color statusColor = const Color(0xFF6B7280);
+    Color statusColor = colorScheme.onSurfaceVariant;
     String statusText = status;
     
     switch (status.toLowerCase()) {
       case 'in_progress':
-        statusColor = const Color(0xFF10B981);
+        statusColor = colorScheme.primary;
         statusText = localizations.rideStatusActive;
         break;
       case 'completed':
-        statusColor = const Color(0xFF6B7280);
+        statusColor = colorScheme.onSurfaceVariant;
         statusText = localizations.rideStatusCompleted;
         break;
       case 'cancelled':
-        statusColor = const Color(0xFFD32F2F);
+        statusColor = colorScheme.error;
         statusText = localizations.rideStatusCancelled;
         break;
       case 'scheduled':
-        statusColor = const Color(0xFF10B981);
+        statusColor = colorScheme.primary;
         statusText = localizations.rideStatusScheduled;
         break;
     }
@@ -404,11 +404,11 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
     return Container(
       margin: EdgeInsets.zero,
       padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 20),
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
         border: Border(
           bottom: BorderSide(
-            color: Color(0xFFE5E7EB),
+            color: colorScheme.outline.withOpacity(0.2),
             width: 0.5,
           ),
         ),
@@ -425,7 +425,7 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
                     Text(
                       routeName,
                       style: theme.textTheme.titleLarge?.copyWith(
-                        color: const Color(0xFF111827),
+                        color: colorScheme.onSurface,
                         fontWeight: FontWeight.w400,
                       ),
                     ),
@@ -434,7 +434,7 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
                       Text(
                         dateTimeDisplay,
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: const Color(0xFF6B7280),
+                          color: colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -470,7 +470,7 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
         onPressed: _isStartingRide ? null : _startRide,
         style: ElevatedButton.styleFrom(
           elevation: 0,
-          backgroundColor: const Color(0xFF10B981),
+          backgroundColor: colorScheme.primary,
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(6),
@@ -505,7 +505,7 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
         onPressed: _isEndingRide ? null : _endRide,
         style: ElevatedButton.styleFrom(
           elevation: 0,
-          backgroundColor: const Color(0xFFD32F2F),
+          backgroundColor: colorScheme.error,
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(6),
@@ -540,9 +540,9 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
         onPressed: _toggleLocationSharing,
         style: OutlinedButton.styleFrom(
           elevation: 0,
-          foregroundColor: _isCurrentRideSharing ? const Color(0xFFD32F2F) : const Color(0xFF10B981),
+          foregroundColor: _isCurrentRideSharing ? colorScheme.error : colorScheme.primary,
           side: BorderSide(
-            color: _isCurrentRideSharing ? const Color(0xFFD32F2F) : const Color(0xFF10B981),
+            color: _isCurrentRideSharing ? colorScheme.error : colorScheme.primary,
             width: 1,
           ),
           shape: RoundedRectangleBorder(
@@ -555,7 +555,7 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
               ? localizations.stopLocationSharing 
               : localizations.startLocationSharing,
           style: theme.textTheme.titleMedium?.copyWith(
-            color: _isCurrentRideSharing ? const Color(0xFFD32F2F) : const Color(0xFF10B981),
+            color: _isCurrentRideSharing ? colorScheme.error : colorScheme.primary,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -580,7 +580,7 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
         },
         style: ElevatedButton.styleFrom(
           elevation: 0,
-          backgroundColor: const Color(0xFF10B981),
+          backgroundColor: colorScheme.primary,
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(6),
@@ -661,32 +661,32 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
     final dropoffStop = booking['dropoffStop'] ?? '';
 
     // Status color and translated text
-    Color statusColor = const Color(0xFF6B7280);
+    Color statusColor = colorScheme.onSurfaceVariant;
     String statusText = status;
     
     switch (status.toLowerCase()) {
       case 'confirmed':
-        statusColor = const Color(0xFF10B981);
+        statusColor = colorScheme.primary;
         statusText = localizations.bookingStatusConfirmed;
         break;
       case 'unconfirmed':
-        statusColor = const Color(0xFFF59E0B);
+        statusColor = Colors.orange;
         statusText = localizations.bookingStatusUnconfirmed;
         break;
       case 'checked_in':
-        statusColor = const Color(0xFF3B82F6);
+        statusColor = Colors.blue;
         statusText = localizations.bookingStatusCheckedIn;
         break;
       case 'cancelled':
-        statusColor = const Color(0xFFD32F2F);
+        statusColor = colorScheme.error;
         statusText = localizations.bookingStatusCancelled;
         break;
       case 'completed':
-        statusColor = const Color(0xFF6B7280);
+        statusColor = colorScheme.onSurfaceVariant;
         statusText = localizations.bookingStatusCompleted;
         break;
       case 'waiting_list':
-        statusColor = const Color(0xFFF59E0B);
+        statusColor = Colors.orange;
         statusText = localizations.bookingStatusWaitingList;
         break;
     }
@@ -694,11 +694,11 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
     return Container(
       margin: EdgeInsets.zero,
       padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16),
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
         border: Border(
           bottom: BorderSide(
-            color: Color(0xFFE5E7EB),
+            color: colorScheme.outline.withOpacity(0.2),
             width: 0.5,
           ),
         ),
@@ -715,7 +715,7 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
                     Text(
                       fullName,
                       style: theme.textTheme.titleLarge?.copyWith(
-                        color: const Color(0xFF111827),
+                        color: colorScheme.onSurface,
                         fontWeight: FontWeight.w400,
                       ),
                     ),
@@ -724,7 +724,7 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
                       Text(
                         phone,
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: const Color(0xFF6B7280),
+                          color: colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -801,8 +801,8 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
             onPressed: () => _showCancelConfirmation(booking['_id']),
             style: OutlinedButton.styleFrom(
               elevation: 0,
-              foregroundColor: const Color(0xFFD32F2F),
-              side: const BorderSide(color: Color(0xFFD32F2F), width: 1),
+              foregroundColor: colorScheme.error,
+              side: BorderSide(color: colorScheme.error, width: 1),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(6),
               ),
@@ -811,7 +811,7 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
             child: Text(
               localizations.cancel,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: const Color(0xFFD32F2F),
+                color: colorScheme.error,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -830,8 +830,8 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
             onPressed: () => _updateBookingStatus(booking['_id'], 'confirm'),
             style: OutlinedButton.styleFrom(
               elevation: 0,
-              foregroundColor: const Color(0xFF10B981),
-              side: const BorderSide(color: Color(0xFF10B981), width: 1),
+              foregroundColor: colorScheme.primary,
+              side: BorderSide(color: colorScheme.primary, width: 1),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(6),
               ),
@@ -840,7 +840,7 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
             child: Text(
               localizations.confirm,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: const Color(0xFF10B981),
+                color: colorScheme.primary,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -859,8 +859,8 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
             onPressed: () => _updateBookingStatus(booking['_id'], 'checkin'),
             style: OutlinedButton.styleFrom(
               elevation: 0,
-              foregroundColor: const Color(0xFF3B82F6),
-              side: const BorderSide(color: Color(0xFF3B82F6), width: 1),
+              foregroundColor: Colors.blue,
+              side: BorderSide(color: Colors.blue, width: 1),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(6),
               ),
@@ -869,7 +869,7 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
             child: Text(
               localizations.checkIn,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: const Color(0xFF3B82F6),
+                color: Colors.blue,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -888,8 +888,8 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
             onPressed: () => _updateBookingStatus(booking['_id'], 'dropoff'),
             style: OutlinedButton.styleFrom(
               elevation: 0,
-              foregroundColor: const Color(0xFF10B981),
-              side: const BorderSide(color: Color(0xFF10B981), width: 1),
+              foregroundColor: colorScheme.primary,
+              side: BorderSide(color: colorScheme.primary, width: 1),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(6),
               ),
@@ -898,7 +898,7 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
             child: Text(
               localizations.dropOff,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: const Color(0xFF10B981),
+                color: colorScheme.primary,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -914,24 +914,60 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
 
   Future<void> _showCancelConfirmation(String bookingId) async {
     final localizations = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(localizations.confirmCancellation),
-          content: Text(localizations.confirmCancellationMessage),
+          title: Text(
+            localizations.confirmCancellation,
+            style: theme.textTheme.headlineMedium?.copyWith(
+              color: colorScheme.onSurface,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+          content: Text(
+            localizations.confirmCancellationMessage,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: Text(localizations.cancel),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
               style: TextButton.styleFrom(
-                foregroundColor: Colors.red,
+                foregroundColor: colorScheme.onSurfaceVariant,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
               ),
-              child: Text(localizations.confirmCancellation),
+              child: Text(
+                localizations.cancel,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: ElevatedButton.styleFrom(
+                elevation: 0,
+                backgroundColor: colorScheme.error,
+                foregroundColor: colorScheme.onError,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ),
+              child: Text(
+                localizations.confirmCancellation,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onError,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ),
           ],
         );

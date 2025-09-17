@@ -224,16 +224,17 @@ class _RideTrackingScreenState extends State<RideTrackingScreen> {
         elevation: 0,
         leading: IconButton(
           icon: Icon(
-            Icons.arrow_back,
+            Icons.arrow_back_ios,
             color: colorScheme.onSurface,
+            size: 20,
           ),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
           localizations.trackingRide(widget.rideName),
-          style: theme.textTheme.titleLarge?.copyWith(
+          style: theme.textTheme.headlineMedium?.copyWith(
             color: colorScheme.onSurface,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w400,
           ),
         ),
         actions: [
@@ -285,7 +286,7 @@ class _RideTrackingScreenState extends State<RideTrackingScreen> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
-            FilledButton.icon(
+            ElevatedButton(
               onPressed: () {
                 setState(() {
                   _isLoading = true;
@@ -293,8 +294,22 @@ class _RideTrackingScreenState extends State<RideTrackingScreen> {
                 });
                 _fetchRideLocation();
               },
-              icon: const Icon(Icons.refresh),
-              label: Text(localizations.retry),
+              style: ElevatedButton.styleFrom(
+                elevation: 0,
+                backgroundColor: colorScheme.primary,
+                foregroundColor: colorScheme.onPrimary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                minimumSize: const Size.fromHeight(48),
+              ),
+              child: Text(
+                localizations.retry,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: colorScheme.onPrimary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ),
           ],
         ),
@@ -441,27 +456,44 @@ class _RideTrackingScreenState extends State<RideTrackingScreen> {
 
   void _showStopInfo(Map<String, dynamic> stop) {
     final localizations = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Row(
-            children: [
-              const Icon(Icons.directions_bus_filled, color: Colors.orange),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  stop['name'] ?? 'Bus Stop',
-                  style: const TextStyle(fontSize: 18),
-                ),
-              ),
-            ],
+          title: Text(
+            stop['name'] ?? 'Bus Stop',
+            style: theme.textTheme.headlineMedium?.copyWith(
+              color: colorScheme.onSurface,
+              fontWeight: FontWeight.w400,
+            ),
           ),
+          content: stop['address']?.isNotEmpty == true 
+            ? Text(
+                stop['address'],
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              )
+            : null,
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text(localizations.cancel),
+              style: TextButton.styleFrom(
+                foregroundColor: colorScheme.primary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ),
+              child: Text(
+                localizations.cancel,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.primary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ),
           ],
         );
@@ -475,23 +507,24 @@ class _RideTrackingScreenState extends State<RideTrackingScreen> {
       children: [
         // Zoom In button
         Container(
-          width: 48,
-          height: 48,
+          width: 44,
+          height: 44,
           decoration: BoxDecoration(
             color: colorScheme.surface,
             borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(8),
-              topRight: Radius.circular(8),
+              topLeft: Radius.circular(6),
+              topRight: Radius.circular(6),
             ),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.1),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
+                blurRadius: 2,
+                offset: const Offset(0, 1),
               ),
             ],
             border: Border.all(
               color: colorScheme.outline.withOpacity(0.2),
+              width: 1,
             ),
           ),
           child: Material(
@@ -499,13 +532,13 @@ class _RideTrackingScreenState extends State<RideTrackingScreen> {
             child: InkWell(
               onTap: _zoomIn,
               borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(8),
-                topRight: Radius.circular(8),
+                topLeft: Radius.circular(6),
+                topRight: Radius.circular(6),
               ),
               child: Icon(
                 Icons.add,
                 color: colorScheme.onSurface,
-                size: 24,
+                size: 20,
               ),
             ),
           ),
@@ -513,30 +546,31 @@ class _RideTrackingScreenState extends State<RideTrackingScreen> {
         
         // Divider line
         Container(
-          width: 48,
+          width: 44,
           height: 1,
           color: colorScheme.outline.withOpacity(0.2),
         ),
         
         // Zoom Out button
         Container(
-          width: 48,
-          height: 48,
+          width: 44,
+          height: 44,
           decoration: BoxDecoration(
             color: colorScheme.surface,
             borderRadius: const BorderRadius.only(
-              bottomLeft: Radius.circular(8),
-              bottomRight: Radius.circular(8),
+              bottomLeft: Radius.circular(6),
+              bottomRight: Radius.circular(6),
             ),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.1),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
+                blurRadius: 2,
+                offset: const Offset(0, 1),
               ),
             ],
             border: Border.all(
               color: colorScheme.outline.withOpacity(0.2),
+              width: 1,
             ),
           ),
           child: Material(
@@ -544,13 +578,13 @@ class _RideTrackingScreenState extends State<RideTrackingScreen> {
             child: InkWell(
               onTap: _zoomOut,
               borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(8),
-                bottomRight: Radius.circular(8),
+                bottomLeft: Radius.circular(6),
+                bottomRight: Radius.circular(6),
               ),
               child: Icon(
                 Icons.remove,
                 color: colorScheme.onSurface,
-                size: 24,
+                size: 20,
               ),
             ),
           ),
@@ -566,13 +600,15 @@ class _RideTrackingScreenState extends State<RideTrackingScreen> {
     final totalDistance = _rideProgress?['totalDistance'] as num? ?? 0;
     
     return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(16),
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 20),
       decoration: BoxDecoration(
-        color: colorScheme.primaryContainer.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: colorScheme.outline.withOpacity(0.2),
+        color: colorScheme.surface,
+        border: Border(
+          bottom: BorderSide(
+            color: colorScheme.outline.withOpacity(0.2),
+            width: 0.5,
+          ),
         ),
       ),
       child: Column(
@@ -591,9 +627,9 @@ class _RideTrackingScreenState extends State<RideTrackingScreen> {
               const SizedBox(width: 8),
               Text(
                 localizations.rideInProgress,
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: colorScheme.primary,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: colorScheme.onSurface,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const Spacer(),

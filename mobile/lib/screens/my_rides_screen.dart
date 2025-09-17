@@ -118,7 +118,7 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
         title: Text(
           localizations.myRidesTitle,
           style: theme.textTheme.displayMedium?.copyWith(
-            color: const Color(0xFF111827),
+            color: theme.colorScheme.onSurface,
             fontWeight: FontWeight.w300,
             letterSpacing: -0.5,
           ),
@@ -130,7 +130,7 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
             onPressed: _loadRides,
             icon: Icon(
               Icons.refresh,
-              color: const Color(0xFF6B7280),
+              color: theme.colorScheme.onSurfaceVariant,
               size: 24,
             ),
             tooltip: localizations.refresh,
@@ -141,7 +141,7 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
             onPressed: _navigateToBookRide,
             icon: Icon(
               Icons.add_circle_outline,
-              color: const Color(0xFF10B981),
+              color: theme.colorScheme.primary,
               size: 24,
             ),
             tooltip: localizations.bookNewRide,
@@ -156,7 +156,7 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
             },
             icon: Icon(
               _showAllRides ? Icons.filter_list_off : Icons.filter_list,
-              color: const Color(0xFF6B7280),
+              color: theme.colorScheme.onSurfaceVariant,
               size: 24,
             ),
             tooltip: _showAllRides ? localizations.filter : localizations.showAll,
@@ -167,7 +167,7 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
         child: _isLoading
             ? const Center(
                 child: CircularProgressIndicator(
-                  color: Color(0xFF10B981),
+                  color: const Color(0xFF10B981),
                   strokeWidth: 2,
                 ),
               )
@@ -228,7 +228,7 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
               child: Text(
                 localizations.todayRides,
                 style: theme.textTheme.headlineMedium?.copyWith(
-                  color: const Color(0xFF111827),
+                  color: theme.colorScheme.onSurface,
                   fontWeight: FontWeight.w400,
                 ),
               ),
@@ -251,7 +251,7 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
                 child: Text(
                   localizations.otherRides,
                   style: theme.textTheme.headlineMedium?.copyWith(
-                    color: const Color(0xFF111827),
+                    color: theme.colorScheme.onSurface,
                     fontWeight: FontWeight.w400,
                   ),
                 ),
@@ -271,7 +271,7 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
                   Text(
                     localizations.noActiveRidesFound,
                     style: theme.textTheme.headlineLarge?.copyWith(
-                      color: const Color(0xFF111827),
+                      color: theme.colorScheme.onSurface,
                       fontWeight: FontWeight.w400,
                     ),
                   ),
@@ -281,7 +281,7 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
                   Text(
                     localizations.tapShowAllForCompleted,
                     style: theme.textTheme.bodyLarge?.copyWith(
-                      color: const Color(0xFF6B7280),
+                      color: theme.colorScheme.onSurfaceVariant,
                       height: 1.4,
                     ),
                     textAlign: TextAlign.center,
@@ -308,7 +308,7 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
           Text(
             localizations.myRidesEmpty,
             style: theme.textTheme.displayMedium?.copyWith(
-              color: const Color(0xFF111827),
+              color: theme.colorScheme.onSurface,
               fontWeight: FontWeight.w300,
               letterSpacing: -0.5,
             ),
@@ -319,7 +319,7 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
           Text(
             localizations.myRidesEmptyDescription,
             style: theme.textTheme.bodyLarge?.copyWith(
-              color: const Color(0xFF6B7280),
+              color: theme.colorScheme.onSurfaceVariant,
               height: 1.5,
             ),
           ),
@@ -384,9 +384,9 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16),
       decoration: BoxDecoration(
         color: isToday ? const Color(0xFFF0FDF4) : Colors.white,
-        border: const Border(
+        border: Border(
           bottom: BorderSide(
-            color: Color(0xFFE5E7EB),
+            color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
             width: 0.5,
           ),
         ),
@@ -408,7 +408,7 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
             Text(
               routeName,
               style: theme.textTheme.titleLarge?.copyWith(
-                color: const Color(0xFF111827),
+                color: theme.colorScheme.onSurface,
                 fontWeight: FontWeight.w400,
               ),
             ),
@@ -420,7 +420,7 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
               Text(
                 dateTimeDisplay,
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: const Color(0xFF6B7280),
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
               
@@ -448,7 +448,7 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
                 
                 Icon(
                   Icons.arrow_forward_ios,
-                  color: const Color(0xFFD1D5DB),
+                  color: theme.colorScheme.outline,
                   size: 16,
                 ),
               ],
