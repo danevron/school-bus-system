@@ -178,7 +178,7 @@ class AppLocalizationsHe extends AppLocalizations {
   String get confirm => 'אשר';
 
   @override
-  String get cancel => 'בטל';
+  String get cancel => 'ביטול';
 
   @override
   String get bookingUpdatedSuccessfully => 'ההזמנה עודכנה בהצלחה';
@@ -423,4 +423,37 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get tbd => 'יקבע בהמשך';
+
+  @override
+  String get addGuest => 'הוספת אורח';
+
+  @override
+  String get guest => 'אורח';
+
+  @override
+  String get firstName => 'שם פרטי';
+
+  @override
+  String get lastName => 'שם משפחה';
+
+  @override
+  String get phone => 'טלפון';
+
+  @override
+  String get optional => 'אופציונלי';
+
+  @override
+  String get add => 'הוספה';
+
+  @override
+  String get pleaseEnterFirstName => 'אנא הכנס שם פרטי';
+
+  @override
+  String get pleaseEnterLastName => 'אנא הכנס שם משפחה';
+
+  @override
+  String get guestCreatedSuccessfully => 'האורח נוצר בהצלחה';
+
+  @override
+  String get failedToCreateGuest => 'נכשל ביצירת האורח';
 }

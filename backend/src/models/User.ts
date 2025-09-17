@@ -19,6 +19,9 @@ export interface IUser extends Document {
   // Parent-Student relationships
   parents?: mongoose.Types.ObjectId[]; // For students - references to parent users (max 2)
   children?: mongoose.Types.ObjectId[]; // For parents - references to student users
+  // Guest user fields
+  isGuest: boolean; // True if this is a temporary guest user
+  invitedBy?: mongoose.Types.ObjectId; // Reference to user who invited this guest
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -52,13 +55,17 @@ const userSchema = new Schema<IUser>({
   },
   phone: {
     type: String,
-    required: true,
+    required: function(this: IUser) {
+      return !this.isGuest; // Phone is optional for guest users
+    },
     trim: true
   },
   role: {
     type: String,
     enum: Object.values(UserRole),
-    required: true
+    required: function(this: IUser) {
+      return !this.isGuest; // Role will be set in pre-save for guests
+    }
   },
   isActive: {
     type: Boolean,
@@ -92,7 +99,19 @@ const userSchema = new Schema<IUser>({
       },
       message: 'Only parents can have children'
     }
-  }]
+  }],
+  // Guest user fields
+  isGuest: {
+    type: Boolean,
+    default: false
+  },
+  invitedBy: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: function(this: IUser) {
+      return this.isGuest; // Required only for guest users
+    }
+  }
 }, {
   timestamps: true
 });
@@ -108,6 +127,19 @@ userSchema.index(
     }
   }
 );
+
+// Pre-validation hook to set guest user defaults
+userSchema.pre('validate', function(next) {
+  // Set guest users to student role before validation
+  if (this.isGuest) {
+    this.role = UserRole.STUDENT;
+    // Ensure phone has a default value if not provided
+    if (!this.phone) {
+      this.phone = '';
+    }
+  }
+  next();
+});
 
 // Pre-save hook to handle students and password hashing
 userSchema.pre('save', async function(next) {

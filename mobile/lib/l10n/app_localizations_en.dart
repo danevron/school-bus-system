@@ -429,4 +429,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tbd => 'TBD';
+
+  @override
+  String get addGuest => 'Add Guest';
+
+  @override
+  String get guest => 'Guest';
+
+  @override
+  String get firstName => 'First Name';
+
+  @override
+  String get lastName => 'Last Name';
+
+  @override
+  String get phone => 'Phone';
+
+  @override
+  String get optional => 'Optional';
+
+  @override
+  String get add => 'Add';
+
+  @override
+  String get pleaseEnterFirstName => 'Please enter first name';
+
+  @override
+  String get pleaseEnterLastName => 'Please enter last name';
+
+  @override
+  String get guestCreatedSuccessfully => 'Guest created successfully';
+
+  @override
+  String get failedToCreateGuest => 'Failed to create guest';
 }

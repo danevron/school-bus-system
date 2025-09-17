@@ -138,8 +138,6 @@ export const bookingController = {
 
       const user = await User.findById(currentUserId).populate('children');
 
-      console.log('Current User:', user);
-
       let isCurrentUserChild = false;
       // If current user is a parent, ensure the passenger is one of their children
       if (currentUserRole === UserRole.PARENT && user?.children) {
@@ -148,11 +146,16 @@ export const bookingController = {
         );
       }
 
-      console.log('Is Current User Child:', isCurrentUserChild);
+      // Check if passenger is a guest created by current user
+      let isCurrentUserGuest = false;
+      if (passenger.isGuest && passenger.invitedBy) {
+        isCurrentUserGuest = passenger.invitedBy.toString() === currentUserId;
+      }
 
-      // Authorization check: Users can only book for themselves unless they're admin
-      if (currentUserRole !== UserRole.ADMIN && (passengerId !== currentUserId && !isCurrentUserChild)) {
-        return res.status(403).json({ message: 'You can only create bookings for yourself' });
+      // Authorization check: Users can only book for themselves, their children, or their guests unless they're admin
+      if (currentUserRole !== UserRole.ADMIN && 
+          (passengerId !== currentUserId && !isCurrentUserChild && !isCurrentUserGuest)) {
+        return res.status(403).json({ message: 'You can only create bookings for yourself, your children, or guests you created' });
       }
 
       // Check if passenger already has a booking for this ride (excluding cancelled ones)
@@ -289,17 +292,25 @@ export const bookingController = {
       const currentUserId = req.user?.userId;
       const currentUserRole = req.user?.role;
 
-      const booking = await Booking.findById(id).populate('passenger');
+      const booking = await Booking.findById(id).populate('passenger', 'isGuest invitedBy');
       if (!booking) {
         return res.status(404).json({ message: 'Booking not found' });
       }
 
+      if (!booking.passenger) {
+        return res.status(404).json({ message: 'Passenger not found' });
+      }
+
+      const passenger = booking.passenger as any;
       // Authorization check: Admin, passenger themselves, or parent of the passenger
       let canCancel = false;
       
       if (currentUserRole === UserRole.ADMIN) {
         canCancel = true;
       } else if (booking.passenger._id.toString() === currentUserId) {
+        canCancel = true;
+      } else if (passenger.isGuest && passenger.invitedBy?.toString() === currentUserId) {
+        // Current user is the one who created this guest passenger
         canCancel = true;
       } else if (currentUserRole === UserRole.PARENT) {
         // Check if current user is a parent of the passenger
@@ -485,7 +496,7 @@ export const bookingController = {
       // Manually fetch passenger details from Users collection and add action permissions
       const bookingsWithPassengers = await Promise.all(
         bookings.map(async (booking) => {
-          const passenger = await User.findById(booking.passenger, 'firstName lastName phone email role');
+          const passenger = await User.findById(booking.passenger, 'firstName lastName phone email role isGuest invitedBy');
           
           // Calculate action permissions for this booking
           const actions = {
@@ -507,6 +518,11 @@ export const bookingController = {
             actions.canCheckIn = booking.status === BookingStatus.CONFIRMED || booking.status === BookingStatus.UNCONFIRMED;
             actions.canDropOff = booking.status === BookingStatus.CHECKED_IN;
           }
+          // Guest's creator can cancel and confirm the guest's bookings
+          else if (passenger?.isGuest && passenger?.invitedBy?.toString() === currentUserId)  {
+            actions.canCancel = booking.canBeCancelled().canCancel;
+            actions.canConfirm = booking.status === BookingStatus.UNCONFIRMED;
+          }
           // Student/Parent can cancel and confirm their own bookings or their children's bookings
           else if (currentUserRole === UserRole.STUDENT || currentUserRole === UserRole.PARENT) {
             const isOwnBooking = booking.passenger.toString() === currentUserId;
@@ -523,7 +539,7 @@ export const bookingController = {
               actions.canCancel = booking.canBeCancelled().canCancel;
               actions.canConfirm = booking.status === BookingStatus.UNCONFIRMED;
             }
-          }
+          } 
 
           return {
             ...booking.toObject(),

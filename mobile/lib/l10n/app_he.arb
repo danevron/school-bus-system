@@ -603,5 +603,53 @@
   "tbd": "יקבע בהמשך",
   "@tbd": {
     "description": "To be determined - placeholder for missing date/time"
+  },
+  "addGuest": "הוספת אורח",
+  "@addGuest": {
+    "description": "Button text to add a guest passenger"
+  },
+  "guest": "אורח",
+  "@guest": {
+    "description": "Label for guest passengers"
+  },
+  "firstName": "שם פרטי",
+  "@firstName": {
+    "description": "First name field label"
+  },
+  "lastName": "שם משפחה",
+  "@lastName": {
+    "description": "Last name field label"
+  },
+  "phone": "טלפון",
+  "@phone": {
+    "description": "Phone number field label"
+  },
+  "optional": "אופציונלי",
+  "@optional": {
+    "description": "Label indicating a field is optional"
+  },
+  "add": "הוספה",
+  "@add": {
+    "description": "Add button text"
+  },
+  "cancel": "ביטול",
+  "@cancel": {
+    "description": "Cancel button text"
+  },
+  "pleaseEnterFirstName": "אנא הכנס שם פרטי",
+  "@pleaseEnterFirstName": {
+    "description": "Validation message for required first name"
+  },
+  "pleaseEnterLastName": "אנא הכנס שם משפחה",
+  "@pleaseEnterLastName": {
+    "description": "Validation message for required last name"
+  },
+  "guestCreatedSuccessfully": "האורח נוצר בהצלחה",
+  "@guestCreatedSuccessfully": {
+    "description": "Success message when guest is created"
+  },
+  "failedToCreateGuest": "נכשל ביצירת האורח",
+  "@failedToCreateGuest": {
+    "description": "Error message when guest creation fails"
   }
 }

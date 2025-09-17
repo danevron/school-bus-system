@@ -15,6 +15,10 @@ router.get('/profile', authenticate, authController.getProfile);
 router.get('/my-students', authenticate, requireParent, authController.getMyStudents);
 router.post('/my-students', authenticate, requireParent, authController.createStudentForParent);
 
+// Guest routes (for any authenticated user)
+router.post('/guests', authenticate, authController.createGuest);
+router.get('/my-guests', authenticate, authController.getMyGuests);
+
 // Admin routes
 router.get('/users', authenticate, requireAdmin, authController.getAllUsers);
 router.post('/students', authenticate, requireAdmin, authController.createStudent);

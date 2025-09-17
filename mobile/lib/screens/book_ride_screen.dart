@@ -59,14 +59,13 @@ class _BookRideScreenState extends State<BookRideScreen> {
             'lastName': childMap['lastName'] ?? '',
             'role': childMap['role'] ?? 'student',
             'isCurrentUser': false,
+            'isGuest': false,
           });
         }
       }
 
-      // Default selection is current user
-      if (_availablePassengers.isNotEmpty) {
-        _selectedPassengerId = _availablePassengers.last['_id'];
-      }
+      // Load guests from API
+      await _loadGuests();
     } catch (e) {
       // Fallback to just current user if API call fails
       final currentUser = AuthService.user;
@@ -77,10 +76,206 @@ class _BookRideScreenState extends State<BookRideScreen> {
           'lastName': currentUser?['lastName'] ?? '',
           'role': currentUser?['role'] ?? 'parent',
           'isCurrentUser': true,
+          'isGuest': false,
         }
       ];
-      if (_availablePassengers.isNotEmpty) {
-        _selectedPassengerId = _availablePassengers.first['_id'];
+    }
+
+    // Default selection is current user
+    if (_availablePassengers.isNotEmpty) {
+      _selectedPassengerId = _availablePassengers.first['_id'];
+    }
+  }
+
+  Future<void> _loadGuests() async {
+    try {
+      final response = await AuthService.authenticatedRequest('GET', '/api/auth/my-guests');
+      
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        final guests = responseData['data']['guests'] as List? ?? [];
+        
+        // Add guests to available passengers
+        for (final guest in guests) {
+          final guestMap = guest as Map<String, dynamic>;
+          _availablePassengers.add({
+            '_id': guestMap['_id'],
+            'firstName': guestMap['firstName'] ?? 'Guest',
+            'lastName': guestMap['lastName'] ?? '',
+            'role': guestMap['role'] ?? 'student',
+            'isCurrentUser': false,
+            'isGuest': true,
+          });
+        }
+      }
+    } catch (e) {
+      // Ignore error if guests API fails
+    }
+  }
+
+  Future<void> _refreshPassengers() async {
+    await _loadAvailablePassengers();
+    setState(() {});
+  }
+
+  void _showAddGuestDialog() {
+    final formKey = GlobalKey<FormState>();
+    String firstName = '';
+    String lastName = '';
+    String phone = '';
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        final theme = Theme.of(context);
+        final colorScheme = theme.colorScheme;
+        final l10n = AppLocalizations.of(context)!;
+        
+        return AlertDialog(
+          backgroundColor: colorScheme.surface,
+          title: Text(
+            l10n.addGuest,
+            style: theme.textTheme.titleLarge?.copyWith(
+              color: colorScheme.onSurface,
+            ),
+          ),
+          content: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  decoration: InputDecoration(
+                    labelText: l10n.firstName,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return l10n.pleaseEnterFirstName;
+                    }
+                    return null;
+                  },
+                  onSaved: (value) => firstName = value?.trim() ?? '',
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  decoration: InputDecoration(
+                    labelText: l10n.lastName,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return l10n.pleaseEnterLastName;
+                    }
+                    return null;
+                  },
+                  onSaved: (value) => lastName = value?.trim() ?? '',
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  decoration: InputDecoration(
+                    labelText: '${l10n.phone} (${l10n.optional})',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  keyboardType: TextInputType.phone,
+                  onSaved: (value) => phone = value?.trim() ?? '',
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(l10n.cancel, style: TextStyle(color: colorScheme.outline)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colorScheme.primary,
+                foregroundColor: colorScheme.onPrimary,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: () async {
+                if (formKey.currentState!.validate()) {
+                  formKey.currentState!.save();
+                  await _createGuest(firstName, lastName, phone);
+                  if (mounted) Navigator.of(context).pop();
+                }
+              },
+              child: Text(l10n.add),
+            ),
+          ],
+        );
+      }
+    );
+  }
+
+  Future<void> _createGuest(String firstName, String lastName, String phone) async {
+    try {
+      setState(() => _isLoading = true);
+      
+      final requestBody = {
+        'firstName': firstName,
+        'lastName': lastName,
+        if (phone.isNotEmpty) 'phone': phone,
+      };
+      
+      final response = await AuthService.authenticatedRequest(
+        'POST', 
+        '/api/auth/guests',
+        body: requestBody,
+      );
+      
+      if (response.statusCode == 201) {
+        final responseData = json.decode(response.body);
+        final guest = responseData['data']['guest'] as Map<String, dynamic>;
+        
+        // Add the new guest to available passengers
+        _availablePassengers.add({
+          '_id': guest['_id'],
+          'firstName': guest['firstName'] ?? 'Guest',
+          'lastName': guest['lastName'] ?? '',
+          'role': guest['role'] ?? 'student',
+          'isCurrentUser': false,
+          'isGuest': true,
+        });
+        
+        // Select the new guest
+        _selectedPassengerId = guest['_id'];
+        
+        setState(() {});
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.guestCreatedSuccessfully),
+              backgroundColor: Theme.of(context).colorScheme.primary,
+            ),
+          );
+        }
+      } else {
+        throw Exception('Failed to create guest');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.failedToCreateGuest),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
       }
     }
   }
@@ -428,7 +623,7 @@ class _BookRideScreenState extends State<BookRideScreen> {
         child: Column(
           children: [
             // Passenger Selection (only when user has children)
-            if (_hasChildren) _buildPassengerSelection(theme, colorScheme, localizations),
+            _buildPassengerSelection(theme, colorScheme, localizations),
             
             // Available Rides List
             Expanded(
@@ -471,37 +666,72 @@ class _BookRideScreenState extends State<BookRideScreen> {
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: _availablePassengers.map((passenger) {
-              final isSelected = passenger['_id'] == _selectedPassengerId;
-              final displayName = passenger['isCurrentUser']
-                  ? localizations.mePassenger(passenger['firstName'])
-                  : '${passenger['firstName']} ${passenger['lastName']}';
-              
-              return ChoiceChip(
-                label: Text(displayName),
-                selected: isSelected,
-                onSelected: (selected) {
-                  if (selected) {
-                    setState(() {
-                      _selectedPassengerId = passenger['_id'];
-                    });
-                  }
-                },
-                backgroundColor: Colors.white,
-                selectedColor: const Color(0xFF10B981).withOpacity(0.1),
+            children: [
+              ..._availablePassengers.map((passenger) {
+                final isSelected = passenger['_id'] == _selectedPassengerId;
+                String displayName;
+                if (passenger['isCurrentUser']) {
+                  displayName = localizations.mePassenger(passenger['firstName']);
+                } else if (passenger['isGuest'] == true) {
+                  displayName = '${passenger['firstName']} ${passenger['lastName']} (${localizations.guest})';
+                } else {
+                  displayName = '${passenger['firstName']} ${passenger['lastName']}';
+                }
+                
+                return ChoiceChip(
+                  label: Text(displayName),
+                  selected: isSelected,
+                  onSelected: (selected) {
+                    if (selected) {
+                      setState(() {
+                        _selectedPassengerId = passenger['_id'];
+                      });
+                    }
+                  },
+                  backgroundColor: colorScheme.surface,
+                  selectedColor: colorScheme.primary.withOpacity(0.1),
+                  side: BorderSide(
+                    color: isSelected ? colorScheme.primary : colorScheme.outline,
+                    width: 1,
+                  ),
+                  labelStyle: TextStyle(
+                    color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                );
+              }).toList(),
+              // Add Guest button
+              ActionChip(
+                label: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.person_add,
+                      size: 16,
+                      color: colorScheme.primary,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(localizations.addGuest),
+                  ],
+                ),
+                onPressed: _showAddGuestDialog,
+                backgroundColor: colorScheme.surface,
                 side: BorderSide(
-                  color: isSelected ? const Color(0xFF10B981) : const Color(0xFFE5E7EB),
+                  color: colorScheme.primary,
                   width: 1,
                 ),
                 labelStyle: TextStyle(
-                  color: isSelected ? const Color(0xFF10B981) : const Color(0xFF6B7280),
+                  color: colorScheme.primary,
                   fontWeight: FontWeight.w500,
                 ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),
                 ),
-              );
-            }).toList(),
+              ),
+            ],
           ),
         ],
       ),

@@ -371,3 +371,69 @@ export const createStudentForParent = async (req: Request, res: Response): Promi
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
+
+export const createGuest = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user?.userId) {
+      res.status(401).json({ message: 'User not authenticated' });
+      return;
+    }
+
+    const { error } = userValidation.createGuest.validate(req.body);
+    if (error) {
+      res.status(400).json({ message: error.details[0].message });
+      return;
+    }
+
+    const { firstName, lastName, phone } = req.body;
+
+    // Create new guest user (will be treated as student)
+    const guest = new User({
+      firstName,
+      lastName,
+      phone: phone || '', // Optional phone number
+      isGuest: true,
+      invitedBy: req.user.userId
+    });
+
+    await guest.save();
+
+    res.status(201).json({
+      message: 'Guest created successfully',
+      data: {
+        guest: {
+          _id: guest._id,
+          id: guest._id,
+          firstName: guest.firstName,
+          lastName: guest.lastName,
+          phone: guest.phone,
+          role: guest.role,
+          isGuest: guest.isGuest
+        }
+      }
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+export const getMyGuests = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user?.userId) {
+      res.status(401).json({ message: 'User not authenticated' });
+      return;
+    }
+
+    const guests = await User.find({
+      isGuest: true,
+      invitedBy: req.user.userId
+    }).select('-password').sort({ createdAt: -1 });
+
+    res.json({
+      message: 'Guests retrieved successfully',
+      data: { guests }
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};

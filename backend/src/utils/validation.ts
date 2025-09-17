@@ -18,6 +18,12 @@ export const userValidation = {
     phone: Joi.string().pattern(/^\+?[\d\s\-\(\)]+$/).required()
   }),
 
+  createGuest: Joi.object({
+    firstName: Joi.string().min(2).max(50).required(),
+    lastName: Joi.string().min(2).max(50).required(),
+    phone: Joi.string().pattern(/^\+?[\d\s\-\(\)]+$/).optional().allow('')
+  }),
+
   login: Joi.object({
     email: Joi.string().email().required(),
     password: Joi.string().required()

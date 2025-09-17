@@ -871,6 +871,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'TBD'**
   String get tbd;
+
+  /// Button text to add a guest passenger
+  ///
+  /// In en, this message translates to:
+  /// **'Add Guest'**
+  String get addGuest;
+
+  /// Label for guest passengers
+  ///
+  /// In en, this message translates to:
+  /// **'Guest'**
+  String get guest;
+
+  /// First name field label
+  ///
+  /// In en, this message translates to:
+  /// **'First Name'**
+  String get firstName;
+
+  /// Last name field label
+  ///
+  /// In en, this message translates to:
+  /// **'Last Name'**
+  String get lastName;
+
+  /// Phone number field label
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get phone;
+
+  /// Label indicating a field is optional
+  ///
+  /// In en, this message translates to:
+  /// **'Optional'**
+  String get optional;
+
+  /// Add button text
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get add;
+
+  /// Validation message for required first name
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter first name'**
+  String get pleaseEnterFirstName;
+
+  /// Validation message for required last name
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter last name'**
+  String get pleaseEnterLastName;
+
+  /// Success message when guest is created
+  ///
+  /// In en, this message translates to:
+  /// **'Guest created successfully'**
+  String get guestCreatedSuccessfully;
+
+  /// Error message when guest creation fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create guest'**
+  String get failedToCreateGuest;
 }
 
 class _AppLocalizationsDelegate

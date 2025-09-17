@@ -603,5 +603,53 @@
   "tbd": "TBD",
   "@tbd": {
     "description": "To be determined - placeholder for missing date/time"
+  },
+  "addGuest": "Add Guest",
+  "@addGuest": {
+    "description": "Button text to add a guest passenger"
+  },
+  "guest": "Guest",
+  "@guest": {
+    "description": "Label for guest passengers"
+  },
+  "firstName": "First Name",
+  "@firstName": {
+    "description": "First name field label"
+  },
+  "lastName": "Last Name",
+  "@lastName": {
+    "description": "Last name field label"
+  },
+  "phone": "Phone",
+  "@phone": {
+    "description": "Phone number field label"
+  },
+  "optional": "Optional",
+  "@optional": {
+    "description": "Label indicating a field is optional"
+  },
+  "add": "Add",
+  "@add": {
+    "description": "Add button text"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel button text"
+  },
+  "pleaseEnterFirstName": "Please enter first name",
+  "@pleaseEnterFirstName": {
+    "description": "Validation message for required first name"
+  },
+  "pleaseEnterLastName": "Please enter last name",
+  "@pleaseEnterLastName": {
+    "description": "Validation message for required last name"
+  },
+  "guestCreatedSuccessfully": "Guest created successfully",
+  "@guestCreatedSuccessfully": {
+    "description": "Success message when guest is created"
+  },
+  "failedToCreateGuest": "Failed to create guest",
+  "@failedToCreateGuest": {
+    "description": "Error message when guest creation fails"
   }
 }
