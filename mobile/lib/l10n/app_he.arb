@@ -651,5 +651,33 @@
   "failedToCreateGuest": "נכשל ביצירת האורח",
   "@failedToCreateGuest": {
     "description": "Error message when guest creation fails"
+  },
+  "invalidCredentials": "כתובת אימייל או סיסמה שגויים",
+  "@invalidCredentials": {
+    "description": "Error message for wrong login credentials"
+  },
+  "userNotFound": "המשתמש לא נמצא",
+  "@userNotFound": {
+    "description": "Error message when user doesn't exist"
+  },
+  "accountDeactivated": "החשבון מושבת",
+  "@accountDeactivated": {
+    "description": "Error message when account is disabled"
+  },
+  "validationError": "אנא בדוק את הנתונים שהוזנו",
+  "@validationError": {
+    "description": "Error message for validation failures"
+  },
+  "serverError": "שגיאת שרת. אנא נסה שוב",
+  "@serverError": {
+    "description": "Error message for server errors"
+  },
+  "networkError": "שגיאת רשת. אנא בדוק את החיבור לאינטרנט",
+  "@networkError": {
+    "description": "Error message for network connectivity issues"
+  },
+  "openInMaps": "פתח במפות",
+  "@openInMaps": {
+    "description": "Text for opening location in maps app"
   }
 }

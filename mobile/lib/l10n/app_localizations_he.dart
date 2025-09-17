@@ -81,7 +81,7 @@ class AppLocalizationsHe extends AppLocalizations {
   String get forgotPasswordComingSoon => 'תכונת שחזור סיסמה תגיע בקרוב';
 
   @override
-  String get networkError => 'אירעה שגיאת רשת';
+  String get networkError => 'שגיאת רשת. אנא בדוק את החיבור לאינטרנט';
 
   @override
   String get loginFailed => 'הכניסה נכשלה';
@@ -456,4 +456,22 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get failedToCreateGuest => 'נכשל ביצירת האורח';
+
+  @override
+  String get invalidCredentials => 'כתובת אימייל או סיסמה שגויים';
+
+  @override
+  String get userNotFound => 'המשתמש לא נמצא';
+
+  @override
+  String get accountDeactivated => 'החשבון מושבת';
+
+  @override
+  String get validationError => 'אנא בדוק את הנתונים שהוזנו';
+
+  @override
+  String get serverError => 'שגיאת שרת. אנא נסה שוב';
+
+  @override
+  String get openInMaps => 'פתח במפות';
 }

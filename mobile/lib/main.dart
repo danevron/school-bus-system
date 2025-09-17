@@ -52,6 +52,7 @@ class _SchoolBusAppState extends State<SchoolBusApp> {
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF10B981),
           brightness: Brightness.light,
+          surface: Colors.white,
         ),
         useMaterial3: true,
         textTheme: GoogleFonts.rubikTextTheme().copyWith(
@@ -100,6 +101,14 @@ class _SchoolBusAppState extends State<SchoolBusApp> {
           scrolledUnderElevation: 0,
           backgroundColor: Colors.transparent,
           foregroundColor: Color(0xFF1A1A1A),
+        ),
+        dialogTheme: const DialogThemeData(
+          backgroundColor: Colors.white,
+          surfaceTintColor: Colors.transparent,
+        ),
+        bottomSheetTheme: const BottomSheetThemeData(
+          backgroundColor: Colors.white,
+          surfaceTintColor: Colors.transparent,
         ),
       ),
       darkTheme: ThemeData(

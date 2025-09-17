@@ -475,10 +475,10 @@ export const bookingController = {
       const { rideId } = req.params;
       const currentUserRole = req.user?.role;
       const currentUserId = req.user?.userId;
+      const ride = await Ride.findById(rideId);
 
       // If user is driver, verify they're assigned to this ride
       if (currentUserRole === UserRole.DRIVER) {
-        const ride = await Ride.findById(rideId);
         if (!ride || ride.driver.toString() !== currentUserId) {
           return res.status(403).json({ message: 'You are not assigned to this ride' });
         }
@@ -510,13 +510,13 @@ export const bookingController = {
           if (currentUserRole === UserRole.ADMIN) {
             actions.canCancel = booking.canBeCancelled().canCancel;
             actions.canConfirm = booking.status === BookingStatus.UNCONFIRMED || booking.status === BookingStatus.WAITING_LIST;
-            actions.canCheckIn = booking.status === BookingStatus.CONFIRMED || booking.status === BookingStatus.UNCONFIRMED;
-            actions.canDropOff = booking.status === BookingStatus.CHECKED_IN;
+            actions.canCheckIn = ride?.status === RideStatus.IN_PROGRESS && (booking.status === BookingStatus.CONFIRMED || booking.status === BookingStatus.UNCONFIRMED);
+            actions.canDropOff = ride?.status === RideStatus.IN_PROGRESS && booking.status === BookingStatus.CHECKED_IN;
           }
           // Driver can check in and drop off all bookings on their ride
           else if (currentUserRole === UserRole.DRIVER) {
-            actions.canCheckIn = booking.status === BookingStatus.CONFIRMED || booking.status === BookingStatus.UNCONFIRMED;
-            actions.canDropOff = booking.status === BookingStatus.CHECKED_IN;
+            actions.canCheckIn = ride?.status === RideStatus.IN_PROGRESS && (booking.status === BookingStatus.CONFIRMED || booking.status === BookingStatus.UNCONFIRMED);
+            actions.canDropOff = ride?.status === RideStatus.IN_PROGRESS && booking.status === BookingStatus.CHECKED_IN;
           }
           // Guest's creator can cancel and confirm the guest's bookings
           else if (passenger?.isGuest && passenger?.invitedBy?.toString() === currentUserId)  {

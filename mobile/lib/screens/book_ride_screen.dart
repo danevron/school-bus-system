@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../l10n/app_localizations.dart';
 import '../services/auth_service.dart';
 
@@ -19,8 +20,6 @@ class _BookRideScreenState extends State<BookRideScreen> {
   Map<String, String?> _selectedDropoffStops = {}; // rideId -> stopId
   Set<String> _expandedRides = {}; // Track which rides are expanded
   
-  bool get _hasChildren => _availablePassengers.length > 1;
-
   @override
   void initState() {
     super.initState();
@@ -118,167 +117,21 @@ class _BookRideScreenState extends State<BookRideScreen> {
     setState(() {});
   }
 
-  void _showAddGuestDialog() {
-    final formKey = GlobalKey<FormState>();
-    String firstName = '';
-    String lastName = '';
-    String phone = '';
-
-    showDialog(
+  void _showAddGuestDialog() async {
+    await showModalBottomSheet<bool?>(
       context: context,
-      builder: (BuildContext context) {
-        final theme = Theme.of(context);
-        final colorScheme = theme.colorScheme;
-        final l10n = AppLocalizations.of(context)!;
-        
-        return AlertDialog(
-          backgroundColor: colorScheme.surface,
-          title: Text(
-            l10n.addGuest,
-            style: theme.textTheme.titleLarge?.copyWith(
-              color: colorScheme.onSurface,
-            ),
-          ),
-          content: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  decoration: InputDecoration(
-                    labelText: l10n.firstName,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return l10n.pleaseEnterFirstName;
-                    }
-                    return null;
-                  },
-                  onSaved: (value) => firstName = value?.trim() ?? '',
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  decoration: InputDecoration(
-                    labelText: l10n.lastName,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return l10n.pleaseEnterLastName;
-                    }
-                    return null;
-                  },
-                  onSaved: (value) => lastName = value?.trim() ?? '',
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  decoration: InputDecoration(
-                    labelText: '${l10n.phone} (${l10n.optional})',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  keyboardType: TextInputType.phone,
-                  onSaved: (value) => phone = value?.trim() ?? '',
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(l10n.cancel, style: TextStyle(color: colorScheme.outline)),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: colorScheme.primary,
-                foregroundColor: colorScheme.onPrimary,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              onPressed: () async {
-                if (formKey.currentState!.validate()) {
-                  formKey.currentState!.save();
-                  await _createGuest(firstName, lastName, phone);
-                  if (mounted) Navigator.of(context).pop();
-                }
-              },
-              child: Text(l10n.add),
-            ),
-          ],
-        );
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => const _AddGuestModal(),
+    ).then((guestCreated) {
+      if (guestCreated == true) {
+        _refreshPassengers();
       }
-    );
+    });
   }
 
-  Future<void> _createGuest(String firstName, String lastName, String phone) async {
-    try {
-      setState(() => _isLoading = true);
-      
-      final requestBody = {
-        'firstName': firstName,
-        'lastName': lastName,
-        if (phone.isNotEmpty) 'phone': phone,
-      };
-      
-      final response = await AuthService.authenticatedRequest(
-        'POST', 
-        '/api/auth/guests',
-        body: requestBody,
-      );
-      
-      if (response.statusCode == 201) {
-        final responseData = json.decode(response.body);
-        final guest = responseData['data']['guest'] as Map<String, dynamic>;
-        
-        // Add the new guest to available passengers
-        _availablePassengers.add({
-          '_id': guest['_id'],
-          'firstName': guest['firstName'] ?? 'Guest',
-          'lastName': guest['lastName'] ?? '',
-          'role': guest['role'] ?? 'student',
-          'isCurrentUser': false,
-          'isGuest': true,
-        });
-        
-        // Select the new guest
-        _selectedPassengerId = guest['_id'];
-        
-        setState(() {});
-        
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(AppLocalizations.of(context)!.guestCreatedSuccessfully),
-              backgroundColor: Theme.of(context).colorScheme.primary,
-            ),
-          );
-        }
-      } else {
-        throw Exception('Failed to create guest');
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.failedToCreateGuest),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
-  }
 
   Future<void> _loadAvailableRides() async {
     setState(() {
@@ -316,7 +169,6 @@ class _BookRideScreenState extends State<BookRideScreen> {
             },
             'date': rideMap['date'],
             'startTime': rideMap['startTime'],
-            'vehicle': rideMap['vehicle'] ?? {},
             'driver': rideMap['driver'] ?? {},
             'availableSeats': rideMap['availableSeats'] ?? 0,
             'maxCapacity': rideMap['maxCapacity'] ?? 0,
@@ -465,7 +317,6 @@ class _BookRideScreenState extends State<BookRideScreen> {
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
               style: TextButton.styleFrom(
-                foregroundColor: dialogColorScheme.onSurfaceVariant,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),
                 ),
@@ -473,7 +324,6 @@ class _BookRideScreenState extends State<BookRideScreen> {
               child: Text(
                 localizations.cancel,
                 style: dialogTheme.textTheme.bodyMedium?.copyWith(
-                  color: dialogColorScheme.onSurfaceVariant,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -482,8 +332,6 @@ class _BookRideScreenState extends State<BookRideScreen> {
               onPressed: () => Navigator.of(context).pop(true),
               style: ElevatedButton.styleFrom(
                 elevation: 0,
-                backgroundColor: dialogColorScheme.primary,
-                foregroundColor: dialogColorScheme.onPrimary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),
                 ),
@@ -491,7 +339,6 @@ class _BookRideScreenState extends State<BookRideScreen> {
               child: Text(
                 localizations.bookThisRide,
                 style: dialogTheme.textTheme.bodyMedium?.copyWith(
-                  color: dialogColorScheme.onPrimary,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -643,11 +490,11 @@ class _BookRideScreenState extends State<BookRideScreen> {
     return Container(
       margin: EdgeInsets.zero,
       padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 20),
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
         border: Border(
           bottom: BorderSide(
-            color: Color(0xFFE5E7EB),
+            color: colorScheme.outline.withOpacity(0.2),
             width: 0.5,
           ),
         ),
@@ -658,7 +505,7 @@ class _BookRideScreenState extends State<BookRideScreen> {
           Text(
             localizations.bookRideFor,
             style: theme.textTheme.headlineMedium?.copyWith(
-              color: const Color(0xFF111827),
+              color: colorScheme.onSurface,
               fontWeight: FontWeight.w400,
             ),
           ),
@@ -711,20 +558,13 @@ class _BookRideScreenState extends State<BookRideScreen> {
                     Icon(
                       Icons.person_add,
                       size: 16,
-                      color: colorScheme.primary,
                     ),
                     const SizedBox(width: 4),
                     Text(localizations.addGuest),
                   ],
                 ),
                 onPressed: _showAddGuestDialog,
-                backgroundColor: colorScheme.surface,
-                side: BorderSide(
-                  color: colorScheme.primary,
-                  width: 1,
-                ),
-                labelStyle: TextStyle(
-                  color: colorScheme.primary,
+                labelStyle: const TextStyle(
                   fontWeight: FontWeight.w500,
                 ),
                 shape: RoundedRectangleBorder(
@@ -747,7 +587,7 @@ class _BookRideScreenState extends State<BookRideScreen> {
           child: Text(
             localizations.availableRidesCount(_availableRides.length),
             style: theme.textTheme.headlineMedium?.copyWith(
-              color: const Color(0xFF111827),
+              color: colorScheme.onSurface,
               fontWeight: FontWeight.w400,
             ),
           ),
@@ -768,7 +608,6 @@ class _BookRideScreenState extends State<BookRideScreen> {
 
   Widget _buildRideCard(Map<String, dynamic> ride, ThemeData theme, ColorScheme colorScheme, AppLocalizations localizations) {
     final route = ride['route'] ?? {};
-    final vehicle = ride['vehicle'] ?? {};
     final driver = ride['driver'] ?? {};
     final availableSeats = ride['availableSeats'] ?? 0;
     final maxCapacity = ride['maxCapacity'] ?? 0;
@@ -776,11 +615,11 @@ class _BookRideScreenState extends State<BookRideScreen> {
     return Container(
       margin: EdgeInsets.zero,
       padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16),
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
         border: Border(
           bottom: BorderSide(
-            color: Color(0xFFE5E7EB),
+            color: colorScheme.outline.withOpacity(0.2),
             width: 0.5,
           ),
         ),
@@ -798,7 +637,7 @@ class _BookRideScreenState extends State<BookRideScreen> {
                     Text(
                       route['name'] ?? localizations.unknownRoute,
                       style: theme.textTheme.titleLarge?.copyWith(
-                        color: const Color(0xFF111827),
+                        color: colorScheme.onSurface,
                         fontWeight: FontWeight.w400,
                       ),
                     ),
@@ -807,7 +646,7 @@ class _BookRideScreenState extends State<BookRideScreen> {
                       Text(
                         route['description'],
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: const Color(0xFF6B7280),
+                          color: colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -817,13 +656,13 @@ class _BookRideScreenState extends State<BookRideScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: availableSeats > 5 ? const Color(0xFF10B981).withOpacity(0.1) : const Color(0xFFF59E0B).withOpacity(0.1),
+                  color: availableSeats > 5 ? colorScheme.primary.withOpacity(0.1) : colorScheme.error.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
                   localizations.seatsAvailable(availableSeats, maxCapacity),
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: availableSeats > 5 ? const Color(0xFF10B981) : const Color(0xFFF59E0B),
+                    color: availableSeats > 5 ? colorScheme.primary : colorScheme.error,
                     fontWeight: FontWeight.w400,
                   ),
                 ),
@@ -837,17 +676,17 @@ class _BookRideScreenState extends State<BookRideScreen> {
           Text(
             '${_formatDate(ride['date'] ?? '')} at ${_formatTime(ride['startTime'] ?? '')}',
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: const Color(0xFF6B7280),
+              color: colorScheme.onSurfaceVariant,
             ),
           ),
           
           const SizedBox(height: 4),
           
-          // Vehicle and driver
+          // Driver
           Text(
-            '${vehicle['licensePlate']} - Driver: ${driver['firstName']} ${driver['lastName']}',
+            '${driver['firstName']} ${driver['lastName']}',
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: const Color(0xFF6B7280),
+              color: colorScheme.onSurfaceVariant,
             ),
           ),
           
@@ -869,8 +708,6 @@ class _BookRideScreenState extends State<BookRideScreen> {
               },
               style: OutlinedButton.styleFrom(
                 elevation: 0,
-                foregroundColor: const Color(0xFF10B981),
-                side: const BorderSide(color: Color(0xFF10B981), width: 1),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),
                 ),
@@ -879,7 +716,6 @@ class _BookRideScreenState extends State<BookRideScreen> {
               child: Text(
                 _expandedRides.contains(ride['_id']) ? localizations.hideBookingOptions : localizations.showBookingOptions,
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: const Color(0xFF10B981),
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -899,9 +735,6 @@ class _BookRideScreenState extends State<BookRideScreen> {
                 onPressed: availableSeats > 0 ? () => _bookRide(ride) : null,
                 style: ElevatedButton.styleFrom(
                   elevation: 0,
-                  backgroundColor: const Color(0xFF10B981),
-                  foregroundColor: Colors.white,
-                  disabledBackgroundColor: const Color(0xFF6B7280),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(6),
                   ),
@@ -910,7 +743,6 @@ class _BookRideScreenState extends State<BookRideScreen> {
                 child: Text(
                   availableSeats > 0 ? localizations.bookThisRide : localizations.fullyBooked,
                   style: theme.textTheme.titleMedium?.copyWith(
-                    color: Colors.white,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -1073,18 +905,8 @@ class _BookRideScreenState extends State<BookRideScreen> {
                                   selectedStop!['name'] ?? localizations.unknownStop,
                                   style: theme.textTheme.bodyMedium?.copyWith(
                                     fontWeight: FontWeight.w500,
-                                    color: colorScheme.onSurface,
                                   ),
                                 ),
-                                if (selectedStop['address']?.isNotEmpty == true) ...[
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    selectedStop['address'],
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: colorScheme.onSurfaceVariant,
-                                    ),
-                                  ),
-                                ],
                                 if (selectedStop['estimatedTime']?.isNotEmpty == true) ...[
                                   const SizedBox(height: 4),
                                   Container(
@@ -1106,16 +928,11 @@ class _BookRideScreenState extends State<BookRideScreen> {
                             )
                       : Text(
                           hint,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                          ),
+                          style: theme.textTheme.bodyMedium,
                         ),
                 ),
                 Icon(
                   hasSelection ? Icons.edit : Icons.arrow_forward_ios,
-                  color: hasSelection 
-                      ? colorScheme.primary
-                      : colorScheme.onSurfaceVariant,
                   size: 16,
                 ),
               ],
@@ -1266,6 +1083,15 @@ class _StopSelectionModalState extends State<_StopSelectionModal> {
     Navigator.of(context).pop(_selectedStopId);
   }
 
+  Future<void> _openInMaps(String address) async {
+    final encodedAddress = Uri.encodeComponent(address);
+    final url = Uri.parse('maps:?q=$encodedAddress');
+    
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
@@ -1405,9 +1231,6 @@ class _StopSelectionModalState extends State<_StopSelectionModal> {
                   : null,
               style: ElevatedButton.styleFrom(
                 elevation: 0,
-                backgroundColor: colorScheme.primary,
-                foregroundColor: colorScheme.onPrimary,
-                disabledBackgroundColor: colorScheme.onSurfaceVariant,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),
                 ),
@@ -1416,7 +1239,6 @@ class _StopSelectionModalState extends State<_StopSelectionModal> {
               child: Text(
                 localizations.confirmSelection,
                 style: theme.textTheme.titleMedium?.copyWith(
-                  color: colorScheme.onPrimary,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -1470,10 +1292,24 @@ class _StopSelectionModalState extends State<_StopSelectionModal> {
                       ),
                       if (address.isNotEmpty) ...[
                         const SizedBox(height: 4),
-                        Text(
-                          address,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
+                        GestureDetector(
+                          onTap: () => _openInMaps(address),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.location_on,
+                                size: 16,
+                                color: colorScheme.primary,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                localizations.openInMaps,
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: colorScheme.primary,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
@@ -1506,12 +1342,10 @@ class _StopSelectionModalState extends State<_StopSelectionModal> {
                   child: isSelected
                       ? Icon(
                           Icons.check_circle,
-                          color: colorScheme.primary,
                           size: 20,
                         )
                       : Icon(
                           Icons.radio_button_unchecked,
-                          color: colorScheme.onSurfaceVariant,
                           size: 20,
                         ),
                 ),
@@ -1519,6 +1353,244 @@ class _StopSelectionModalState extends State<_StopSelectionModal> {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _AddGuestModal extends StatefulWidget {
+  const _AddGuestModal();
+
+  @override
+  State<_AddGuestModal> createState() => _AddGuestModalState();
+}
+
+class _AddGuestModalState extends State<_AddGuestModal> {
+  final _formKey = GlobalKey<FormState>();
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
+  final _phoneController = TextEditingController();
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _phoneController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _createGuest() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final l10n = AppLocalizations.of(context)!;
+    
+    try {
+      setState(() => _isLoading = true);
+      
+      final requestBody = {
+        'firstName': _firstNameController.text.trim(),
+        'lastName': _lastNameController.text.trim(),
+        if (_phoneController.text.trim().isNotEmpty) 'phone': _phoneController.text.trim(),
+      };
+      
+      final response = await AuthService.authenticatedRequest(
+        'POST', 
+        '/api/auth/guests',
+        body: requestBody,
+      );
+      
+      if (response.statusCode == 201) {
+        if (mounted) {
+          Navigator.of(context).pop(true); // Return true to indicate successful creation
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.guestCreatedSuccessfully),
+              backgroundColor: Theme.of(context).colorScheme.primary,
+            ),
+          );
+        }
+      } else {
+        throw Exception('Failed to create guest');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.failedToCreateGuest),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.8,
+      decoration: const BoxDecoration(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Column(
+        children: [
+          // Handle bar
+          Container(
+            width: 40,
+            height: 4,
+            margin: const EdgeInsets.symmetric(vertical: 8),
+            decoration: BoxDecoration(
+              color: colorScheme.onSurfaceVariant.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+
+          // Header
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 20),
+            decoration: BoxDecoration(
+              color: colorScheme.surface,
+              border: Border(
+                bottom: BorderSide(
+                  color: colorScheme.outline.withOpacity(0.2),
+                  width: 0.5,
+                ),
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.person_add,
+                  color: colorScheme.primary,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    localizations.addGuest,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      color: colorScheme.onSurface,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+                  child: Text(localizations.cancel),
+                ),
+              ],
+            ),
+          ),
+
+          // Content
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(32.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    TextFormField(
+                      controller: _firstNameController,
+                      decoration: InputDecoration(
+                        labelText: localizations.firstName,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        prefixIcon: const Icon(Icons.person),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return localizations.pleaseEnterFirstName;
+                        }
+                        return null;
+                      },
+                      enabled: !_isLoading,
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _lastNameController,
+                      decoration: InputDecoration(
+                        labelText: localizations.lastName,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        prefixIcon: const Icon(Icons.person_outline),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return localizations.pleaseEnterLastName;
+                        }
+                        return null;
+                      },
+                      enabled: !_isLoading,
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _phoneController,
+                      decoration: InputDecoration(
+                        labelText: '${localizations.phone} (${localizations.optional})',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        prefixIcon: const Icon(Icons.phone),
+                      ),
+                      keyboardType: TextInputType.phone,
+                      enabled: !_isLoading,
+                    ),
+                    const Spacer(),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // Actions
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(32.0),
+            decoration: BoxDecoration(
+              color: colorScheme.surface,
+              border: Border(
+                top: BorderSide(
+                  color: colorScheme.outline.withOpacity(0.2),
+                  width: 0.5,
+                ),
+              ),
+            ),
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              icon: _isLoading
+                  ? SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : const Icon(Icons.check),
+              onPressed: _isLoading ? null : _createGuest,
+              label: Text(
+                localizations.add,
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

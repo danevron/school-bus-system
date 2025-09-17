@@ -242,10 +242,10 @@ abstract class AppLocalizations {
   /// **'Forgot password feature coming soon'**
   String get forgotPasswordComingSoon;
 
-  /// Generic network error message
+  /// Error message for network connectivity issues
   ///
   /// In en, this message translates to:
-  /// **'Network error occurred'**
+  /// **'Network error. Please check your connection'**
   String get networkError;
 
   /// Generic login failure message
@@ -937,6 +937,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to create guest'**
   String get failedToCreateGuest;
+
+  /// Error message for wrong login credentials
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid email or password'**
+  String get invalidCredentials;
+
+  /// Error message when user doesn't exist
+  ///
+  /// In en, this message translates to:
+  /// **'User not found'**
+  String get userNotFound;
+
+  /// Error message when account is disabled
+  ///
+  /// In en, this message translates to:
+  /// **'Account is deactivated'**
+  String get accountDeactivated;
+
+  /// Error message for validation failures
+  ///
+  /// In en, this message translates to:
+  /// **'Please check your input'**
+  String get validationError;
+
+  /// Error message for server errors
+  ///
+  /// In en, this message translates to:
+  /// **'Server error. Please try again'**
+  String get serverError;
+
+  /// Text for opening location in maps app
+  ///
+  /// In en, this message translates to:
+  /// **'Open in Maps'**
+  String get openInMaps;
 }
 
 class _AppLocalizationsDelegate

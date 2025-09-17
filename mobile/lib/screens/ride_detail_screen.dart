@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../l10n/app_localizations.dart';
 import '../services/auth_service.dart';
 import '../services/location_service.dart';
@@ -89,7 +90,7 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
                 'canCheckIn': false,
                 'canDropOff': false,
               },
-            } as Map<String, dynamic>;
+            };
           }).toList();
           _isLoading = false;
         });
@@ -138,7 +139,7 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(localizations.rideStartedSuccessfully),
-              backgroundColor: Colors.green,
+              backgroundColor: Theme.of(context).colorScheme.primary,
             ),
           );
         }
@@ -190,7 +191,7 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(localizations.rideEndedSuccessfully),
-              backgroundColor: Colors.green,
+              backgroundColor: Theme.of(context).colorScheme.primary,
             ),
           );
         }
@@ -280,7 +281,7 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(successMessage),
-              backgroundColor: Colors.green,
+              backgroundColor: Theme.of(context).colorScheme.primary,
             ),
           );
         }
@@ -298,6 +299,15 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
           ),
         );
       }
+    }
+  }
+
+  Future<void> _makePhoneCall(String phoneNumber) async {
+    final cleanedPhone = phoneNumber.replaceAll(RegExp(r'[^\d+]'), '');
+    final url = Uri.parse('tel:$cleanedPhone');
+    
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
     }
   }
 
@@ -470,8 +480,6 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
         onPressed: _isStartingRide ? null : _startRide,
         style: ElevatedButton.styleFrom(
           elevation: 0,
-          backgroundColor: colorScheme.primary,
-          foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(6),
           ),
@@ -483,15 +491,20 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
                 width: 20,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  color: Colors.white,
                 ),
               )
-            : Text(
-                localizations.startRide,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
-                ),
+            : Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.play_arrow, size: 20),
+                  SizedBox(width: 8),
+                  Text(
+                    localizations.startRide,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
       ),
     );
@@ -506,7 +519,6 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
         style: ElevatedButton.styleFrom(
           elevation: 0,
           backgroundColor: colorScheme.error,
-          foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(6),
           ),
@@ -518,15 +530,20 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
                 width: 20,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  color: Colors.white,
                 ),
               )
-            : Text(
-                localizations.endRide,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
-                ),
+            : Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.stop, size: 20),
+                  SizedBox(width: 8),
+                  Text(
+                    localizations.endRide,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
       ),
     );
@@ -550,14 +567,24 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
           ),
           minimumSize: const Size.fromHeight(48),
         ),
-        child: Text(
-          _isCurrentRideSharing
-              ? localizations.stopLocationSharing 
-              : localizations.startLocationSharing,
-          style: theme.textTheme.titleMedium?.copyWith(
-            color: _isCurrentRideSharing ? colorScheme.error : colorScheme.primary,
-            fontWeight: FontWeight.w500,
-          ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              _isCurrentRideSharing ? Icons.location_off : Icons.my_location,
+              size: 20,
+            ),
+            SizedBox(width: 8),
+            Text(
+              _isCurrentRideSharing
+                  ? localizations.stopLocationSharing 
+                  : localizations.startLocationSharing,
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: _isCurrentRideSharing ? colorScheme.error : colorScheme.primary,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -580,19 +607,23 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
         },
         style: ElevatedButton.styleFrom(
           elevation: 0,
-          backgroundColor: colorScheme.primary,
-          foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(6),
           ),
           minimumSize: const Size.fromHeight(48),
         ),
-        child: Text(
-          localizations.trackRide,
-          style: theme.textTheme.titleMedium?.copyWith(
-            color: Colors.white,
-            fontWeight: FontWeight.w500,
-          ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.map, size: 20),
+            SizedBox(width: 8),
+            Text(
+              localizations.trackRide,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -656,6 +687,7 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
     final passenger = booking['passenger'] ?? {};
     final fullName = '${passenger['firstName'] ?? ''} ${passenger['lastName'] ?? ''}'.trim();
     final phone = passenger['phone'] ?? '';
+    final isGuest = passenger['isGuest'] ?? false;
     final status = booking['status'] ?? 'unknown';
     final pickupStop = booking['pickupStop'] ?? '';
     final dropoffStop = booking['dropoffStop'] ?? '';
@@ -670,11 +702,11 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
         statusText = localizations.bookingStatusConfirmed;
         break;
       case 'unconfirmed':
-        statusColor = Colors.orange;
+        statusColor = colorScheme.secondary;
         statusText = localizations.bookingStatusUnconfirmed;
         break;
       case 'checked_in':
-        statusColor = Colors.blue;
+        statusColor = colorScheme.tertiary;
         statusText = localizations.bookingStatusCheckedIn;
         break;
       case 'cancelled':
@@ -686,7 +718,7 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
         statusText = localizations.bookingStatusCompleted;
         break;
       case 'waiting_list':
-        statusColor = Colors.orange;
+        statusColor = colorScheme.secondary;
         statusText = localizations.bookingStatusWaitingList;
         break;
     }
@@ -712,19 +744,54 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      fullName,
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        color: colorScheme.onSurface,
-                        fontWeight: FontWeight.w400,
-                      ),
+                    Row(
+                      children: [
+                        Text(
+                          fullName,
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            color: colorScheme.onSurface,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        if (isGuest) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Colors.orange.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              localizations.guest,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: Colors.orange,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                     if (phone.isNotEmpty) ...[
                       const SizedBox(height: 4),
-                      Text(
-                        phone,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
+                      GestureDetector(
+                        onTap: () => _makePhoneCall(phone),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.phone,
+                              size: 16,
+                              color: colorScheme.primary,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              phone,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: colorScheme.primary,
+                                decoration: TextDecoration.underline,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -808,12 +875,19 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
               ),
               minimumSize: const Size.fromHeight(40),
             ),
-            child: Text(
-              localizations.cancel,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: colorScheme.error,
-                fontWeight: FontWeight.w500,
-              ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.cancel_outlined, size: 16),
+                SizedBox(width: 6),
+                Text(
+                  localizations.cancel,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.error,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -837,12 +911,19 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
               ),
               minimumSize: const Size.fromHeight(40),
             ),
-            child: Text(
-              localizations.confirm,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: colorScheme.primary,
-                fontWeight: FontWeight.w500,
-              ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.check_circle_outline, size: 16),
+                SizedBox(width: 6),
+                Text(
+                  localizations.confirm,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.primary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -859,19 +940,26 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
             onPressed: () => _updateBookingStatus(booking['_id'], 'checkin'),
             style: OutlinedButton.styleFrom(
               elevation: 0,
-              foregroundColor: Colors.blue,
-              side: BorderSide(color: Colors.blue, width: 1),
+              foregroundColor: colorScheme.tertiary,
+              side: BorderSide(color: colorScheme.tertiary, width: 1),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(6),
               ),
               minimumSize: const Size.fromHeight(40),
             ),
-            child: Text(
-              localizations.checkIn,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: Colors.blue,
-                fontWeight: FontWeight.w500,
-              ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.login, size: 16),
+                SizedBox(width: 6),
+                Text(
+                  localizations.checkIn,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.tertiary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -895,12 +983,19 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
               ),
               minimumSize: const Size.fromHeight(40),
             ),
-            child: Text(
-              localizations.dropOff,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: colorScheme.primary,
-                fontWeight: FontWeight.w500,
-              ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.logout, size: 16),
+                SizedBox(width: 6),
+                Text(
+                  localizations.dropOff,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.primary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -943,12 +1038,19 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
                   borderRadius: BorderRadius.circular(6),
                 ),
               ),
-              child: Text(
-                localizations.cancel,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w500,
-                ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.close, size: 16),
+                  SizedBox(width: 6),
+                  Text(
+                    localizations.cancel,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
             ),
             ElevatedButton(
@@ -961,12 +1063,19 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
                   borderRadius: BorderRadius.circular(6),
                 ),
               ),
-              child: Text(
-                localizations.confirmCancellation,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onError,
-                  fontWeight: FontWeight.w500,
-                ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.delete_forever, size: 16),
+                  SizedBox(width: 6),
+                  Text(
+                    localizations.confirmCancellation,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onError,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

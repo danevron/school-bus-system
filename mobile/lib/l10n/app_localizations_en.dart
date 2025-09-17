@@ -81,7 +81,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get forgotPasswordComingSoon => 'Forgot password feature coming soon';
 
   @override
-  String get networkError => 'Network error occurred';
+  String get networkError => 'Network error. Please check your connection';
 
   @override
   String get loginFailed => 'Login failed';
@@ -462,4 +462,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get failedToCreateGuest => 'Failed to create guest';
+
+  @override
+  String get invalidCredentials => 'Invalid email or password';
+
+  @override
+  String get userNotFound => 'User not found';
+
+  @override
+  String get accountDeactivated => 'Account is deactivated';
+
+  @override
+  String get validationError => 'Please check your input';
+
+  @override
+  String get serverError => 'Server error. Please try again';
+
+  @override
+  String get openInMaps => 'Open in Maps';
 }

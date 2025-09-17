@@ -19,6 +19,29 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
   bool _obscurePassword = true;
 
+  String _translateErrorMessage(String message, AppLocalizations l10n) {
+    // Map common error messages from backend to localized versions
+    switch (message.toLowerCase()) {
+      case 'invalid credentials':
+        return l10n.invalidCredentials;
+      case 'user not found':
+        return l10n.userNotFound;
+      case 'account is deactivated':
+        return l10n.accountDeactivated;
+      case 'validation error':
+        return l10n.validationError;
+      case 'server error':
+        return l10n.serverError;
+      default:
+        // Handle network errors
+        if (message.startsWith('Network error:')) {
+          return l10n.networkError;
+        }
+        // If no translation found, return the original message
+        return message;
+    }
+  }
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -48,7 +71,7 @@ class _LoginScreenState extends State<LoginScreen> {
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(result['message']),
+              content: Text(_translateErrorMessage(result['message'], AppLocalizations.of(context)!)),
               backgroundColor: const Color(0xFFD32F2F),
               behavior: SnackBarBehavior.floating,
               margin: const EdgeInsets.all(16),
@@ -219,13 +242,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                 width: 20,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  color: Colors.white,
                                 ),
                               )
                             : Text(
                                 localizations.login,
                                 style: theme.textTheme.titleMedium?.copyWith(
-                                  color: Colors.white,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
