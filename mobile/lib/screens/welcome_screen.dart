@@ -30,144 +30,96 @@ class WelcomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     
     return Scaffold(
-      backgroundColor: colorScheme.surface,
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
         elevation: 0,
+        backgroundColor: Colors.transparent,
         actions: [
-          PopupMenuButton<Locale>(
-            icon: Icon(
-              Icons.language,
-              color: colorScheme.primary,
+          // Language Toggle - minimalistic like login
+          TextButton(
+            onPressed: () {
+              final currentLocale = Localizations.localeOf(context);
+              final newLocale = currentLocale.languageCode == 'en' 
+                ? const Locale('he', '') 
+                : const Locale('en', '');
+              onLanguageChange(newLocale);
+            },
+            child: Text(
+              Localizations.localeOf(context).languageCode == 'en' ? '🇮🇱' : '🇺🇸',
+              style: const TextStyle(fontSize: 24),
             ),
-            onSelected: onLanguageChange,
-            itemBuilder: (BuildContext context) => [
-              PopupMenuItem<Locale>(
-                value: const Locale('en', ''),
-                child: Row(
-                  children: [
-                    const Text('🇺🇸', style: TextStyle(fontSize: 20)),
-                    const SizedBox(width: 10),
-                    Text(localizations.english),
-                  ],
-                ),
-              ),
-              PopupMenuItem<Locale>(
-                value: const Locale('he', ''),
-                child: Row(
-                  children: [
-                    const Text('🇮🇱', style: TextStyle(fontSize: 20)),
-                    const SizedBox(width: 10),
-                    Text(localizations.hebrew),
-                  ],
-                ),
-              ),
-            ],
           ),
+          
+          const SizedBox(width: 8),
+          
+          // Logout button - clean icon
           IconButton(
-            icon: Icon(
-              Icons.logout,
-              color: colorScheme.primary,
-            ),
             onPressed: () async {
               await AuthService.logout();
               onAuthChanged();
             },
+            icon: Icon(
+              Icons.logout_rounded,
+              color: const Color(0xFF6B7280),
+              size: 24,
+            ),
             tooltip: localizations.logout,
           ),
         ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.symmetric(horizontal: 32.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 60),
+              const SizedBox(height: 120),
               
-              // Centered content
-              Column(
-                children: [
-                  // School Bus Icon
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Icon(
-                      Icons.directions_bus,
-                      size: 80,
-                      color: colorScheme.onPrimaryContainer,
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 30),
-                  
-                  // App Title
-                  Text(
-                    localizations.appTitle,
-                    style: theme.textTheme.headlineLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: colorScheme.primary,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  
-                  const SizedBox(height: 10),
-                  
-                  // Subtitle
-                  Text(
-                    localizations.appSubtitle,
-                    style: theme.textTheme.headlineSmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w300,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  
-                  const SizedBox(height: 40),
-                  
-                  // Welcome Message
-                  Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 16),
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: colorScheme.surfaceVariant.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(15),
-                      border: Border.all(
-                        color: colorScheme.outline.withOpacity(0.2),
-                      ),
-                    ),
-                    child: Column(
-                      children: [
-                        Text(
-                          _getPersonalizedWelcomeMessage(localizations),
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: colorScheme.onSurface,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        
-                        const SizedBox(height: 15),
-                        
-                        Text(
-                          _getPersonalizedWelcomeDescription(localizations),
-                          style: theme.textTheme.bodyLarge?.copyWith(
-                            color: colorScheme.onSurface.withOpacity(0.7),
-                            height: 1.5,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+              // App Title - minimalistic like login
+              Text(
+                localizations.appTitle,
+                style: theme.textTheme.displayMedium?.copyWith(
+                  color: const Color(0xFF111827),
+                  fontWeight: FontWeight.w300,
+                  letterSpacing: -0.5,
+                ),
               ),
+              
+              const SizedBox(height: 8),
+              
+              // Subtitle - minimalistic
+              Text(
+                localizations.appSubtitle,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: const Color(0xFF6B7280),
+                  height: 1.4,
+                ),
+              ),
+              
+              const SizedBox(height: 80),
+              
+              // Welcome Message - clean and simple
+              Text(
+                _getPersonalizedWelcomeMessage(localizations),
+                style: theme.textTheme.headlineLarge?.copyWith(
+                  color: const Color(0xFF111827),
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+              
+              const SizedBox(height: 16),
+              
+              Text(
+                _getPersonalizedWelcomeDescription(localizations),
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: const Color(0xFF6B7280),
+                  height: 1.5,
+                ),
+              ),
+              
+              const SizedBox(height: 40),
             ],
           ),
         ),

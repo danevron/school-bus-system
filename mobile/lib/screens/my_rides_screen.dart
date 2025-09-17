@@ -84,7 +84,12 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('${localizations.networkError}: ${e.toString()}'),
-            backgroundColor: Theme.of(context).colorScheme.error,
+            backgroundColor: const Color(0xFFD32F2F),
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.all(16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(4),
+            ),
           ),
         );
       }
@@ -103,49 +108,47 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: colorScheme.surface,
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: Row(
-          children: [
-            Icon(
-              Icons.directions_bus,
-              size: 28,
-              color: colorScheme.primary,
-            ),
-            const SizedBox(width: 12),
-            Text(
-              localizations.myRidesTitle,
-              style: theme.textTheme.headlineSmall?.copyWith(
-                color: colorScheme.onSurface,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
+        scrolledUnderElevation: 0,
+        title: Text(
+          localizations.myRidesTitle,
+          style: theme.textTheme.displayMedium?.copyWith(
+            color: const Color(0xFF111827),
+            fontWeight: FontWeight.w300,
+            letterSpacing: -0.5,
+          ),
         ),
-        automaticallyImplyLeading: false, // Remove back button since we use bottom nav
+        automaticallyImplyLeading: false,
         actions: [
+          // Refresh button - clean icon
           IconButton(
             onPressed: _loadRides,
             icon: Icon(
               Icons.refresh,
-              color: colorScheme.primary,
+              color: const Color(0xFF6B7280),
+              size: 24,
             ),
             tooltip: localizations.refresh,
           ),
+          
+          // Add button - portal color
           IconButton(
             onPressed: _navigateToBookRide,
             icon: Icon(
               Icons.add_circle_outline,
-              color: colorScheme.primary,
+              color: const Color(0xFF10B981),
+              size: 24,
             ),
             tooltip: localizations.bookNewRide,
           ),
-          TextButton.icon(
+          
+          // Filter toggle - clean icon
+          IconButton(
             onPressed: () {
               setState(() {
                 _showAllRides = !_showAllRides;
@@ -153,28 +156,24 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
             },
             icon: Icon(
               _showAllRides ? Icons.filter_list_off : Icons.filter_list,
-              size: 20,
-              color: colorScheme.primary,
+              color: const Color(0xFF6B7280),
+              size: 24,
             ),
-            label: Text(
-              _showAllRides ? localizations.filter : localizations.showAll,
-              style: TextStyle(
-                color: colorScheme.primary,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
+            tooltip: _showAllRides ? localizations.filter : localizations.showAll,
           ),
         ],
       ),
       body: SafeArea(
         child: _isLoading
             ? const Center(
-                child: CircularProgressIndicator(),
+                child: CircularProgressIndicator(
+                  color: Color(0xFF10B981),
+                  strokeWidth: 2,
+                ),
               )
             : _rides.isEmpty
-                ? _buildEmptyState(localizations, theme, colorScheme)
-                : _buildRidesList(localizations, theme, colorScheme),
+                ? _buildEmptyState(localizations, theme)
+                : _buildRidesList(localizations, theme),
       ),
     );
   }
@@ -211,73 +210,36 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
     }).toList();
   }
 
-  Widget _buildRidesList(AppLocalizations localizations, ThemeData theme, ColorScheme colorScheme) {
+  Widget _buildRidesList(AppLocalizations localizations, ThemeData theme) {
     final todayRides = _getTodayRides();
     final otherRides = _getOtherRides();
     
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          const SizedBox(height: 24),
+          
           // Today's Rides Section
           if (todayRides.isNotEmpty) ...[
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              margin: const EdgeInsets.only(bottom: 16),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    colorScheme.primary.withOpacity(0.1),
-                    colorScheme.primary.withOpacity(0.05),
-                  ],
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32.0),
+              child: Text(
+                localizations.todayRides,
+                style: theme.textTheme.headlineMedium?.copyWith(
+                  color: const Color(0xFF111827),
+                  fontWeight: FontWeight.w400,
                 ),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: colorScheme.primary.withOpacity(0.3),
-                  width: 1,
-                ),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.today,
-                    color: colorScheme.primary,
-                    size: 24,
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    localizations.todayRides,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: colorScheme.primary,
-                    ),
-                  ),
-                  const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: colorScheme.primary,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      '${todayRides.length}',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: colorScheme.onPrimary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
               ),
             ),
-            ...todayRides.map((ride) => _buildRideCard(ride, theme, colorScheme, localizations, isToday: true)),
+            
+            const SizedBox(height: 16),
+            
+            ...todayRides.map((ride) => _buildRideCard(ride, theme, localizations, isToday: true)),
+            
             if (otherRides.isNotEmpty) ...[
-              const SizedBox(height: 24),
-              Divider(color: colorScheme.outline.withOpacity(0.3)),
-              const SizedBox(height: 16),
+              const SizedBox(height: 40),
             ],
           ],
           
@@ -285,114 +247,104 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
           if (otherRides.isNotEmpty) ...[
             if (todayRides.isNotEmpty)
               Padding(
-                padding: const EdgeInsets.only(left: 16, bottom: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 32.0),
                 child: Text(
                   localizations.otherRides,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: colorScheme.onSurfaceVariant,
+                  style: theme.textTheme.headlineMedium?.copyWith(
+                    color: const Color(0xFF111827),
+                    fontWeight: FontWeight.w400,
                   ),
                 ),
               ),
-            ...otherRides.map((ride) => _buildRideCard(ride, theme, colorScheme, localizations)),
+            
+            if (todayRides.isNotEmpty) const SizedBox(height: 16),
+            
+            ...otherRides.map((ride) => _buildRideCard(ride, theme, localizations)),
           ],
           
           // Show message when no rides match filter
           if (todayRides.isEmpty && otherRides.isEmpty && !_showAllRides) ...[
+            const SizedBox(height: 80),
             Center(
-              child: Padding(
-                padding: const EdgeInsets.all(32.0),
-                child: Column(
-                  children: [
-                    Icon(
-                      Icons.filter_list_off,
-                      size: 48,
-                      color: colorScheme.onSurfaceVariant.withOpacity(0.5),
+              child: Column(
+                children: [
+                  Text(
+                    localizations.noActiveRidesFound,
+                    style: theme.textTheme.headlineLarge?.copyWith(
+                      color: const Color(0xFF111827),
+                      fontWeight: FontWeight.w400,
                     ),
-                    const SizedBox(height: 16),
-                    Text(
-                      localizations.noActiveRidesFound,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
+                  ),
+                  
+                  const SizedBox(height: 8),
+                  
+                  Text(
+                    localizations.tapShowAllForCompleted,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: const Color(0xFF6B7280),
+                      height: 1.4,
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      localizations.tapShowAllForCompleted,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant.withOpacity(0.7),
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
             ),
           ],
+          
+          const SizedBox(height: 40),
         ],
       ),
     );
   }
 
-  Widget _buildEmptyState(AppLocalizations localizations, ThemeData theme, ColorScheme colorScheme) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: colorScheme.primaryContainer.withOpacity(0.3),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.route,
-                size: 64,
-                color: colorScheme.primary,
-              ),
+  Widget _buildEmptyState(AppLocalizations localizations, ThemeData theme) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 32.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 80),
+          
+          Text(
+            localizations.myRidesEmpty,
+            style: theme.textTheme.displayMedium?.copyWith(
+              color: const Color(0xFF111827),
+              fontWeight: FontWeight.w300,
+              letterSpacing: -0.5,
             ),
-            
-            const SizedBox(height: 24),
-            
-            Text(
-              localizations.myRidesEmpty,
-              style: theme.textTheme.titleLarge?.copyWith(
-                color: colorScheme.onSurface,
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.center,
+          ),
+          
+          const SizedBox(height: 16),
+          
+          Text(
+            localizations.myRidesEmptyDescription,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: const Color(0xFF6B7280),
+              height: 1.5,
             ),
-            
-            const SizedBox(height: 12),
-            
-            Text(
-              localizations.myRidesEmptyDescription,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: colorScheme.onSurface.withOpacity(0.7),
-                height: 1.5,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            
-            const SizedBox(height: 32),
-            
-            FilledButton.icon(
+          ),
+          
+          const SizedBox(height: 48),
+          
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
               onPressed: _loadRides,
-              icon: const Icon(Icons.refresh),
-              label: Text(localizations.refresh),
-              style: FilledButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              child: Text(
+                localizations.refresh,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildRideCard(Map<String, dynamic> ride, ThemeData theme, ColorScheme colorScheme, AppLocalizations localizations, {bool isToday = false}) {
+  Widget _buildRideCard(Map<String, dynamic> ride, ThemeData theme, AppLocalizations localizations, {bool isToday = false}) {
     final status = ride['status'] ?? 'unknown';
     final startTime = ride['startTime'] ?? '';
     final date = ride['date'] ?? '';
@@ -404,101 +356,44 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
       dateTimeDisplay = _formatDateTime(startTime, startDate: date);
     }
     
-    // Status color, icon and translated text
-    Color statusColor = colorScheme.onSurface;
-    IconData statusIcon = Icons.directions_bus;
+    // Status color and translated text
+    Color statusColor = const Color(0xFF6B7280);
     String statusText = status;
     
     switch (status.toLowerCase()) {
       case 'in_progress':
-        statusColor = Colors.green;
-        statusIcon = Icons.play_circle;
+        statusColor = const Color(0xFF10B981);
         statusText = localizations.rideStatusActive;
         break;
       case 'completed':
-        statusColor = colorScheme.onSurfaceVariant;
-        statusIcon = Icons.check_circle;
+        statusColor = const Color(0xFF6B7280);
         statusText = localizations.rideStatusCompleted;
         break;
       case 'cancelled':
-        statusColor = Colors.red;
-        statusIcon = Icons.cancel;
+        statusColor = const Color(0xFFD32F2F);
         statusText = localizations.rideStatusCancelled;
         break;
       case 'scheduled':
-        statusColor = colorScheme.primary;
-        statusIcon = Icons.schedule;
+        statusColor = const Color(0xFF10B981);
         statusText = localizations.rideStatusScheduled;
         break;
     }
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: isToday ? 4 : 1,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: isToday ? BorderSide(
-          color: colorScheme.primary.withOpacity(0.3),
-          width: 1.5,
-        ) : BorderSide.none,
+    return Container(
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16),
+      decoration: BoxDecoration(
+        color: isToday ? const Color(0xFFF0FDF4) : Colors.white,
+        border: const Border(
+          bottom: BorderSide(
+            color: Color(0xFFE5E7EB),
+            width: 0.5,
+          ),
+        ),
       ),
-      child: Container(
-        decoration: isToday ? BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          gradient: LinearGradient(
-            colors: [
-              colorScheme.primary.withOpacity(0.02),
-              Colors.transparent,
-            ],
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-          ),
-        ) : null,
-        child: ListTile(
-        leading: Icon(
-          statusIcon,
-          color: statusColor,
-          size: 32,
-        ),
-        title: Text(
-          routeName,
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (dateTimeDisplay.isNotEmpty) ...[
-              const SizedBox(height: 4),
-              Text(
-                dateTimeDisplay,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-            const SizedBox(height: 6),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: statusColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                statusText,
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: statusColor,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
-        ),
-        trailing: Icon(
-          Icons.chevron_right,
-          color: colorScheme.onSurfaceVariant,
-        ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
           onTap: () {
             Navigator.of(context).push(
               MaterialPageRoute(
@@ -506,8 +401,62 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
               ),
             );
           },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Route name
+            Text(
+              routeName,
+              style: theme.textTheme.titleLarge?.copyWith(
+                color: const Color(0xFF111827),
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+            
+            const SizedBox(height: 8),
+            
+            // Date and time
+            if (dateTimeDisplay.isNotEmpty) ...[
+              Text(
+                dateTimeDisplay,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: const Color(0xFF6B7280),
+                ),
+              ),
+              
+              const SizedBox(height: 12),
+            ],
+            
+            // Status
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: statusColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    statusText,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: statusColor,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ),
+                
+                Icon(
+                  Icons.arrow_forward_ios,
+                  color: const Color(0xFFD1D5DB),
+                  size: 16,
+                ),
+              ],
+            ),
+          ],
         ),
       ),
+    ),
     );
   }
 

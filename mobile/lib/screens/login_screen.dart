@@ -43,16 +43,18 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (mounted) {
         if (result['success']) {
-          // Trigger auth state refresh in main app
           widget.onAuthChanged?.call();
-          // Navigate to home/welcome screen
           Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
         } else {
-          // Show error message
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(result['message']),
-              backgroundColor: Theme.of(context).colorScheme.error,
+              backgroundColor: const Color(0xFFD32F2F),
+              behavior: SnackBarBehavior.floating,
+              margin: const EdgeInsets.all(16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
+              ),
             ),
           );
         }
@@ -70,108 +72,87 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
         elevation: 0,
+        backgroundColor: Colors.transparent,
         actions: [
-          PopupMenuButton<Locale>(
-            icon: Icon(
-              Icons.language,
-              color: colorScheme.primary,
+          TextButton(
+            onPressed: () {
+              final currentLocale = Localizations.localeOf(context);
+              final newLocale = currentLocale.languageCode == 'en' 
+                ? const Locale('he', '') 
+                : const Locale('en', '');
+              widget.onLanguageChange(newLocale);
+            },
+            child: Text(
+              Localizations.localeOf(context).languageCode == 'en' ? '🇮🇱' : '🇺🇸',
+              style: const TextStyle(fontSize: 24),
             ),
-            onSelected: widget.onLanguageChange,
-            itemBuilder: (BuildContext context) => [
-              PopupMenuItem<Locale>(
-                value: const Locale('en', ''),
-                child: Row(
-                  children: [
-                    const Text('🇺🇸', style: TextStyle(fontSize: 20)),
-                    const SizedBox(width: 10),
-                    Text(localizations.english),
-                  ],
-                ),
-              ),
-              PopupMenuItem<Locale>(
-                value: const Locale('he', ''),
-                child: Row(
-                  children: [
-                    const Text('🇮🇱', style: TextStyle(fontSize: 20)),
-                    const SizedBox(width: 10),
-                    Text(localizations.hebrew),
-                  ],
-                ),
-              ),
-            ],
           ),
         ],
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 60),
+              const SizedBox(height: 80),
               
-              // App Title and Bus Icon
-              Column(
-                children: [
-                  Icon(
-                    Icons.directions_bus,
-                    size: 80,
-                    color: colorScheme.primary,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    localizations.appTitle,
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      color: colorScheme.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    localizations.appSubtitle,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+              // Minimalist Title
+              Text(
+                localizations.appTitle,
+                style: theme.textTheme.displayMedium?.copyWith(
+                  color: const Color(0xFF111827),
+                  fontWeight: FontWeight.w300,
+                  letterSpacing: -0.5,
+                ),
               ),
               
-              const SizedBox(height: 60),
+              const SizedBox(height: 8),
               
-              // Login Form
+              Text(
+                localizations.appSubtitle,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: const Color(0xFF6B7280),
+                  height: 1.4,
+                ),
+              ),
+              
+              const SizedBox(height: 80),
+              
+              // Clean Form
               Form(
                 key: _formKey,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       localizations.login,
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        color: colorScheme.onSurface,
-                        fontWeight: FontWeight.w600,
+                      style: theme.textTheme.headlineMedium?.copyWith(
+                        color: const Color(0xFF111827),
+                        fontWeight: FontWeight.w400,
                       ),
-                      textAlign: TextAlign.center,
                     ),
                     
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 48),
                     
                     // Email Field
                     TextFormField(
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
                       textInputAction: TextInputAction.next,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: const Color(0xFF111827),
+                      ),
                       decoration: InputDecoration(
                         labelText: localizations.email,
-                        prefixIcon: const Icon(Icons.email_outlined),
-                        border: const OutlineInputBorder(),
+                        labelStyle: theme.textTheme.bodyMedium?.copyWith(
+                          color: const Color(0xFF6B7280),
+                        ),
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
@@ -185,7 +166,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       },
                     ),
                     
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 32),
                     
                     // Password Field
                     TextFormField(
@@ -193,14 +174,19 @@ class _LoginScreenState extends State<LoginScreen> {
                       obscureText: _obscurePassword,
                       textInputAction: TextInputAction.done,
                       onFieldSubmitted: (_) => _handleLogin(),
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: const Color(0xFF111827),
+                      ),
                       decoration: InputDecoration(
                         labelText: localizations.password,
-                        prefixIcon: const Icon(Icons.lock_outlined),
+                        labelStyle: theme.textTheme.bodyMedium?.copyWith(
+                          color: const Color(0xFF6B7280),
+                        ),
                         suffixIcon: IconButton(
                           icon: Icon(
-                            _obscurePassword
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
+                            _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                            color: const Color(0xFF6B7280),
+                            size: 20,
                           ),
                           onPressed: () {
                             setState(() {
@@ -208,7 +194,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             });
                           },
                         ),
-                        border: const OutlineInputBorder(),
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -221,42 +206,55 @@ class _LoginScreenState extends State<LoginScreen> {
                       },
                     ),
                     
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 56),
                     
                     // Login Button
-                    FilledButton(
-                      onPressed: _isLoading ? null : _handleLogin,
-                      style: FilledButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                      child: _isLoading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: _isLoading ? null : _handleLogin,
+                        child: _isLoading
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : Text(
+                                localizations.login,
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
-                            )
-                          : Text(
-                              localizations.login,
-                              style: const TextStyle(fontSize: 16),
-                            ),
+                      ),
                     ),
                     
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 24),
                     
-                    // Forgot Password Link
+                    // Forgot Password
                     TextButton(
                       onPressed: _isLoading ? null : () {
-                        // TODO: Implement forgot password
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(localizations.forgotPasswordComingSoon),
+                            behavior: SnackBarBehavior.floating,
+                            margin: const EdgeInsets.all(16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(4),
+                            ),
                           ),
                         );
                       },
-                      child: Text(localizations.forgotPassword),
+                      child: Text(
+                        localizations.forgotPassword,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: const Color(0xFF6B7280),
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
                     ),
                   ],
                 ),

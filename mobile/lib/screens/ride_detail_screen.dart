@@ -308,22 +308,24 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: colorScheme.surface,
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        scrolledUnderElevation: 0,
         leading: IconButton(
           icon: Icon(
-            Icons.arrow_back,
-            color: colorScheme.onSurface,
+            Icons.arrow_back_ios,
+            color: const Color(0xFF111827),
+            size: 20,
           ),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
           _currentRide['route']?['name'] ?? localizations.rideDetails,
-          style: theme.textTheme.titleLarge?.copyWith(
-            color: colorScheme.onSurface,
-            fontWeight: FontWeight.bold,
+          style: theme.textTheme.headlineMedium?.copyWith(
+            color: const Color(0xFF111827),
+            fontWeight: FontWeight.w400,
           ),
         ),
       ),
@@ -376,42 +378,39 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
       dateTimeDisplay = _formatDateTime(startTime, startDate: date);
     }
     
-    // Status color, icon and translated text
-    Color statusColor = colorScheme.onSurface;
-    IconData statusIcon = Icons.directions_bus;
+    // Status color and translated text
+    Color statusColor = const Color(0xFF6B7280);
     String statusText = status;
     
     switch (status.toLowerCase()) {
       case 'in_progress':
-        statusColor = Colors.green;
-        statusIcon = Icons.play_circle;
+        statusColor = const Color(0xFF10B981);
         statusText = localizations.rideStatusActive;
         break;
       case 'completed':
-        statusColor = colorScheme.onSurfaceVariant;
-        statusIcon = Icons.check_circle;
+        statusColor = const Color(0xFF6B7280);
         statusText = localizations.rideStatusCompleted;
         break;
       case 'cancelled':
-        statusColor = Colors.red;
-        statusIcon = Icons.cancel;
+        statusColor = const Color(0xFFD32F2F);
         statusText = localizations.rideStatusCancelled;
         break;
       case 'scheduled':
-        statusColor = colorScheme.primary;
-        statusIcon = Icons.schedule;
+        statusColor = const Color(0xFF10B981);
         statusText = localizations.rideStatusScheduled;
         break;
     }
 
     return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: colorScheme.primaryContainer.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: colorScheme.outline.withOpacity(0.2),
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 20),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          bottom: BorderSide(
+            color: Color(0xFFE5E7EB),
+            width: 0.5,
+          ),
         ),
       ),
       child: Column(
@@ -419,12 +418,6 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
         children: [
           Row(
             children: [
-              Icon(
-                statusIcon,
-                color: statusColor,
-                size: 32,
-              ),
-              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -432,15 +425,16 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
                     Text(
                       routeName,
                       style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF111827),
+                        fontWeight: FontWeight.w400,
                       ),
                     ),
                     if (dateTimeDisplay.isNotEmpty) ...[
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 8),
                       Text(
                         dateTimeDisplay,
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
+                          color: const Color(0xFF6B7280),
                         ),
                       ),
                     ],
@@ -448,16 +442,16 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: statusColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
                   statusText,
-                  style: theme.textTheme.labelMedium?.copyWith(
+                  style: theme.textTheme.bodyMedium?.copyWith(
                     color: statusColor,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w400,
                   ),
                 ),
               ),
@@ -471,22 +465,34 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
   Widget _buildStartRideButton(ThemeData theme, ColorScheme colorScheme, AppLocalizations localizations) {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      child: FilledButton.icon(
+      margin: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 8),
+      child: ElevatedButton(
         onPressed: _isStartingRide ? null : _startRide,
-        icon: _isStartingRide 
-            ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
-            : const Icon(Icons.play_arrow),
-        label: Text(_isStartingRide ? localizations.startingRide : localizations.startRide),
-        style: FilledButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          backgroundColor: Colors.green,
+        style: ElevatedButton.styleFrom(
+          elevation: 0,
+          backgroundColor: const Color(0xFF10B981),
           foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(6),
+          ),
+          minimumSize: const Size.fromHeight(48),
         ),
+        child: _isStartingRide
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
+            : Text(
+                localizations.startRide,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
       ),
     );
   }
@@ -494,22 +500,34 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
   Widget _buildEndRideButton(ThemeData theme, ColorScheme colorScheme, AppLocalizations localizations) {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      child: FilledButton.icon(
+      margin: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 8),
+      child: ElevatedButton(
         onPressed: _isEndingRide ? null : _endRide,
-        icon: _isEndingRide 
-            ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
-            : const Icon(Icons.stop),
-        label: Text(_isEndingRide ? localizations.endingRide : localizations.endRide),
-        style: FilledButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          backgroundColor: Colors.red,
+        style: ElevatedButton.styleFrom(
+          elevation: 0,
+          backgroundColor: const Color(0xFFD32F2F),
           foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(6),
+          ),
+          minimumSize: const Size.fromHeight(48),
         ),
+        child: _isEndingRide
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
+            : Text(
+                localizations.endRide,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
       ),
     );
   }
@@ -517,23 +535,28 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
   Widget _buildLocationSharingButton(ThemeData theme, ColorScheme colorScheme, AppLocalizations localizations) {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: OutlinedButton.icon(
+      margin: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 8),
+      child: OutlinedButton(
         onPressed: _toggleLocationSharing,
-        icon: _isCurrentRideSharing
-            ? const Icon(Icons.location_off, size: 20)
-            : const Icon(Icons.location_on, size: 20),
-        label: Text(
+        style: OutlinedButton.styleFrom(
+          elevation: 0,
+          foregroundColor: _isCurrentRideSharing ? const Color(0xFFD32F2F) : const Color(0xFF10B981),
+          side: BorderSide(
+            color: _isCurrentRideSharing ? const Color(0xFFD32F2F) : const Color(0xFF10B981),
+            width: 1,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(6),
+          ),
+          minimumSize: const Size.fromHeight(48),
+        ),
+        child: Text(
           _isCurrentRideSharing
               ? localizations.stopLocationSharing 
-              : localizations.startLocationSharing
-        ),
-        style: OutlinedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          foregroundColor: _isCurrentRideSharing ? Colors.red : Colors.blue,
-          side: BorderSide(
-            color: _isCurrentRideSharing ? Colors.red : Colors.blue,
-            width: 2,
+              : localizations.startLocationSharing,
+          style: theme.textTheme.titleMedium?.copyWith(
+            color: _isCurrentRideSharing ? const Color(0xFFD32F2F) : const Color(0xFF10B981),
+            fontWeight: FontWeight.w500,
           ),
         ),
       ),
@@ -543,8 +566,8 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
   Widget _buildTrackRideButton(ThemeData theme, ColorScheme colorScheme, AppLocalizations localizations) {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: FilledButton.icon(
+      margin: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 8),
+      child: ElevatedButton(
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute(
@@ -555,11 +578,21 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
             ),
           );
         },
-        icon: const Icon(Icons.map, size: 20),
-        label: Text(localizations.trackRide),
-        style: FilledButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          backgroundColor: colorScheme.primary,
+        style: ElevatedButton.styleFrom(
+          elevation: 0,
+          backgroundColor: const Color(0xFF10B981),
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(6),
+          ),
+          minimumSize: const Size.fromHeight(48),
+        ),
+        child: Text(
+          localizations.trackRide,
+          style: theme.textTheme.titleMedium?.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ),
     );
@@ -596,17 +629,18 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16),
           child: Text(
             localizations.passengersCount(_bookings.length),
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
+            style: theme.textTheme.headlineMedium?.copyWith(
+              color: const Color(0xFF111827),
+              fontWeight: FontWeight.w400,
             ),
           ),
         ),
         Expanded(
           child: ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: EdgeInsets.zero,
             itemCount: _bookings.length,
             itemBuilder: (context, index) {
               final booking = _bookings[index];
@@ -626,143 +660,118 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
     final pickupStop = booking['pickupStop'] ?? '';
     final dropoffStop = booking['dropoffStop'] ?? '';
 
-    // Status color and icon
-    Color statusColor = colorScheme.onSurface;
-    IconData statusIcon = Icons.person;
+    // Status color and translated text
+    Color statusColor = const Color(0xFF6B7280);
     String statusText = status;
     
     switch (status.toLowerCase()) {
       case 'confirmed':
-        statusColor = Colors.green;
-        statusIcon = Icons.check_circle;
+        statusColor = const Color(0xFF10B981);
         statusText = localizations.bookingStatusConfirmed;
         break;
       case 'unconfirmed':
-        statusColor = Colors.orange;
-        statusIcon = Icons.schedule;
+        statusColor = const Color(0xFFF59E0B);
         statusText = localizations.bookingStatusUnconfirmed;
         break;
       case 'checked_in':
-        statusColor = Colors.blue;
-        statusIcon = Icons.login;
+        statusColor = const Color(0xFF3B82F6);
         statusText = localizations.bookingStatusCheckedIn;
         break;
       case 'cancelled':
-        statusColor = Colors.red;
-        statusIcon = Icons.cancel;
+        statusColor = const Color(0xFFD32F2F);
         statusText = localizations.bookingStatusCancelled;
         break;
       case 'completed':
-        statusColor = Colors.grey;
-        statusIcon = Icons.check_circle_outline;
+        statusColor = const Color(0xFF6B7280);
         statusText = localizations.bookingStatusCompleted;
         break;
       case 'waiting_list':
-        statusColor = Colors.amber;
-        statusIcon = Icons.hourglass_empty;
+        statusColor = const Color(0xFFF59E0B);
         statusText = localizations.bookingStatusWaitingList;
         break;
     }
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  statusIcon,
-                  color: statusColor,
-                  size: 24,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        fullName,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      if (phone.isNotEmpty) ...[
-                        const SizedBox(height: 2),
-                        Text(
-                          phone,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    statusText,
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: statusColor,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            
-            if (pickupStop.isNotEmpty || dropoffStop.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              if (pickupStop.isNotEmpty) ...[
-                Row(
-                  children: [
-                    Icon(
-                      Icons.location_on,
-                      color: Colors.green,
-                      size: 16,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        '${localizations.pickup}: $pickupStop',
-                        style: theme.textTheme.bodySmall,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-              if (dropoffStop.isNotEmpty) ...[
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.location_off,
-                      color: Colors.red,
-                      size: 16,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        '${localizations.dropoff}: $dropoffStop',
-                        style: theme.textTheme.bodySmall,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ],
-            
-            // Dynamic action buttons based on API permissions
-            _buildActionButtons(booking, theme, colorScheme, localizations),
-          ],
+    return Container(
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          bottom: BorderSide(
+            color: Color(0xFFE5E7EB),
+            width: 0.5,
+          ),
         ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      fullName,
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        color: const Color(0xFF111827),
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    if (phone.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        phone,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: const Color(0xFF6B7280),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: statusColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  statusText,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: statusColor,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          
+          if (pickupStop.isNotEmpty || dropoffStop.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            if (pickupStop.isNotEmpty) ...[
+              Text(
+                '${localizations.pickup}: $pickupStop',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: const Color(0xFF6B7280),
+                ),
+              ),
+            ],
+            if (dropoffStop.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text(
+                '${localizations.dropoff}: $dropoffStop',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: const Color(0xFF6B7280),
+                ),
+              ),
+            ],
+          ],
+          
+          // Dynamic action buttons based on API permissions
+          _buildActionButtons(booking, theme, colorScheme, localizations),
+        ],
       ),
     );
   }
@@ -788,13 +797,23 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
       actionButtons.add(
         SizedBox(
           width: double.infinity,
-          child: OutlinedButton.icon(
+          child: OutlinedButton(
             onPressed: () => _showCancelConfirmation(booking['_id']),
-            icon: const Icon(Icons.cancel, size: 16),
-            label: Text(localizations.cancel),
             style: OutlinedButton.styleFrom(
-              foregroundColor: Colors.red,
-              side: const BorderSide(color: Colors.red),
+              elevation: 0,
+              foregroundColor: const Color(0xFFD32F2F),
+              side: const BorderSide(color: Color(0xFFD32F2F), width: 1),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(6),
+              ),
+              minimumSize: const Size.fromHeight(40),
+            ),
+            child: Text(
+              localizations.cancel,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: const Color(0xFFD32F2F),
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
         ),
@@ -807,13 +826,23 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
       actionButtons.add(
         SizedBox(
           width: double.infinity,
-          child: OutlinedButton.icon(
+          child: OutlinedButton(
             onPressed: () => _updateBookingStatus(booking['_id'], 'confirm'),
-            icon: const Icon(Icons.check, size: 16),
-            label: Text(localizations.confirm),
             style: OutlinedButton.styleFrom(
-              foregroundColor: Colors.green,
-              side: const BorderSide(color: Colors.green),
+              elevation: 0,
+              foregroundColor: const Color(0xFF10B981),
+              side: const BorderSide(color: Color(0xFF10B981), width: 1),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(6),
+              ),
+              minimumSize: const Size.fromHeight(40),
+            ),
+            child: Text(
+              localizations.confirm,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: const Color(0xFF10B981),
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
         ),
@@ -826,13 +855,23 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
       actionButtons.add(
         SizedBox(
           width: double.infinity,
-          child: OutlinedButton.icon(
+          child: OutlinedButton(
             onPressed: () => _updateBookingStatus(booking['_id'], 'checkin'),
-            icon: const Icon(Icons.login, size: 16),
-            label: Text(localizations.checkIn),
             style: OutlinedButton.styleFrom(
-              foregroundColor: Colors.blue,
-              side: const BorderSide(color: Colors.blue),
+              elevation: 0,
+              foregroundColor: const Color(0xFF3B82F6),
+              side: const BorderSide(color: Color(0xFF3B82F6), width: 1),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(6),
+              ),
+              minimumSize: const Size.fromHeight(40),
+            ),
+            child: Text(
+              localizations.checkIn,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: const Color(0xFF3B82F6),
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
         ),
@@ -845,13 +884,23 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
       actionButtons.add(
         SizedBox(
           width: double.infinity,
-          child: OutlinedButton.icon(
+          child: OutlinedButton(
             onPressed: () => _updateBookingStatus(booking['_id'], 'dropoff'),
-            icon: const Icon(Icons.logout, size: 16),
-            label: Text(localizations.dropOff),
             style: OutlinedButton.styleFrom(
-              foregroundColor: Colors.green,
-              side: const BorderSide(color: Colors.green),
+              elevation: 0,
+              foregroundColor: const Color(0xFF10B981),
+              side: const BorderSide(color: Color(0xFF10B981), width: 1),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(6),
+              ),
+              minimumSize: const Size.fromHeight(40),
+            ),
+            child: Text(
+              localizations.dropOff,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: const Color(0xFF10B981),
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
         ),
