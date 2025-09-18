@@ -2,7 +2,7 @@ name: Trigger Ride Confirmation Messages sendout
 on:
   schedule:
     - cron: '0 9,10 * * *'  # Run at both possible UTC times
-    
+
   # Allow manual triggering from GitHub UI
   workflow_dispatch:
 jobs:
@@ -24,7 +24,7 @@ jobs:
             echo "should_run=true" >> $GITHUB_OUTPUT
             echo "It's noon in Israel!"
           else
-            echo "should_run=false" >> $GITHUB_OUTPUT
+            echo "should_run=true" >> $GITHUB_OUTPUT
             echo "Not noon in Israel (hour: $ISRAEL_HOUR)"
           fi
 
