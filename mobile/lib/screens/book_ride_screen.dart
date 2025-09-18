@@ -19,7 +19,6 @@ class _BookRideScreenState extends State<BookRideScreen> {
   String? _selectedPassengerId;
   Map<String, String?> _selectedPickupStops = {}; // rideId -> stopId
   Map<String, String?> _selectedDropoffStops = {}; // rideId -> stopId
-  Set<String> _expandedRides = {}; // Track which rides are expanded
   
   @override
   void initState() {
@@ -520,19 +519,21 @@ class _BookRideScreenState extends State<BookRideScreen> {
     final availableSeats = ride['availableSeats'] ?? 0;
     final maxCapacity = ride['maxCapacity'] ?? 0;
 
-    return Container(
-      margin: EdgeInsets.zero,
-      padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        border: Border(
-          bottom: BorderSide(
-            color: colorScheme.outline.withOpacity(0.2),
-            width: 0.5,
+    return InkWell(
+      onTap: () => _showRideBookingModal(ride),
+      child: Container(
+        margin: EdgeInsets.zero,
+        padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16),
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          border: Border(
+            bottom: BorderSide(
+              color: colorScheme.outline.withOpacity(0.2),
+              width: 0.5,
+            ),
           ),
         ),
-      ),
-      child: Column(
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Route name and available seats
@@ -607,69 +608,58 @@ class _BookRideScreenState extends State<BookRideScreen> {
               color: colorScheme.onSurfaceVariant,
             ),
           ),
-          
-          const SizedBox(height: 16),
-          
-          // Expand/Collapse button
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton(
-              onPressed: () {
-                setState(() {
-                  final rideId = ride['_id'];
-                  if (_expandedRides.contains(rideId)) {
-                    _expandedRides.remove(rideId);
-                  } else {
-                    _expandedRides.add(rideId);
-                  }
-                });
-              },
-              style: OutlinedButton.styleFrom(
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                minimumSize: const Size.fromHeight(44),
-              ),
-              child: Text(
-                _expandedRides.contains(ride['_id']) ? localizations.hideBookingOptions : localizations.showBookingOptions,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ),
-          
-          // Stop selection section (only when expanded)
-          if (_expandedRides.contains(ride['_id'])) ...[
-            const SizedBox(height: 16),
-            _buildStopSelection(ride, theme, colorScheme, localizations),
-            const SizedBox(height: 16),
-            
-            // Book button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => _bookRide(ride),
-                style: ElevatedButton.styleFrom(
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  minimumSize: const Size.fromHeight(48),
-                ),
-                child: Text(
-                  availableSeats > 0 ? localizations.bookThisRide : localizations.fullyBooked,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ),
-          ],
         ],
+        ),
       ),
     );
+  }
+
+  Future<void> _showRideBookingModal(Map<String, dynamic> ride) async {
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => _RideBookingModal(
+        ride: ride,
+        onBook: (pickupStopId, dropoffStopId) async {
+          Navigator.of(context).pop();
+          await _bookRideWithStops(ride, pickupStopId, dropoffStopId);
+        },
+      ),
+    );
+  }
+
+  Future<void> _bookRideWithStops(Map<String, dynamic> ride, String? pickupStopId, String? dropoffStopId) async {
+    if (pickupStopId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.pleaseSelectPickupStop),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+      return;
+    }
+    
+    if (dropoffStopId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.pleaseSelectDropoffStop),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+      return;
+    }
+
+    // Set the selected stops for this ride temporarily to use existing booking logic
+    final rideId = ride['_id'];
+    setState(() {
+      _selectedPickupStops[rideId] = pickupStopId;
+      _selectedDropoffStops[rideId] = dropoffStopId;
+    });
+
+    await _bookRide(ride);
   }
 
   Widget _buildStopSelection(Map<String, dynamic> ride, ThemeData theme, ColorScheme colorScheme, AppLocalizations localizations) {
@@ -939,6 +929,346 @@ class _BookRideScreenState extends State<BookRideScreen> {
   }
 }
 
+class _RideBookingModal extends StatefulWidget {
+  final Map<String, dynamic> ride;
+  final Function(String?, String?) onBook;
+
+  const _RideBookingModal({
+    required this.ride,
+    required this.onBook,
+  });
+
+  @override
+  State<_RideBookingModal> createState() => _RideBookingModalState();
+}
+
+class _RideBookingModalState extends State<_RideBookingModal> {
+  String? _selectedPickupStopId;
+  String? _selectedDropoffStopId;
+
+  @override
+  Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final ride = widget.ride;
+    final route = ride['route'] ?? {};
+    final stops = ride['stops'] as List? ?? [];
+    final availableSeats = ride['availableSeats'] ?? 0;
+    
+    // Find selected stop details
+    Map<String, dynamic>? pickupStop;
+    Map<String, dynamic>? dropoffStop;
+    
+    if (_selectedPickupStopId != null) {
+      try {
+        pickupStop = stops.cast<Map<String, dynamic>>().firstWhere(
+          (stop) => stop['stopId'] == _selectedPickupStopId,
+        );
+      } catch (e) {
+        pickupStop = null;
+      }
+    }
+    
+    if (_selectedDropoffStopId != null) {
+      try {
+        dropoffStop = stops.cast<Map<String, dynamic>>().firstWhere(
+          (stop) => stop['stopId'] == _selectedDropoffStopId,
+        );
+      } catch (e) {
+        dropoffStop = null;
+      }
+    }
+
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.85,
+      width: double.infinity,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Handle bar
+          Center(
+            child: Container(
+              margin: const EdgeInsets.only(top: 12),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: colorScheme.onSurfaceVariant.withOpacity(0.4),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          
+          // Header with close button
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    route['name'] ?? localizations.unknownRoute,
+                    style: theme.textTheme.headlineMedium?.copyWith(
+                      color: colorScheme.onSurface,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  icon: Icon(
+                    Icons.close,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          // Content
+          Expanded(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Ride info
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: colorScheme.primary.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: colorScheme.primary.withOpacity(0.1),
+                          width: 1,
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              HumanReadableDate(
+                                dateString: ride['date'] ?? '',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                              Text(
+                                ' - ${_formatTime(ride['startTime'] ?? '')}',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            availableSeats == 0 ? localizations.fullyBooked : '',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: availableSeats > 5 ? colorScheme.primary : colorScheme.error,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          Text(
+                            localizations.seatsAvailable(availableSeats, ride['maxCapacity'] ?? 0),
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: availableSeats > 5 ? colorScheme.primary : colorScheme.error,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    
+                    const SizedBox(height: 24),
+                    
+                    // Stop selection
+                    Text(
+                      localizations.selectStops,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: colorScheme.onSurface,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    
+                    const SizedBox(height: 16),
+                    
+                    // Pickup stop
+                    _buildStopSelector(
+                      label: localizations.pickup,
+                      selectedStop: pickupStop,
+                      hint: localizations.choosePickupStop,
+                      onTap: () => _showStopSelection('pickup'),
+                      theme: theme,
+                      colorScheme: colorScheme,
+                    ),
+                    
+                    const SizedBox(height: 16),
+                    
+                    // Dropoff stop
+                    _buildStopSelector(
+                      label: localizations.dropoff,
+                      selectedStop: dropoffStop,
+                      hint: localizations.chooseDropoffStop,
+                      onTap: () => _showStopSelection('dropoff'),
+                      theme: theme,
+                      colorScheme: colorScheme,
+                    ),
+                    
+                    const SizedBox(height: 24),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          
+          // Book button
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+            child: ElevatedButton.icon(
+              icon: const Icon(Icons.check_circle_outline),
+              onPressed: (_selectedPickupStopId != null && _selectedDropoffStopId != null)
+                  ? () => widget.onBook(_selectedPickupStopId, _selectedDropoffStopId)
+                  : null,
+              label: Text(localizations.bookThisRide),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStopSelector({
+    required String label,
+    required Map<String, dynamic>? selectedStop,
+    required String hint,
+    required VoidCallback onTap,
+    required ThemeData theme,
+    required ColorScheme colorScheme,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 6),
+        InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: colorScheme.outline.withOpacity(0.5),
+                width: 1,
+              ),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: selectedStop?.isNotEmpty == true
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              selectedStop!['name'] ?? '',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: colorScheme.onSurface,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            if (selectedStop!['address']?.isNotEmpty == true) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                selectedStop!['address'],
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ],
+                        )
+                      : Text(
+                          hint,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: colorScheme.onSurfaceVariant.withOpacity(0.7),
+                          ),
+                        ),
+                ),
+                Icon(
+                  Icons.arrow_drop_down,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _showStopSelection(String type) async {
+    final stops = widget.ride['stops'] as List? ?? [];
+    final route = widget.ride['route'] ?? {};
+    
+    final result = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => _StopSelectionModal(
+        stops: stops.cast<Map<String, dynamic>>(),
+        selectionType: type,
+        currentSelection: type == 'pickup' ? _selectedPickupStopId : _selectedDropoffStopId,
+        excludeStopId: type == 'dropoff' ? _selectedPickupStopId : null,
+        rideRoute: route['name'] ?? 'Unknown Route',
+        isDropoff: type == 'dropoff',
+      ),
+    );
+
+    if (result != null) {
+      setState(() {
+        if (type == 'pickup') {
+          _selectedPickupStopId = result;
+          print('Selected pickup stop: $result');
+          // Reset dropoff if same as pickup
+          if (_selectedDropoffStopId == result) {
+            _selectedDropoffStopId = null;
+          }
+        } else {
+          _selectedDropoffStopId = result;
+          print('Selected dropoff stop: $result');
+        }
+      });
+    }
+  }
+
+  String _formatTime(String timeString) {
+    try {
+      if (timeString.isEmpty) return '';
+      final timeDateTime = DateTime.parse(timeString);
+      return '${timeDateTime.hour.toString().padLeft(2, '0')}:${timeDateTime.minute.toString().padLeft(2, '0')}';
+    } catch (e) {
+      return timeString;
+    }
+  }
+}
+
 class _StopSelectionModal extends StatefulWidget {
   final List<Map<String, dynamic>> stops;
   final String selectionType;
@@ -995,9 +1325,6 @@ class _StopSelectionModalState extends State<_StopSelectionModal> {
     setState(() {
       _selectedStopId = stopId;
     });
-  }
-
-  void _confirmSelection() {
     Navigator.of(context).pop(_selectedStopId);
   }
 
@@ -1136,30 +1463,6 @@ class _StopSelectionModalState extends State<_StopSelectionModal> {
                   ),
                 ),
               ],
-            ),
-          ),
-
-          // Confirm button
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(32.0),
-            child: ElevatedButton(
-              onPressed: _selectedStopId != null
-                  ? _confirmSelection
-                  : null,
-              style: ElevatedButton.styleFrom(
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                minimumSize: const Size.fromHeight(48),
-              ),
-              child: Text(
-                localizations.confirmSelection,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
             ),
           ),
         ],

@@ -111,19 +111,17 @@ class _LoginScreenState extends State<LoginScreen> {
         elevation: 0,
         backgroundColor: Colors.transparent,
         actions: [
-          TextButton(
+          IconButton(
             onPressed: () {
               final currentLocale = Localizations.localeOf(context);
-              final newLocale = currentLocale.languageCode == 'en'
-                  ? const Locale('he', '')
-                  : const Locale('en', '');
+              final newLocale = currentLocale.languageCode == 'en' 
+                ? const Locale('he', '') 
+                : const Locale('en', '');
               widget.onLanguageChange(newLocale);
             },
-            child: Text(
-              Localizations.localeOf(context).languageCode == 'en'
-                  ? '🇮🇱'
-                  : '🇺🇸',
-              style: const TextStyle(fontSize: 24),
+            icon: Icon(
+              Icons.language_outlined,
+              size: 24,
             ),
           ),
         ],

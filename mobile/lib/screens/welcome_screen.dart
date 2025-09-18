@@ -37,8 +37,8 @@ class WelcomeScreen extends StatelessWidget {
         elevation: 0,
         backgroundColor: Colors.transparent,
         actions: [
-          // Language Toggle - minimalistic like login
-          TextButton(
+          // Logout button - clean icon
+          IconButton(
             onPressed: () {
               final currentLocale = Localizations.localeOf(context);
               final newLocale = currentLocale.languageCode == 'en' 
@@ -46,15 +46,11 @@ class WelcomeScreen extends StatelessWidget {
                 : const Locale('en', '');
               onLanguageChange(newLocale);
             },
-            child: Text(
-              Localizations.localeOf(context).languageCode == 'en' ? '🇮🇱' : '🇺🇸',
-              style: const TextStyle(fontSize: 24),
+            icon: Icon(
+              Icons.language_outlined,
+              size: 24,
             ),
           ),
-          
-          const SizedBox(width: 8),
-          
-          // Logout button - clean icon
           IconButton(
             onPressed: () async {
               await AuthService.logout();
@@ -62,7 +58,6 @@ class WelcomeScreen extends StatelessWidget {
             },
             icon: Icon(
               Icons.logout_rounded,
-              color: const Color(0xFF6B7280),
               size: 24,
             ),
             tooltip: localizations.logout,
