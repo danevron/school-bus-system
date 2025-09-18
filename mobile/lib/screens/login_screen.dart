@@ -6,7 +6,11 @@ class LoginScreen extends StatefulWidget {
   final VoidCallback? onAuthChanged;
   final Function(Locale) onLanguageChange;
 
-  const LoginScreen({super.key, this.onAuthChanged, required this.onLanguageChange});
+  const LoginScreen({
+    super.key,
+    this.onAuthChanged,
+    required this.onLanguageChange,
+  });
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -71,7 +75,12 @@ class _LoginScreenState extends State<LoginScreen> {
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(_translateErrorMessage(result['message'], AppLocalizations.of(context)!)),
+              content: Text(
+                _translateErrorMessage(
+                  result['message'],
+                  AppLocalizations.of(context)!,
+                ),
+              ),
               backgroundColor: const Color(0xFFD32F2F),
               behavior: SnackBarBehavior.floating,
               margin: const EdgeInsets.all(16),
@@ -105,13 +114,15 @@ class _LoginScreenState extends State<LoginScreen> {
           TextButton(
             onPressed: () {
               final currentLocale = Localizations.localeOf(context);
-              final newLocale = currentLocale.languageCode == 'en' 
-                ? const Locale('he', '') 
-                : const Locale('en', '');
+              final newLocale = currentLocale.languageCode == 'en'
+                  ? const Locale('he', '')
+                  : const Locale('en', '');
               widget.onLanguageChange(newLocale);
             },
             child: Text(
-              Localizations.localeOf(context).languageCode == 'en' ? '🇮🇱' : '🇺🇸',
+              Localizations.localeOf(context).languageCode == 'en'
+                  ? '🇮🇱'
+                  : '🇺🇸',
               style: const TextStyle(fontSize: 24),
             ),
           ),
@@ -124,7 +135,7 @@ class _LoginScreenState extends State<LoginScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 80),
-              
+
               // Minimalist Title
               Text(
                 localizations.appTitle,
@@ -134,9 +145,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   letterSpacing: -0.5,
                 ),
               ),
-              
+
               const SizedBox(height: 8),
-              
+
               Text(
                 localizations.appSubtitle,
                 style: theme.textTheme.bodyLarge?.copyWith(
@@ -144,9 +155,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   height: 1.4,
                 ),
               ),
-              
+
               const SizedBox(height: 80),
-              
+
               // Clean Form
               Form(
                 key: _formKey,
@@ -160,9 +171,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         fontWeight: FontWeight.w400,
                       ),
                     ),
-                    
+
                     const SizedBox(height: 48),
-                    
+
                     // Email Field
                     TextFormField(
                       controller: _emailController,
@@ -181,16 +192,17 @@ class _LoginScreenState extends State<LoginScreen> {
                         if (value == null || value.trim().isEmpty) {
                           return localizations.emailRequired;
                         }
-                        if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                            .hasMatch(value.trim())) {
+                        if (!RegExp(
+                          r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                        ).hasMatch(value.trim())) {
                           return localizations.emailInvalid;
                         }
                         return null;
                       },
                     ),
-                    
+
                     const SizedBox(height: 32),
-                    
+
                     // Password Field
                     TextFormField(
                       controller: _passwordController,
@@ -207,7 +219,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         suffixIcon: IconButton(
                           icon: Icon(
-                            _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                            _obscurePassword
+                                ? Icons.visibility_off
+                                : Icons.visibility,
                             color: const Color(0xFF6B7280),
                             size: 20,
                           ),
@@ -228,9 +242,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         return null;
                       },
                     ),
-                    
+
                     const SizedBox(height: 56),
-                    
+
                     // Login Button
                     SizedBox(
                       width: double.infinity,
@@ -252,23 +266,27 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                       ),
                     ),
-                    
+
                     const SizedBox(height: 24),
-                    
+
                     // Forgot Password
                     TextButton(
-                      onPressed: _isLoading ? null : () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(localizations.forgotPasswordComingSoon),
-                            behavior: SnackBarBehavior.floating,
-                            margin: const EdgeInsets.all(16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                          ),
-                        );
-                      },
+                      onPressed: _isLoading
+                          ? null
+                          : () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    localizations.forgotPasswordComingSoon,
+                                  ),
+                                  behavior: SnackBarBehavior.floating,
+                                  margin: const EdgeInsets.all(16),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                ),
+                              );
+                            },
                       child: Text(
                         localizations.forgotPassword,
                         style: theme.textTheme.bodyMedium?.copyWith(

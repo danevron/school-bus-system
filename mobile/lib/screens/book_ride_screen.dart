@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../l10n/app_localizations.dart';
 import '../services/auth_service.dart';
+import '../widgets/human_readable_date.dart';
 
 class BookRideScreen extends StatefulWidget {
   const BookRideScreen({super.key});
@@ -239,113 +240,20 @@ class _BookRideScreenState extends State<BookRideScreen> {
       return;
     }
     
-    // Show booking confirmation dialog
-    final confirmed = await showDialog<bool>(
+    // Show booking confirmation modal
+    final confirmed = await showModalBottomSheet<bool>(
       context: context,
-      builder: (BuildContext context) {
-        final selectedPassenger = _availablePassengers.firstWhere(
-          (p) => p['_id'] == _selectedPassengerId,
-        );
-        
-        final pickupStop = (ride['stops'] as List).firstWhere(
-          (stop) => stop['stopId'] == pickupStopId,
-        );
-        
-        final dropoffStop = (ride['stops'] as List).firstWhere(
-          (stop) => stop['stopId'] == dropoffStopId,
-        );
-        
-        final dialogTheme = Theme.of(context);
-        final dialogColorScheme = dialogTheme.colorScheme;
-        
-        return AlertDialog(
-          title: Text(
-            localizations.confirmBooking,
-            style: dialogTheme.textTheme.headlineMedium?.copyWith(
-              color: dialogColorScheme.onSurface,
-              fontWeight: FontWeight.w400,
-            ),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '${localizations.ride}: ${ride['route']['name']}',
-                style: dialogTheme.textTheme.bodyMedium?.copyWith(
-                  color: dialogColorScheme.onSurface,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                '${localizations.passenger}: ${selectedPassenger['firstName']} ${selectedPassenger['lastName']}',
-                style: dialogTheme.textTheme.bodyMedium?.copyWith(
-                  color: dialogColorScheme.onSurface,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                '${localizations.date}: ${_formatDate(ride['date'])}',
-                style: dialogTheme.textTheme.bodyMedium?.copyWith(
-                  color: dialogColorScheme.onSurface,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                '${localizations.time}: ${_formatTime(ride['startTime'] ?? '')}',
-                style: dialogTheme.textTheme.bodyMedium?.copyWith(
-                  color: dialogColorScheme.onSurface,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                '${localizations.pickup}: ${pickupStop['name']}',
-                style: dialogTheme.textTheme.bodyMedium?.copyWith(
-                  color: dialogColorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '${localizations.dropoff}: ${dropoffStop['name']}',
-                style: dialogTheme.textTheme.bodyMedium?.copyWith(
-                  color: dialogColorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              style: TextButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6),
-                ),
-              ),
-              child: Text(
-                localizations.cancel,
-                style: dialogTheme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              style: ElevatedButton.styleFrom(
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6),
-                ),
-              ),
-              child: Text(
-                localizations.bookThisRide,
-                style: dialogTheme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ],
-        );
-      },
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => _BookingConfirmationModal(
+        ride: ride,
+        selectedPassengerId: _selectedPassengerId,
+        pickupStopId: pickupStopId,
+        dropoffStopId: dropoffStopId,
+        availablePassengers: _availablePassengers,
+      ),
     );
 
     if (confirmed == true) {
@@ -673,11 +581,21 @@ class _BookRideScreenState extends State<BookRideScreen> {
           const SizedBox(height: 12),
           
           // Date and time
-          Text(
-            '${_formatDate(ride['date'] ?? '')} at ${_formatTime(ride['startTime'] ?? '')}',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            ),
+          Row(
+            children: [
+              HumanReadableDate(
+                dateString: ride['date'] ?? '',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+              Text(
+                ' - ${_formatTime(ride['startTime'] ?? '')}',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
           ),
           
           const SizedBox(height: 4),
@@ -732,7 +650,7 @@ class _BookRideScreenState extends State<BookRideScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: availableSeats > 0 ? () => _bookRide(ride) : null,
+                onPressed: () => _bookRide(ride),
                 style: ElevatedButton.styleFrom(
                   elevation: 0,
                   shape: RoundedRectangleBorder(
@@ -1588,6 +1506,327 @@ class _AddGuestModalState extends State<_AddGuestModal> {
                 localizations.add,
                 style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BookingConfirmationModal extends StatelessWidget {
+  final Map<String, dynamic> ride;
+  final String? selectedPassengerId;
+  final String? pickupStopId;
+  final String? dropoffStopId;
+  final List<Map<String, dynamic>> availablePassengers;
+
+  const _BookingConfirmationModal({
+    required this.ride,
+    required this.selectedPassengerId,
+    required this.pickupStopId,
+    required this.dropoffStopId,
+    required this.availablePassengers,
+  });
+
+  String _formatDate(String dateString) {
+    try {
+      final date = DateTime.parse(dateString);
+      return '${date.day}/${date.month}/${date.year}';
+    } catch (e) {
+      return dateString;
+    }
+  }
+
+  String _formatTime(String timeString) {
+    try {
+      final time = DateTime.parse(timeString);
+      return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+    } catch (e) {
+      return timeString;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    final selectedPassenger = availablePassengers.firstWhere(
+      (p) => p['_id'] == selectedPassengerId,
+    );
+    
+    final pickupStop = (ride['stops'] as List).firstWhere(
+      (stop) => stop['stopId'] == pickupStopId,
+    );
+    
+    final dropoffStop = (ride['stops'] as List).firstWhere(
+      (stop) => stop['stopId'] == dropoffStopId,
+    );
+
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.7,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Column(
+        children: [
+          // Handle bar
+          Container(
+            width: 40,
+            height: 4,
+            margin: const EdgeInsets.symmetric(vertical: 8),
+            decoration: BoxDecoration(
+              color: colorScheme.onSurfaceVariant.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+
+          // Header
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    localizations.confirmBooking,
+                    style: theme.textTheme.headlineMedium?.copyWith(
+                      color: colorScheme.onSurface,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(
+                    Icons.close,
+                    color: colorScheme.onSurfaceVariant,
+                    size: 24,
+                  ),
+                  onPressed: () => Navigator.of(context).pop(false),
+                ),
+              ],
+            ),
+          ),
+
+          // Content
+          Expanded(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                  // Ride Info Card
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: colorScheme.primary.withOpacity(0.05),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: colorScheme.primary.withOpacity(0.1),
+                        width: 1,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          ride['route']['name'],
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            color: colorScheme.onSurface,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.calendar_today,
+                              size: 16,
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                            const SizedBox(width: 8),
+                            HumanReadableDate(
+                              dateString: ride['date'],
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: colorScheme.onSurface,
+                              ),
+                            ),
+                            const SizedBox(width: 20),
+                            Icon(
+                              Icons.access_time,
+                              size: 16,
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              _formatTime(ride['startTime'] ?? ''),
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: colorScheme.onSurface,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // Passenger Info
+                  Text(
+                    localizations.passenger,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: colorScheme.onSurface,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: colorScheme.surface,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: colorScheme.outline.withOpacity(0.2),
+                        width: 1,
+                      ),
+                    ),
+                    child: Text(
+                      '${selectedPassenger['firstName']} ${selectedPassenger['lastName']}',
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: colorScheme.onSurface,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // Pickup Stop
+                  Row(
+                    children: [
+                      Container(
+                        width: 12,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          color: colorScheme.primary,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              localizations.pickup,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            Text(
+                              pickupStop['name'],
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: colorScheme.onSurface,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  
+                  const SizedBox(height: 16),
+                  
+                  // Dropoff Stop
+                  Row(
+                    children: [
+                      Container(
+                        width: 12,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          color: colorScheme.error,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              localizations.dropoff,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            Text(
+                              dropoffStop['name'],
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: colorScheme.onSurface,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+                ),
+              ),
+            ),
+          ),
+
+          // Action Buttons
+          Padding(
+            padding: const EdgeInsets.all(32.0),
+            child: Column(
+              children: [
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(true),
+                    style: ElevatedButton.styleFrom(
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      minimumSize: const Size.fromHeight(48),
+                    ),
+                    child: Text(
+                      localizations.bookThisRide,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    style: TextButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      minimumSize: const Size.fromHeight(48),
+                    ),
+                    child: Text(
+                      localizations.cancel,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],

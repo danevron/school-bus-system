@@ -70,7 +70,22 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
         final bookingsData = responseData['data']?['bookings'] as List? ?? [];
-        
+
+        bookingsData.forEach((booking) {
+          booking['actionable'] = booking['actions']?['canCancel'] == true ||
+              booking['actions']?['canConfirm'] == true ||
+              booking['actions']?['canCheckIn'] == true ||
+              booking['actions']?['canDropOff'] == true;
+        });
+
+        // sort by status (non-cancelled first), then by actionable (actionable first)
+        bookingsData.sort((a, b) => b['status'].compareTo(a['status']));
+        bookingsData.sort((a, b) {
+          final aActionable = a['actionable'] == true ? 1 : 0;
+          final bActionable = b['actionable'] == true ? 1 : 0;
+          return bActionable.compareTo(aActionable);
+        });
+
         setState(() {
           _bookings = bookingsData.map((booking) {
             // Transform the API response to match our expected format
@@ -662,7 +677,7 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16),
           child: Text(
-            localizations.passengersCount(_bookings.length),
+            localizations.passengersCount(_bookings.where((b) => b['status'] != 'cancelled').length),
             style: theme.textTheme.headlineMedium?.copyWith(
               color: const Color(0xFF111827),
               fontWeight: FontWeight.w400,
@@ -1008,79 +1023,15 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
   }
 
   Future<void> _showCancelConfirmation(String bookingId) async {
-    final localizations = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showModalBottomSheet<bool>(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(
-            localizations.confirmCancellation,
-            style: theme.textTheme.headlineMedium?.copyWith(
-              color: colorScheme.onSurface,
-              fontWeight: FontWeight.w400,
-            ),
-          ),
-          content: Text(
-            localizations.confirmCancellationMessage,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              style: TextButton.styleFrom(
-                foregroundColor: colorScheme.onSurfaceVariant,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6),
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.close, size: 16),
-                  SizedBox(width: 6),
-                  Text(
-                    localizations.cancel,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              style: ElevatedButton.styleFrom(
-                elevation: 0,
-                backgroundColor: colorScheme.error,
-                foregroundColor: colorScheme.onError,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6),
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.delete_forever, size: 16),
-                  SizedBox(width: 6),
-                  Text(
-                    localizations.confirmCancellation,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onError,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        );
-      },
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => _CancellationConfirmationModal(
+        bookingId: bookingId,
+      ),
     );
 
     if (confirmed == true) {
@@ -1104,5 +1055,102 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
     } catch (e) {
       return startDate; // Return original if parsing fails
     }
+  }
+}
+
+class _CancellationConfirmationModal extends StatelessWidget {
+  final String bookingId;
+
+  const _CancellationConfirmationModal({
+    required this.bookingId,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.4,
+      width: double.infinity,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Handle bar
+          Center(
+            child: Container(
+              margin: const EdgeInsets.only(top: 12),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: colorScheme.onSurfaceVariant.withOpacity(0.4),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          
+          // Header with close button
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  localizations.confirmCancellation,
+                  style: theme.textTheme.headlineMedium?.copyWith(
+                    color: colorScheme.onSurface,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  icon: Icon(
+                    Icons.close,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          // Content
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    localizations.confirmCancellationMessage,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                      height: 1.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          
+          Padding(
+            padding: const EdgeInsets.only(bottom: 60, left: 20, right: 20),
+            child: ElevatedButton.icon(
+              label: Text(localizations.cancel),
+              icon: const Icon(Icons.delete_forever, size: 16),
+              onPressed: () => Navigator.of(context).pop(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colorScheme.error,
+                foregroundColor: colorScheme.onError,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

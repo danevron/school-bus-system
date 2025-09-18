@@ -328,7 +328,7 @@
   "@confirmCancellation": {
     "description": "Dialog title for confirming cancellation"
   },
-  "confirmCancellationMessage": "האם אתה בטוח שברצונך לבטל את ההזמנה הזו?",
+  "confirmCancellationMessage": "האם אתה בטוח שברצונך לבטל את ההזמנה לא ניתן לבטל את הביטול?",
   "@confirmCancellationMessage": {
     "description": "Dialog message asking user to confirm cancellation"
   },

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 import '../services/auth_service.dart';
+import '../widgets/human_readable_date.dart';
 import 'ride_detail_screen.dart';
 import 'book_ride_screen.dart';
 
@@ -416,12 +417,24 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
             const SizedBox(height: 8),
             
             // Date and time
-            if (dateTimeDisplay.isNotEmpty) ...[
-              Text(
-                dateTimeDisplay,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
+            if (date.isNotEmpty) ...[
+              Row(
+                children: [
+                  HumanReadableDate(
+                    dateString: date,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  if (startTime.isNotEmpty) ...[
+                    Text(
+                      ' - ${_formatTime(startTime)}',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ],
               ),
               
               const SizedBox(height: 12),
@@ -460,6 +473,16 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
     );
   }
 
+  String _formatTime(String timeString) {
+    try {
+      if (timeString.isEmpty) return '';
+      final timeDateTime = DateTime.parse(timeString);
+      return '${timeDateTime.hour.toString().padLeft(2, '0')}:${timeDateTime.minute.toString().padLeft(2, '0')}';
+    } catch (e) {
+      return timeString;
+    }
+  }
+
   String _formatDateTime(String timeString, {required String startDate}) {
     try {
       final dateDateTime = DateTime.parse(startDate);
@@ -467,8 +490,7 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
       final date = '${rideDate.day}/${rideDate.month}/${rideDate.year}';
 
       if (timeString.isNotEmpty) {
-        final timeDateTime = DateTime.parse(timeString);
-        final time = '${timeDateTime.hour.toString().padLeft(2, '0')}:${timeDateTime.minute.toString().padLeft(2, '0')}';
+        final time = _formatTime(timeString);
         return '$date - $time';
       } else {
         return date;

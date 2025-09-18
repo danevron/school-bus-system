@@ -254,7 +254,7 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get confirmCancellationMessage =>
-      'האם אתה בטוח שברצונך לבטל את ההזמנה הזו?';
+      'האם אתה בטוח שברצונך לבטל את ההזמנה לא ניתן לבטל את הביטול?';
 
   @override
   String get bookNewRide => 'הזמן נסיעה חדשה';
