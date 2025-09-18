@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'screens/main_navigation_screen.dart';
+import 'screens/ride_detail_screen.dart';
 import 'l10n/app_localizations.dart';
 import 'services/auth_service.dart';
 import 'services/location_foreground_service.dart';
+import 'services/notification_service.dart';
 import 'screens/login_screen.dart';
 
 void main() async {
@@ -13,6 +15,12 @@ void main() async {
   // Initialize services
   await AuthService.init();
   LocationForegroundService.initializeService();
+  try {
+    await NotificationService.initialize();
+  } catch (e) {
+    print('Failed to initialize NotificationService: $e');
+    // Continue without notifications for now
+  }
   
   runApp(const SchoolBusApp());
 }
@@ -26,10 +34,13 @@ class SchoolBusApp extends StatefulWidget {
 
 class _SchoolBusAppState extends State<SchoolBusApp> {
   Locale _locale = const Locale('en', '');
+  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
 
   @override
   void initState() {
     super.initState();
+    // Provide navigator key to notification service for deep linking
+    NotificationService.navigatorKey = _navigatorKey;
   }
 
   void _changeLanguage(Locale locale) {
@@ -47,6 +58,7 @@ class _SchoolBusAppState extends State<SchoolBusApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: _navigatorKey,
       title: 'School Bus App',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
@@ -183,6 +195,17 @@ class _SchoolBusAppState extends State<SchoolBusApp> {
             : LoginScreen(onAuthChanged: _onAuthChanged, onLanguageChange: _changeLanguage),
         '/login': (context) => LoginScreen(onAuthChanged: _onAuthChanged, onLanguageChange: _changeLanguage),
         '/home': (context) => MainNavigationScreen(onLanguageChange: _changeLanguage, onAuthChanged: _onAuthChanged),
+      },
+      onGenerateRoute: (settings) {
+        if (settings.name == '/ride-detail') {
+          final args = settings.arguments as Map<String, dynamic>?;
+          if (args != null && args['ride'] != null) {
+            return MaterialPageRoute(
+              builder: (context) => RideDetailScreen(ride: args['ride']),
+            );
+          }
+        }
+        return null;
       },
       initialRoute: '/',
     );

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'notification_service.dart';
 
 class AuthService {
   static const String _baseUrl = 'http://localhost:3000'; // TODO: Make this configurable
@@ -50,6 +51,14 @@ class AuthService {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString(_tokenKey, _token!);
         await prefs.setString(_userKey, json.encode(_user));
+        
+        // Register FCM token after successful login
+        try {
+          await NotificationService.getTokenAndRegister();
+        } catch (e) {
+          print('Failed to register FCM token: $e');
+          // Don't fail login if FCM registration fails
+        }
         
         return {
           'success': true,

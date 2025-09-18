@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1013073436513",
+    "project_id": "school-bus-system-96367",
+    "storage_bucket": "school-bus-system-96367.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1013073436513:android:18b919e5b420fd9d8a2f20",
+        "android_client_info": {
+          "package_name": "com.schoolbus.school_bus_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA-0xcahN4_syRg0JHF0FzuLGAzDbtwfd0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

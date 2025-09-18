@@ -61,6 +61,30 @@ class JobsController {
       });
     }
   }
+
+  // Ride confirmation messages sending job
+  async sendRideConfirmationMessages(req: Request, res: Response) {
+    try {
+      const timestamp = new Date().toISOString();
+      log.info('Sending ride confirmation messages', { timestamp });
+
+      // Simulate sending ride confirmation messages
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      log.info('Ride confirmation messages sent successfully', { timestamp });
+      res.status(200).json({
+        message: 'Ride confirmation messages sent successfully',
+        timestamp
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      log.error('Failed to send ride confirmation messages', { error: errorMessage });
+      res.status(500).json({
+        message: 'Failed to send ride confirmation messages',
+        error: errorMessage
+      });
+    }
+  }
 }
 
 export default new JobsController();

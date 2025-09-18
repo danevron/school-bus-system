@@ -1,4 +1,4 @@
-name: Scheduled Jobs
+name: Create Weekly Rides
 
 on:
   schedule:
@@ -28,7 +28,7 @@ jobs:
     needs: health-check
     
     steps:
-      - name: Trigger Scheduled Job
+      - name: Trigger Ride Generation Job
         run: |
           echo "🚌 Triggering ride generation job via API..."
 

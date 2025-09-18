@@ -1,0 +1,67 @@
+name: Trigger Ride Confirmation Messages sendout
+on:
+  schedule:
+    - cron: '0 9,10 * * *'  # Run at both possible UTC times
+    
+  # Allow manual triggering from GitHub UI
+  workflow_dispatch:
+jobs:
+  trigger-ride-confirmation-messages:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if it's noon in Israel
+        id: time-check
+        run: |
+          # Get current time in Israel
+          ISRAEL_TIME=$(TZ='Asia/Jerusalem' date '+%Y-%m-%d %H:%M:%S')
+          ISRAEL_HOUR=$(TZ='Asia/Jerusalem' date '+%H')
+
+          echo "Israel time: $ISRAEL_TIME"
+          echo "Israel hour: $ISRAEL_HOUR"
+
+          # Check if it's noon (12:00) in Israel
+          if [ "$ISRAEL_HOUR" -eq 12 ]; then
+            echo "should_run=true" >> $GITHUB_OUTPUT
+            echo "It's noon in Israel!"
+          else
+            echo "should_run=false" >> $GITHUB_OUTPUT
+            echo "Not noon in Israel (hour: $ISRAEL_HOUR)"
+          fi
+
+      - name: Job health check
+        id: health-check
+        if: steps.time-check.outputs.should_run == 'true'
+        run: |
+          echo "🚌 Checking School Bus Jobs API..."
+          echo "Current time: $(date -u)"
+
+          # Health check (replace with your actual Render URL)
+          curl -f -X GET "${{ secrets.API_BASE_URL }}/api/jobs/health" \
+            -H "Accept: application/json" \
+            || echo "Health check failed - service might be sleeping"
+
+          # Set output variable for job status
+          if [ $? -eq 0 ]; then
+            echo "should_run=true" >> $GITHUB_OUTPUT
+          else
+            echo "should_run=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Trigger Ride Confirmation Messages Job
+        if: steps.health-check.outputs.should_run == 'true'
+        run: |
+          echo "🚌 Triggering ride confirmation messages job via API..."
+
+          response=$(curl -s -X POST "${{ secrets.API_BASE_URL }}/api/jobs/send-ride-confirmation-messages" \
+            -H "Content-Type: application/json" \
+            -H "Accept: application/json")
+
+          echo "API Response: $response"
+
+          # Check if the response indicates success
+          if echo "$response" | grep -q "ride confirmation messages job completed successfully"; then
+            echo "✅ Ride confirmation messages job completed successfully!"
+          else
+            echo "❌ Ride confirmation messages job failed!"
+            exit 1
+          fi
