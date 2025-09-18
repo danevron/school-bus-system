@@ -94,27 +94,25 @@
           <!-- Data Table -->
           <DataTable 
             v-else
-            :value="requests" 
+            :value="filteredRequests" 
             :paginator="true" 
             :rows="10"
             :rowsPerPageOptions="[5, 10, 20, 50]"
-            :globalFilterFields="['student.firstName', 'student.lastName', 'selectedStop.name', 'comments']"
-            :globalFilter="globalFilter"
-            :filters="filters"
-            filterDisplay="row"
             :loading="loading"
             sortMode="multiple"
             removableSort
+            filterDisplay="row"
             :paginatorTemplate="`{CurrentPageReport} {FirstPageLink} {PrevPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}`"
             :currentPageReportTemplate="$t('common.paginatorTemplate')"
             class="requests-datatable"
           >
             <!-- Student Name Column -->
             <Column 
-              field="student.firstName" 
+              field="student" 
               :header="$t('registrations.detail.columns.student')"
               sortable
               style="min-width: 200px"
+              filterField="student"
             >
               <template #body="{ data }">
                 <div class="student-info">
@@ -130,9 +128,9 @@
                   </div>
                 </div>
               </template>
-              <template #filter="{ filterModel }">
+              <template #filter>
                 <InputText 
-                  v-model="filterModel.value" 
+                  v-model="localFilters.student" 
                   type="text" 
                   :placeholder="$t('registrations.detail.filters.searchStudent')"
                   size="small"
@@ -142,10 +140,11 @@
 
             <!-- Parent Column -->
             <Column 
-              field="parent.firstName" 
+              field="parent" 
               :header="$t('registrations.detail.columns.parent')"
               sortable
               style="min-width: 180px"
+              filterField="parent"
             >
               <template #body="{ data }">
                 <div v-if="data.parent" class="parent-info">
@@ -154,9 +153,9 @@
                 </div>
                 <span v-else class="no-parent">{{ $t('registrations.detail.noParent') }}</span>
               </template>
-              <template #filter="{ filterModel }">
+              <template #filter>
                 <InputText 
-                  v-model="filterModel.value" 
+                  v-model="localFilters.parent" 
                   type="text" 
                   :placeholder="$t('registrations.detail.filters.searchParent')"
                   size="small"
@@ -166,10 +165,11 @@
 
             <!-- Selected Stop Column -->
             <Column 
-              field="selectedStop.name" 
+              field="selectedStop" 
               :header="$t('registrations.detail.columns.selectedStop')"
               sortable
               style="min-width: 150px"
+              filterField="selectedStop"
             >
               <template #body="{ data }">
                 <div v-if="data.selectedStop" class="stop-info">
@@ -178,9 +178,9 @@
                 </div>
                 <Tag v-else :value="$t('common.notSelected')" severity="secondary" size="small" />
               </template>
-              <template #filter="{ filterModel }">
+              <template #filter>
                 <InputText 
-                  v-model="filterModel.value" 
+                  v-model="localFilters.selectedStop" 
                   type="text" 
                   :placeholder="$t('registrations.detail.filters.searchStop')"
                   size="small"
@@ -194,6 +194,7 @@
               field="comments" 
               :header="$t('registrations.detail.columns.comments')"
               style="min-width: 200px"
+              filterField="comments"
             >
               <template #body="{ data }">
                 <div v-if="data.comments" class="comments-cell">
@@ -201,9 +202,9 @@
                 </div>
                 <span v-else class="no-comments">{{ $t('registrations.detail.noComments') }}</span>
               </template>
-              <template #filter="{ filterModel }">
+              <template #filter>
                 <InputText 
-                  v-model="filterModel.value" 
+                  v-model="localFilters.comments" 
                   type="text" 
                   :placeholder="$t('registrations.detail.filters.searchComments')"
                   size="small"
@@ -258,13 +259,16 @@ export default {
     const loading = ref(true)
     const globalFilter = ref('')
     
-    // Table filters
-    const filters = ref({
-      'student.firstName': { value: null, matchMode: FilterMatchMode.CONTAINS },
-      'parent.firstName': { value: null, matchMode: FilterMatchMode.CONTAINS },
-      'selectedStop.name': { value: null, matchMode: FilterMatchMode.CONTAINS },
-      'comments': { value: null, matchMode: FilterMatchMode.CONTAINS }
+    // Local filter values for custom filtering
+    const localFilters = ref({
+      student: '',
+      parent: '',
+      selectedStop: '',
+      comments: ''
     })
+
+    // Table filters - empty since we'll handle filtering manually
+    const filters = ref({})
     
     const registrationId = computed(() => route.params.id)
     
@@ -274,6 +278,75 @@ export default {
       { label: t('registrations.title'), path: '/registrations' },
       { label: t('registrations.detail.title') }
     ])
+
+    // Filtered requests with custom filtering
+    const filteredRequests = computed(() => {
+      let filtered = [...requests.value]
+      
+      // Apply student filter
+      if (localFilters.value.student) {
+        const studentFilter = localFilters.value.student.toLowerCase()
+        filtered = filtered.filter(item => {
+          if (!item.student) return false
+          const fullName = `${item.student.firstName || ''} ${item.student.lastName || ''}`.toLowerCase()
+          const phone = (item.student.phone || '').toLowerCase()
+          return fullName.includes(studentFilter) || phone.includes(studentFilter)
+        })
+      }
+      
+      // Apply parent filter
+      if (localFilters.value.parent) {
+        const parentFilter = localFilters.value.parent.toLowerCase()
+        filtered = filtered.filter(item => {
+          if (!item.parent) return false
+          const fullName = `${item.parent.firstName || ''} ${item.parent.lastName || ''}`.toLowerCase()
+          const email = (item.parent.email || '').toLowerCase()
+          return fullName.includes(parentFilter) || email.includes(parentFilter)
+        })
+      }
+      
+      // Apply selected stop filter
+      if (localFilters.value.selectedStop) {
+        const stopFilter = localFilters.value.selectedStop.toLowerCase()
+        filtered = filtered.filter(item => {
+          if (!item.selectedStop) return false
+          const stopName = (item.selectedStop.name || '').toLowerCase()
+          return stopName.includes(stopFilter)
+        })
+      }
+      
+      // Apply comments filter
+      if (localFilters.value.comments) {
+        const commentsFilter = localFilters.value.comments.toLowerCase()
+        filtered = filtered.filter(item => {
+          const comments = (item.comments || '').toLowerCase()
+          return comments.includes(commentsFilter)
+        })
+      }
+      
+      // Apply global filter
+      if (globalFilter.value) {
+        const globalFilterValue = globalFilter.value.toLowerCase()
+        filtered = filtered.filter(item => {
+          const studentName = `${item.student?.firstName || ''} ${item.student?.lastName || ''}`.toLowerCase()
+          const studentPhone = (item.student?.phone || '').toLowerCase()
+          const parentName = `${item.parent?.firstName || ''} ${item.parent?.lastName || ''}`.toLowerCase()
+          const parentEmail = (item.parent?.email || '').toLowerCase()
+          const stopName = (item.selectedStop?.name || '').toLowerCase()
+          const comments = (item.comments || '').toLowerCase()
+          
+          return studentName.includes(globalFilterValue) ||
+                 studentPhone.includes(globalFilterValue) ||
+                 parentName.includes(globalFilterValue) ||
+                 parentEmail.includes(globalFilterValue) ||
+                 stopName.includes(globalFilterValue) ||
+                 comments.includes(globalFilterValue)
+        })
+      }
+      
+      return filtered
+    })
+
     
     
     // Load data
@@ -366,6 +439,8 @@ export default {
       loading,
       globalFilter,
       filters,
+      localFilters,
+      filteredRequests,
       breadcrumbItems,
       refreshData,
       getStudentInitials,

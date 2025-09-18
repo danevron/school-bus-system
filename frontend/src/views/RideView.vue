@@ -300,6 +300,21 @@
                     </span>
                   </div>
                 </div>
+                <div class="stops-info">
+                  <div class="stops-compact">
+                    <div class="stop-compact pickup">
+                      <i class="pi pi-sign-in stop-icon pickup-icon"></i>
+                      <span class="stop-label">{{ $t('rideView.pickup') }}:</span>
+                      <span class="stop-name">{{ booking.pickupStop.name }}</span>
+                    </div>
+                    <div class="stop-compact dropoff">
+                      <i class="pi pi-sign-out stop-icon dropoff-icon"></i>
+                      <span class="stop-label">{{ $t('rideView.dropoff') }}:</span>
+                      <span v-if="booking.dropoffStop" class="stop-name">{{ booking.dropoffStop.name }}</span>
+                      <span v-else class="not-assigned">{{ $t('rideView.notSpecified') }}</span>
+                    </div>
+                  </div>
+                </div>
                 <div class="booking-actions">
                   <!-- Admit/Cancel buttons for waiting list bookings -->
                   <template v-if="booking.status === 'waiting_list'">
@@ -372,38 +387,6 @@
                       size="small"
                     />
                   </template>
-                </div>
-              </div>
-
-              <div class="booking-details">
-                <div class="stops-row">
-                  <div class="stop-assignment pickup">
-                    <div class="stop-header">
-                      <i class="pi pi-sign-in stop-icon pickup-icon"></i>
-                      <span class="stop-label">{{ $t('rideView.pickup') }}</span>
-                    </div>
-                    <div class="stop-content">
-                      <div class="stop-name">{{ booking.pickupStop.name }}</div>
-                    </div>
-                  </div>
-
-                  <div class="route-connector">
-                    <div class="connector-line"></div>
-                    <i class="pi pi-arrow-right connector-arrow"></i>
-                  </div>
-
-                  <div class="stop-assignment dropoff">
-                    <div class="stop-header">
-                      <i class="pi pi-sign-out stop-icon dropoff-icon"></i>
-                      <span class="stop-label">{{ $t('rideView.dropoff') }}</span>
-                    </div>
-                    <div v-if="booking.dropoffStop" class="stop-content">
-                      <div class="stop-name">{{ booking.dropoffStop.name }}</div>
-                    </div>
-                    <div v-else class="no-stop-assigned">
-                      <span class="not-assigned">{{ $t('rideView.notSpecified') }}</span>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
@@ -1313,11 +1296,20 @@ export default {
   flex-shrink: 0;
 }
 
-.passenger-info {
+.stops-info {
   flex: 1;
+  display: flex;
+  align-items: center;
+  margin-left: 0.5rem;
+  min-width: 0;
+}
+
+.passenger-info {
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  min-width: 0;
 }
 
 .passenger-name {
@@ -1386,108 +1378,69 @@ export default {
   padding: 1.25rem;
 }
 
-.stops-row {
-  display: flex;
-  align-items: stretch;
-  gap: 1rem;
-  min-height: 80px;
-}
-
-.stop-assignment {
-  flex: 1;
-  min-width: 0;
+/* Compact stops layout styles - table-like alignment */
+.stops-compact {
   display: flex;
   flex-direction: column;
+  gap: 0.375rem;
+  width: 100%;
 }
 
-.stop-header {
+.stop-compact {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.75rem;
-  flex-shrink: 0;
+  gap: 0.375rem;
 }
 
-.stop-icon {
-  font-size: 1rem;
+.stop-compact .stop-icon {
+  font-size: 0.875rem;
   padding: 0.25rem;
   border-radius: 50%;
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.pickup-icon {
+.stop-compact .pickup-icon {
   color: var(--p-green-600);
   background-color: var(--p-green-50);
 }
 
-.dropoff-icon {
+.stop-compact .dropoff-icon {
   color: var(--p-orange-600);
   background-color: var(--p-orange-50);
 }
 
-.stop-label {
+.stop-compact .stop-label {
   font-weight: 500;
   color: var(--p-text-color);
-  font-size: 0.875rem;
+  font-size: 0.8rem;
+  min-width: 4rem;
+  flex-shrink: 0;
 }
 
-.stop-content {
-  background-color: var(--p-surface-50);
-  border-radius: var(--p-border-radius);
-  padding: 0.75rem;
-  border: 1px solid var(--p-surface-border);
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.stop-content .stop-name {
-  font-weight: 500;
+.stop-compact .stop-name {
+  font-weight: 400;
   color: var(--p-text-color);
-}
-
-.no-stop-assigned {
-  padding: 0.75rem;
-  text-align: center;
+  font-size: 0.8rem;
   flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.not-assigned {
+.stop-compact .not-assigned {
   color: var(--p-text-muted-color);
   font-style: italic;
-  font-size: 0.875rem;
+  font-size: 0.8rem;
+  flex: 1;
+  min-width: 0;
 }
 
-.route-connector {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  min-width: 2rem;
-  align-self: center;
-  margin-top: 2rem;
-}
-
-.connector-line {
-  position: absolute;
-  width: 100%;
-  height: 2px;
-  background-color: var(--p-surface-300);
-  z-index: 1;
-}
-
-.connector-arrow {
-  background-color: var(--p-surface-0);
-  color: var(--p-primary-color);
-  font-size: 1rem;
-  padding: 0.25rem;
-  border-radius: 50%;
-  z-index: 2;
-  position: relative;
-}
 
 .loading-container, .error-container, .not-found-container {
   display: flex;
