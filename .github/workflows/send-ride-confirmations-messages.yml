@@ -52,7 +52,7 @@ jobs:
         run: |
           echo "🚌 Triggering ride confirmation messages job via API..."
 
-          response=$(curl -s -X POST "${{ secrets.API_BASE_URL }}/api/jobs/send-ride-confirmation-messages" \
+          response=$(curl -s -X POST "${{ secrets.API_BASE_URL }}/api/jobs/scheduled/send-ride-confirmation-messages" \
             -H "Content-Type: application/json" \
             -H "Accept: application/json")
 

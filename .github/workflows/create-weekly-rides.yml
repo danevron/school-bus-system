@@ -32,7 +32,7 @@ jobs:
         run: |
           echo "🚌 Triggering ride generation job via API..."
 
-          response=$(curl -s -X POST "${{ secrets.API_BASE_URL }}/api/jobs/generate-weekly-rides" \
+          response=$(curl -s -X POST "${{ secrets.API_BASE_URL }}/api/jobs/scheduled/generate-weekly-rides" \
             -H "Content-Type: application/json" \
             -H "Accept: application/json")
           

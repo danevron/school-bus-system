@@ -13,4 +13,7 @@ router.post('/generate-weekly-rides', authenticate, requireAdmin, jobsController
 // Alternative endpoint without auth for GitHub Actions (we'll secure this with API key)
 router.post('/scheduled/generate-weekly-rides', jobsController.generateWeeklyRides);
 
+// Send ride confirmation messages (admin only for now)
+router.post('/scheduled/send-ride-confirmation-messages', jobsController.sendRideConfirmationMessages);
+
 export default router;
