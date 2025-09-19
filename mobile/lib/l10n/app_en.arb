@@ -8,6 +8,10 @@
   "@appSubtitle": {
     "description": "The subtitle of the application"
   },
+  "loading": "Loading...",
+  "@loading": {
+    "description": "Loading text displayed on splash screen"
+  },
   "language": "Language",
   "@language": {
     "description": "Language selection label"
@@ -527,6 +531,15 @@
   "justNow": "Just now",
   "@justNow": {
     "description": "Time indicator for very recent updates"
+  },
+  "totalDistance": "Total distance",
+  "@totalDistance": {
+    "description": "Total distance indicator",
+    "placeholder": "Total distance"
+  },
+  "km": "km",
+  "@km": {
+    "description": "km"
   },
   "minutesAgo": "{minutes}m ago",
   "@minutesAgo": {

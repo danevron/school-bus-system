@@ -17,8 +17,8 @@ class _BookRideScreenState extends State<BookRideScreen> {
   List<Map<String, dynamic>> _availableRides = [];
   List<Map<String, dynamic>> _availablePassengers = [];
   String? _selectedPassengerId;
-  Map<String, String?> _selectedPickupStops = {}; // rideId -> stopId
-  Map<String, String?> _selectedDropoffStops = {}; // rideId -> stopId
+  final Map<String, String?> _selectedPickupStops = {}; // rideId -> stopId
+  final Map<String, String?> _selectedDropoffStops = {}; // rideId -> stopId
   
   @override
   void initState() {
@@ -41,30 +41,25 @@ class _BookRideScreenState extends State<BookRideScreen> {
         }
       ];
 
-      // Load children from profile endpoint for any user type
-      final response = await AuthService.authenticatedRequest('GET', '/api/auth/profile');
-      
-      if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
-        final user = responseData['user'] as Map<String, dynamic>?;
-        final children = user?['children'] as List? ?? [];
+      final guestsResponse = await AuthService.authenticatedRequest('GET', '/api/auth/my-guests');
+
+      if (guestsResponse.statusCode == 200) {
+        final responseData = json.decode(guestsResponse.body);
+        final guests = responseData['data']['guests'] as List? ?? [];
         
-        // Add children to available passengers
-        for (final child in children) {
-          final childMap = child as Map<String, dynamic>;
+        // Add guests to available passengers
+        for (final guest in guests) {
+          final guestMap = guest as Map<String, dynamic>;
           _availablePassengers.add({
-            '_id': childMap['_id'],
-            'firstName': childMap['firstName'] ?? 'Child',
-            'lastName': childMap['lastName'] ?? '',
-            'role': childMap['role'] ?? 'student',
+            '_id': guestMap['_id'],
+            'firstName': guestMap['firstName'] ?? 'Guest',
+            'lastName': guestMap['lastName'] ?? '',
+            'role': guestMap['role'] ?? 'student',
             'isCurrentUser': false,
-            'isGuest': false,
+            'isGuest': true,
           });
         }
       }
-
-      // Load guests from API
-      await _loadGuests();
     } catch (e) {
       // Fallback to just current user if API call fails
       final currentUser = AuthService.user;
@@ -83,32 +78,6 @@ class _BookRideScreenState extends State<BookRideScreen> {
     // Default selection is current user
     if (_availablePassengers.isNotEmpty) {
       _selectedPassengerId = _availablePassengers.first['_id'];
-    }
-  }
-
-  Future<void> _loadGuests() async {
-    try {
-      final response = await AuthService.authenticatedRequest('GET', '/api/auth/my-guests');
-      
-      if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
-        final guests = responseData['data']['guests'] as List? ?? [];
-        
-        // Add guests to available passengers
-        for (final guest in guests) {
-          final guestMap = guest as Map<String, dynamic>;
-          _availablePassengers.add({
-            '_id': guestMap['_id'],
-            'firstName': guestMap['firstName'] ?? 'Guest',
-            'lastName': guestMap['lastName'] ?? '',
-            'role': guestMap['role'] ?? 'student',
-            'isCurrentUser': false,
-            'isGuest': true,
-          });
-        }
-      }
-    } catch (e) {
-      // Ignore error if guests API fails
     }
   }
 
@@ -1133,11 +1102,19 @@ class _RideBookingModalState extends State<_RideBookingModal> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
             child: ElevatedButton.icon(
-              icon: const Icon(Icons.check_circle_outline),
+              icon: Icon(availableSeats == 0 ? Icons.schedule : Icons.check_circle_outline),
               onPressed: (_selectedPickupStopId != null && _selectedDropoffStopId != null)
                   ? () => widget.onBook(_selectedPickupStopId, _selectedDropoffStopId)
                   : null,
-              label: Text(localizations.bookThisRide),
+              style: availableSeats == 0 
+                  ? ElevatedButton.styleFrom(
+                      backgroundColor: colorScheme.secondary,
+                      foregroundColor: colorScheme.onSecondary,
+                    )
+                  : null,
+              label: Text(availableSeats == 0 
+                  ? localizations.bookingStatusWaitingList 
+                  : localizations.bookThisRide),
             ),
           ),
         ],
@@ -1713,7 +1690,7 @@ class _AddGuestModalState extends State<_AddGuestModal> {
 
           // Content
           Expanded(
-            child: Padding(
+            child: SingleChildScrollView(
               padding: const EdgeInsets.all(32.0),
               child: Form(
                 key: _formKey,
@@ -1767,7 +1744,7 @@ class _AddGuestModalState extends State<_AddGuestModal> {
                       keyboardType: TextInputType.phone,
                       enabled: !_isLoading,
                     ),
-                    const Spacer(),
+                    const SizedBox(height: 32),
                   ],
                 ),
               ),
@@ -1855,6 +1832,7 @@ class _BookingConfirmationModal extends StatelessWidget {
     final localizations = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final availableSeats = ride['availableSeats'] ?? 0;
 
     final selectedPassenger = availablePassengers.firstWhere(
       (p) => p['_id'] == selectedPassengerId,
@@ -2101,9 +2079,13 @@ class _BookingConfirmationModal extends StatelessWidget {
                         borderRadius: BorderRadius.circular(6),
                       ),
                       minimumSize: const Size.fromHeight(48),
+                      backgroundColor: availableSeats == 0 ? colorScheme.secondary : null,
+                      foregroundColor: availableSeats == 0 ? colorScheme.onSecondary : null,
                     ),
                     child: Text(
-                      localizations.bookThisRide,
+                      availableSeats == 0 
+                          ? localizations.bookingStatusWaitingList 
+                          : localizations.bookThisRide,
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w500,
                       ),

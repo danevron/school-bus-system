@@ -110,6 +110,12 @@ abstract class AppLocalizations {
   /// **'Mobile App'**
   String get appSubtitle;
 
+  /// Loading text displayed on splash screen
+  ///
+  /// In en, this message translates to:
+  /// **'Loading...'**
+  String get loading;
+
   /// Language selection label
   ///
   /// In en, this message translates to:
@@ -793,6 +799,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Just now'**
   String get justNow;
+
+  /// Total distance indicator
+  ///
+  /// In en, this message translates to:
+  /// **'Total distance'**
+  String get totalDistance;
+
+  /// km
+  ///
+  /// In en, this message translates to:
+  /// **'km'**
+  String get km;
 
   /// Time indicator for minutes ago
   ///

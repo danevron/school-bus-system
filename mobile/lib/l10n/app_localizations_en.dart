@@ -15,6 +15,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appSubtitle => 'Mobile App';
 
   @override
+  String get loading => 'Loading...';
+
+  @override
   String get language => 'Language';
 
   @override
@@ -380,6 +383,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get justNow => 'Just now';
+
+  @override
+  String get totalDistance => 'Total distance';
+
+  @override
+  String get km => 'km';
 
   @override
   String minutesAgo(int minutes) {

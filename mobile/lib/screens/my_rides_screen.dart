@@ -398,7 +398,10 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
           onTap: () {
             Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (context) => RideDetailScreen(ride: ride),
+                builder: (context) => RideDetailScreen(
+                  ride: ride,
+                  onRideUpdated: _loadRides,
+                ),
               ),
             );
           },

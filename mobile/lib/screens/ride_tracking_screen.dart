@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -341,7 +340,7 @@ class _RideTrackingScreenState extends State<RideTrackingScreen> {
                   TileLayer(
                     urlTemplate: MapTileConfig.getTileUrlTemplate(),
                     subdomains: MapTileConfig.getSubdomains(),
-                    userAgentPackageName: 'com.example.school_bus_app',
+                    userAgentPackageName: 'com.danevron.school_bus_app',
                     additionalOptions: MapTileConfig.getAdditionalOptions(),
                   ),
                   
@@ -645,7 +644,7 @@ class _RideTrackingScreenState extends State<RideTrackingScreen> {
           if (totalDistance > 0) ...[
             const SizedBox(height: 4),
             Text(
-              'Total Distance: ${(totalDistance / 1000).toStringAsFixed(1)} km',
+              '${localizations.totalDistance}: ${(totalDistance / 1000).toStringAsFixed(1)} ${localizations.km}',
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onSurfaceVariant,
               ),

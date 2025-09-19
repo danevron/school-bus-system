@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/main_navigation_screen.dart';
 import 'screens/ride_detail_screen.dart';
+import 'screens/splash_screen.dart';
 import 'l10n/app_localizations.dart';
 import 'services/auth_service.dart';
 import 'services/location_foreground_service.dart';
@@ -35,18 +37,66 @@ class SchoolBusApp extends StatefulWidget {
 class _SchoolBusAppState extends State<SchoolBusApp> {
   Locale _locale = const Locale('en', '');
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
+  bool _isInitialized = false;
 
   @override
   void initState() {
     super.initState();
     // Provide navigator key to notification service for deep linking
     NotificationService.navigatorKey = _navigatorKey;
+    _initializeApp();
   }
 
-  void _changeLanguage(Locale locale) {
+  Future<void> _initializeApp() async {
+    // Load saved locale preference
+    await _loadSavedLocale();
+    
+    // Add a minimum splash screen duration
+    await Future.delayed(const Duration(seconds: 2));
+    
+    if (mounted) {
+      setState(() {
+        _isInitialized = true;
+      });
+    }
+  }
+
+  Future<void> _loadSavedLocale() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final savedLanguageCode = prefs.getString('language_code');
+      
+      if (savedLanguageCode != null) {
+        setState(() {
+          _locale = Locale(savedLanguageCode, '');
+        });
+      } else {
+        // If no saved preference, try to use system locale
+        final systemLocale = WidgetsBinding.instance.platformDispatcher.locale;
+        if (systemLocale.languageCode == 'he') {
+          setState(() {
+            _locale = const Locale('he', '');
+          });
+        }
+      }
+    } catch (e) {
+      // If there's an error loading preferences, keep the default English locale
+      print('Error loading saved locale: $e');
+    }
+  }
+
+  void _changeLanguage(Locale locale) async {
     setState(() {
       _locale = locale;
     });
+    
+    // Save the language preference
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('language_code', locale.languageCode);
+    } catch (e) {
+      print('Error saving language preference: $e');
+    }
   }
 
   void _onAuthChanged() {
@@ -60,6 +110,7 @@ class _SchoolBusAppState extends State<SchoolBusApp> {
     return MaterialApp(
       navigatorKey: _navigatorKey,
       title: 'School Bus App',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF10B981),
@@ -190,9 +241,11 @@ class _SchoolBusAppState extends State<SchoolBusApp> {
         Locale('he', ''), // Hebrew
       ],
       routes: {
-        '/': (context) => AuthService.isAuthenticated 
-            ? MainNavigationScreen(onLanguageChange: _changeLanguage, onAuthChanged: _onAuthChanged)
-            : LoginScreen(onAuthChanged: _onAuthChanged, onLanguageChange: _changeLanguage),
+        '/': (context) => _isInitialized 
+            ? (AuthService.isAuthenticated 
+                ? MainNavigationScreen(onLanguageChange: _changeLanguage, onAuthChanged: _onAuthChanged)
+                : LoginScreen(onAuthChanged: _onAuthChanged, onLanguageChange: _changeLanguage))
+            : const SplashScreen(),
         '/login': (context) => LoginScreen(onAuthChanged: _onAuthChanged, onLanguageChange: _changeLanguage),
         '/home': (context) => MainNavigationScreen(onLanguageChange: _changeLanguage, onAuthChanged: _onAuthChanged),
       },

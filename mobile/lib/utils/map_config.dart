@@ -11,7 +11,7 @@ class MapTileConfig {
   /// Get the recommended tile URL template based on platform
   static String getTileUrlTemplate() {
     if (Platform.isIOS) {
-      // Use CartoDB Voyager for iOS (clean, Apple-like styling)
+      // Use CartoDB Positron for iOS (clean, Apple-like styling)
       return getCartoVoyagerUrl();
     } else {
       // Use OpenStreetMap for Android

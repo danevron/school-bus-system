@@ -8,6 +8,10 @@
   "@appSubtitle": {
     "description": "The subtitle of the application"
   },
+  "loading": "טוען...",
+  "@loading": {
+    "description": "Loading text displayed on splash screen"
+  },
   "language": "שפה",
   "@language": {
     "description": "Language selection label"
@@ -114,7 +118,7 @@
       }
     }
   },
-  "welcomePersonalizedDescription": "התחברת בהצלחה למערכת ההסעות. נהל את הנסיעות שלך והישאר מעודכן עם מידע תחבורתי.",
+  "welcomePersonalizedDescription": "כאן תוכלו לראות את הנסיעות שלכם, לאשר הגעה ולהזמין אורחים לנסיעות",
   "@welcomePersonalizedDescription": {
     "description": "Personalized welcome description for logged in users"
   },
@@ -134,7 +138,7 @@
   "@myRidesEmpty": {
     "description": "Message when driver has no rides"
   },
-  "myRidesEmptyDescription": "הנסיעות שהוקצו לך יופיעו כאן. פנה למנהל המערכת אם אמורות להיות לך נסיעות מוקצות.",
+  "myRidesEmptyDescription": "הנסיעות שאתם רשומים אליהם יופיעו כאן. פנה למנהל המערכת אם אמורות להיות לך נסיעות.",
   "@myRidesEmptyDescription": {
     "description": "Description for empty rides state"
   },
@@ -146,7 +150,7 @@
   "@rideStatusActive": {
     "description": "Ride status - currently active"
   },
-  "rideStatusCompleted": "הושלם",
+  "rideStatusCompleted": "הסתיים",
   "@rideStatusCompleted": {
     "description": "Ride status - completed"
   },
@@ -328,7 +332,7 @@
   "@confirmCancellation": {
     "description": "Dialog title for confirming cancellation"
   },
-  "confirmCancellationMessage": "האם אתה בטוח שברצונך לבטל את ההזמנה לא ניתן לבטל את הביטול?",
+  "confirmCancellationMessage": "האם אתה בטוח שברצונך לבטל את ההזמנה, לא ניתן לבטל את הביטול?",
   "@confirmCancellationMessage": {
     "description": "Dialog message asking user to confirm cancellation"
   },
@@ -378,7 +382,7 @@
   "@bookThisRide": {
     "description": "Button text to book a specific ride"
   },
-  "fullyBooked": "תפוס במלואו",
+  "fullyBooked": "מלא",
   "@fullyBooked": {
     "description": "Status when no seats are available"
   },
@@ -488,7 +492,7 @@
   "@retry": {
     "description": "Retry button text"
   },
-  "rideInProgress": "נסיעה בתהליך",
+  "rideInProgress": "נסיעה פעילה",
   "@rideInProgress": {
     "description": "Status text for active ride"
   },
@@ -528,6 +532,15 @@
   "@justNow": {
     "description": "Time indicator for very recent updates"
   },
+  "totalDistance": "מרחק כולל",
+  "@totalDistance": {
+    "description": "Total distance indicator",
+    "placeholder": "Total distance"
+  },
+  "km": "ק״מ",
+  "@km": {
+    "description": "km"
+  },
   "minutesAgo": "לפני {minutes} דקות",
   "@minutesAgo": {
     "description": "Time indicator for minutes ago",
@@ -560,11 +573,11 @@
   "@showBookingOptions": {
     "description": "Button text to show booking options"
   },
-  "choosePickupLocationHint": "בחר איפה אתה רוצה להיאסף",
+  "choosePickupLocationHint": "?איפה עולים",
   "@choosePickupLocationHint": {
     "description": "Hint text for pickup location selection modal"
   },
-  "chooseDropoffLocationHint": "בחר איפה אתה רוצה להתיר",
+  "chooseDropoffLocationHint": "איפה יורדים?",
   "@chooseDropoffLocationHint": {
     "description": "Hint text for dropoff location selection modal"
   },
@@ -578,7 +591,7 @@
       }
     }
   },
-  "confirmSelection": "אשר בחירה",
+  "confirmSelection": "אשר",
   "@confirmSelection": {
     "description": "Button text to confirm stop selection"
   },
@@ -644,11 +657,11 @@
   "@pleaseEnterLastName": {
     "description": "Validation message for required last name"
   },
-  "guestCreatedSuccessfully": "האורח נוצר בהצלחה",
+  "guestCreatedSuccessfully": "האורח נרשם בהצלחה",
   "@guestCreatedSuccessfully": {
     "description": "Success message when guest is created"
   },
-  "failedToCreateGuest": "נכשל ביצירת האורח",
+  "failedToCreateGuest": "נכשל ברישום האורח",
   "@failedToCreateGuest": {
     "description": "Error message when guest creation fails"
   },

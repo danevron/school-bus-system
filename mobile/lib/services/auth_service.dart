@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'notification_service.dart';
 
 class AuthService {
-  static const String _baseUrl = 'http://localhost:3000'; // TODO: Make this configurable
+  static const String _baseUrl = 'http://192.168.1.240:3000'; // Your computer's IP address
   static const String _tokenKey = 'auth_token';
   static const String _userKey = 'user_data';
   

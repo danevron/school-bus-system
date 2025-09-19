@@ -15,6 +15,9 @@ class AppLocalizationsHe extends AppLocalizations {
   String get appSubtitle => 'בית הספר זומר';
 
   @override
+  String get loading => 'טוען...';
+
+  @override
   String get language => 'שפה';
 
   @override
@@ -93,7 +96,7 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get welcomePersonalizedDescription =>
-      'התחברת בהצלחה למערכת ההסעות. נהל את הנסיעות שלך והישאר מעודכן עם מידע תחבורתי.';
+      'כאן תוכלו לראות את הנסיעות שלכם, לאשר הגעה ולהזמין אורחים לנסיעות';
 
   @override
   String get welcomeFallbackDescription => 'אפליקציה לניהול הסעות בית ספר.';
@@ -109,7 +112,7 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get myRidesEmptyDescription =>
-      'הנסיעות שהוקצו לך יופיעו כאן. פנה למנהל המערכת אם אמורות להיות לך נסיעות מוקצות.';
+      'הנסיעות שאתם רשומים אליהם יופיעו כאן. פנה למנהל המערכת אם אמורות להיות לך נסיעות.';
 
   @override
   String get refresh => 'רענן';
@@ -118,7 +121,7 @@ class AppLocalizationsHe extends AppLocalizations {
   String get rideStatusActive => 'פעיל';
 
   @override
-  String get rideStatusCompleted => 'הושלם';
+  String get rideStatusCompleted => 'הסתיים';
 
   @override
   String get rideStatusCancelled => 'בוטל';
@@ -254,7 +257,7 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get confirmCancellationMessage =>
-      'האם אתה בטוח שברצונך לבטל את ההזמנה לא ניתן לבטל את הביטול?';
+      'האם אתה בטוח שברצונך לבטל את ההזמנה, לא ניתן לבטל את הביטול?';
 
   @override
   String get bookNewRide => 'הזמן נסיעה חדשה';
@@ -281,7 +284,7 @@ class AppLocalizationsHe extends AppLocalizations {
   String get bookThisRide => 'הזמן נסיעה זו';
 
   @override
-  String get fullyBooked => 'תפוס במלואו';
+  String get fullyBooked => 'מלא';
 
   @override
   String get confirmBooking => 'אשר הזמנה';
@@ -362,7 +365,7 @@ class AppLocalizationsHe extends AppLocalizations {
   String get retry => 'נסה שוב';
 
   @override
-  String get rideInProgress => 'נסיעה בתהליך';
+  String get rideInProgress => 'נסיעה פעילה';
 
   @override
   String driverLabel(String firstName, String lastName) {
@@ -376,6 +379,12 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get justNow => 'כרגע';
+
+  @override
+  String get totalDistance => 'מרחק כולל';
+
+  @override
+  String get km => 'ק״מ';
 
   @override
   String minutesAgo(int minutes) {
@@ -397,10 +406,10 @@ class AppLocalizationsHe extends AppLocalizations {
   String get showBookingOptions => 'הצג אפשרויות הזמנה';
 
   @override
-  String get choosePickupLocationHint => 'בחר איפה אתה רוצה להיאסף';
+  String get choosePickupLocationHint => '?איפה עולים';
 
   @override
-  String get chooseDropoffLocationHint => 'בחר איפה אתה רוצה להתיר';
+  String get chooseDropoffLocationHint => 'איפה יורדים?';
 
   @override
   String availableStopsCount(int count) {
@@ -408,7 +417,7 @@ class AppLocalizationsHe extends AppLocalizations {
   }
 
   @override
-  String get confirmSelection => 'אשר בחירה';
+  String get confirmSelection => 'אשר';
 
   @override
   String eta(String time) {
@@ -452,10 +461,10 @@ class AppLocalizationsHe extends AppLocalizations {
   String get pleaseEnterLastName => 'אנא הכנס שם משפחה';
 
   @override
-  String get guestCreatedSuccessfully => 'האורח נוצר בהצלחה';
+  String get guestCreatedSuccessfully => 'האורח נרשם בהצלחה';
 
   @override
-  String get failedToCreateGuest => 'נכשל ביצירת האורח';
+  String get failedToCreateGuest => 'נכשל ברישום האורח';
 
   @override
   String get invalidCredentials => 'כתובת אימייל או סיסמה שגויים';

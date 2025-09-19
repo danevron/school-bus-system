@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:school_bus_app/widgets/human_readable_date.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../l10n/app_localizations.dart';
 import '../services/auth_service.dart';
@@ -9,23 +10,28 @@ import 'ride_tracking_screen.dart';
 
 class RideDetailScreen extends StatefulWidget {
   final Map<String, dynamic> ride;
+  final VoidCallback? onRideUpdated;
 
   const RideDetailScreen({
     super.key,
     required this.ride,
+    this.onRideUpdated,
   });
 
   @override
   State<RideDetailScreen> createState() => _RideDetailScreenState();
 }
 
-class _RideDetailScreenState extends State<RideDetailScreen> {
+class _RideDetailScreenState extends State<RideDetailScreen>
+    with TickerProviderStateMixin {
   bool _isLoading = false;
   bool _isStartingRide = false;
   bool _isEndingRide = false;
   List<Map<String, dynamic>> _bookings = [];
   late Map<String, dynamic> _currentRide;
   late LocationService _locationService;
+  late AnimationController _pulseController;
+  late Animation<double> _pulseAnimation;
   
   bool get _isDriver => AuthService.user?['role'] == 'driver';
   
@@ -39,12 +45,33 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
     _currentRide = Map<String, dynamic>.from(widget.ride);
     _locationService = LocationService();
     _locationService.addListener(_onLocationServiceChange);
+    
+    // Initialize pulse animation for in-progress rides
+    _pulseController = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    );
+    
+    _pulseAnimation = Tween<double>(
+      begin: 0.8,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _pulseController,
+      curve: Curves.easeInOut,
+    ));
+    
+    // Start animation if ride is in progress
+    if (_currentRide['status'] == 'in_progress') {
+      _pulseController.repeat(reverse: true);
+    }
+    
     _loadBookings();
   }
 
   @override
   void dispose() {
     _locationService.removeListener(_onLocationServiceChange);
+    _pulseController.dispose();
     super.dispose();
   }
 
@@ -149,6 +176,12 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
           _isStartingRide = false;
         });
         
+        // Start pulse animation when ride becomes active
+        _pulseController.repeat(reverse: true);
+        
+        // Notify parent screen that ride was updated
+        widget.onRideUpdated?.call();
+        
         if (mounted) {
           final localizations = AppLocalizations.of(context)!;
           ScaffoldMessenger.of(context).showSnackBar(
@@ -198,8 +231,15 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
           _isEndingRide = false;
         });
         
+        // Stop pulse animation when ride ends
+        _pulseController.stop();
+        _pulseController.reset();
+        
         // Stop location sharing when ride ends
         await _locationService.stopLocationSharing();
+        
+        // Notify parent screen that ride was updated
+        widget.onRideUpdated?.call();
         
         if (mounted) {
           final localizations = AppLocalizations.of(context)!;
@@ -346,12 +386,19 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
           ),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: Text(
-          _currentRide['route']?['name'] ?? localizations.rideDetails,
-          style: theme.textTheme.headlineMedium?.copyWith(
-            color: const Color(0xFF111827),
-            fontWeight: FontWeight.w400,
-          ),
+        title: Row(
+          children: [
+            Text(
+              _currentRide['route']?['name'] ?? localizations.rideDetails,
+              style: theme.textTheme.headlineMedium?.copyWith(
+                color: const Color(0xFF111827),
+                fontWeight: FontWeight.w400,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(width: 8),
+            _buildAppBarStatusBadge(theme, colorScheme, localizations),
+          ],
         ),
       ),
       body: SafeArea(
@@ -391,26 +438,19 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
     );
   }
 
-  Widget _buildRideHeader(ThemeData theme, ColorScheme colorScheme, AppLocalizations localizations) {
+  Widget _buildAppBarStatusBadge(ThemeData theme, ColorScheme colorScheme, AppLocalizations localizations) {
     final status = _currentRide['status'] ?? 'unknown';
-    final startTime = _currentRide['startTime'] ?? '';
-    final date = _currentRide['date'] ?? '';
-    final routeName = _currentRide['route']?['name'] ?? 'Unknown Route';
-    
-    // Format date and time display
-    String dateTimeDisplay = '';
-    if (date.isNotEmpty) {
-      dateTimeDisplay = _formatDateTime(startTime, startDate: date);
-    }
     
     // Status color and translated text
     Color statusColor = colorScheme.onSurfaceVariant;
     String statusText = status;
+    bool isInProgress = false;
     
     switch (status.toLowerCase()) {
       case 'in_progress':
         statusColor = colorScheme.primary;
         statusText = localizations.rideStatusActive;
+        isInProgress = true;
         break;
       case 'completed':
         statusColor = colorScheme.onSurfaceVariant;
@@ -425,6 +465,62 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
         statusText = localizations.rideStatusScheduled;
         break;
     }
+
+    Widget badge = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: statusColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: isInProgress ? Border.all(
+          color: statusColor.withOpacity(0.3),
+          width: 1,
+        ) : null,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (isInProgress) ...[
+            Container(
+              width: 6,
+              height: 6,
+              decoration: BoxDecoration(
+                color: statusColor,
+                shape: BoxShape.circle,
+              ),
+            ),
+            const SizedBox(width: 6),
+          ],
+          Text(
+            statusText,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: statusColor,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (isInProgress) {
+      return AnimatedBuilder(
+        animation: _pulseAnimation,
+        builder: (context, child) {
+          return Transform.scale(
+            scale: _pulseAnimation.value,
+            child: badge,
+          );
+        },
+      );
+    }
+
+    return badge;
+  }
+
+  Widget _buildRideHeader(ThemeData theme, ColorScheme colorScheme, AppLocalizations localizations) {
+    final startTime = _currentRide['startTime'] ?? '';
+    final date = _currentRide['date'] ?? '';
+
+    final formattedStartTime = _formatTime(startTime);
 
     return Container(
       margin: EdgeInsets.zero,
@@ -443,41 +539,26 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
         children: [
           Row(
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      routeName,
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        color: colorScheme.onSurface,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                    if (dateTimeDisplay.isNotEmpty) ...[
-                      const SizedBox(height: 8),
-                      Text(
-                        dateTimeDisplay,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
+              Icon(
+                Icons.schedule,
+                size: 16,
+                color: colorScheme.onSurfaceVariant,
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(4),
+              const SizedBox(width: 8),
+              HumanReadableDate(
+                dateString: date,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w400,
                 ),
-                child: Text(
-                  statusText,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: statusColor,
-                    fontWeight: FontWeight.w400,
-                  ),
+                showYear: false,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                formattedStartTime,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w400,
                 ),
               ),
             ],
@@ -1039,21 +1120,12 @@ class _RideDetailScreenState extends State<RideDetailScreen> {
     }
   }
 
-  String _formatDateTime(String timeString, {required String startDate}) {
+  String _formatTime(String timeString) {
     try {
-      final dateDateTime = DateTime.parse(startDate);
-      final rideDate = DateTime(dateDateTime.year, dateDateTime.month, dateDateTime.day);
-      final date = '${rideDate.day}/${rideDate.month}/${rideDate.year}';
-
-      if (timeString.isNotEmpty) {
-        final timeDateTime = DateTime.parse(timeString);
-        final time = '${timeDateTime.hour.toString().padLeft(2, '0')}:${timeDateTime.minute.toString().padLeft(2, '0')}';
-        return '$date - $time';
-      } else {
-        return date;
-      }
+      final timeDateTime = DateTime.parse(timeString);
+      return '${timeDateTime.hour.toString().padLeft(2, '0')}:${timeDateTime.minute.toString().padLeft(2, '0')}';
     } catch (e) {
-      return startDate; // Return original if parsing fails
+      return timeString; // Return original if parsing fails
     }
   }
 }
