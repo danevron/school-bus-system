@@ -5,6 +5,7 @@ import '../services/auth_service.dart';
 import '../widgets/human_readable_date.dart';
 import 'ride_detail_screen.dart';
 import 'book_ride_screen.dart';
+import '../utils/formatting_utils.dart';
 
 class MyRidesScreen extends StatefulWidget {
   const MyRidesScreen({super.key});
@@ -351,12 +352,6 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
     final date = ride['date'] ?? '';
     final routeName = ride['route']?['name'] ?? 'Unknown Route';
     
-    // Format date and time display
-    String dateTimeDisplay = '';
-    if (date.isNotEmpty) {
-      dateTimeDisplay = _formatDateTime(startTime, startDate: date);
-    }
-    
     // Status color and translated text
     Color statusColor = const Color(0xFF6B7280);
     String statusText = status;
@@ -431,7 +426,7 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
                   ),
                   if (startTime.isNotEmpty) ...[
                     Text(
-                      ' - ${_formatTime(startTime)}',
+                      ' - ${FormattingUtils.formatTime(startTime)}',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -474,32 +469,5 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
       ),
     ),
     );
-  }
-
-  String _formatTime(String timeString) {
-    try {
-      if (timeString.isEmpty) return '';
-      final timeDateTime = DateTime.parse(timeString);
-      return '${timeDateTime.hour.toString().padLeft(2, '0')}:${timeDateTime.minute.toString().padLeft(2, '0')}';
-    } catch (e) {
-      return timeString;
-    }
-  }
-
-  String _formatDateTime(String timeString, {required String startDate}) {
-    try {
-      final dateDateTime = DateTime.parse(startDate);
-      final rideDate = DateTime(dateDateTime.year, dateDateTime.month, dateDateTime.day);
-      final date = '${rideDate.day}/${rideDate.month}/${rideDate.year}';
-
-      if (timeString.isNotEmpty) {
-        final time = _formatTime(timeString);
-        return '$date - $time';
-      } else {
-        return date;
-      }
-    } catch (e) {
-      return startDate; // Return original if parsing fails
-    }
   }
 }

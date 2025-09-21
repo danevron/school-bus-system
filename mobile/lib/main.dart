@@ -95,7 +95,6 @@ class _SchoolBusAppState extends State<SchoolBusApp> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('language_code', locale.languageCode);
     } catch (e) {
-      print('Error saving language preference: $e');
     }
   }
 

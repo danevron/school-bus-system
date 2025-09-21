@@ -506,8 +506,11 @@ export const bookingController = {
             canDropOff: false
           };
 
+          if (ride?.status === RideStatus.COMPLETED) {
+
+          }
           // Admin can perform all actions on all bookings
-          if (currentUserRole === UserRole.ADMIN) {
+          else if (currentUserRole === UserRole.ADMIN) {
             actions.canCancel = booking.canBeCancelled().canCancel;
             actions.canConfirm = booking.status === BookingStatus.UNCONFIRMED || booking.status === BookingStatus.WAITING_LIST;
             actions.canCheckIn = ride?.status === RideStatus.IN_PROGRESS && (booking.status === BookingStatus.CONFIRMED || booking.status === BookingStatus.UNCONFIRMED);

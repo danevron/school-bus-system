@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../l10n/app_localizations.dart';
 import '../services/auth_service.dart';
 import '../widgets/human_readable_date.dart';
+import '../utils/formatting_utils.dart';
 
 class BookRideScreen extends StatefulWidget {
   const BookRideScreen({super.key});
@@ -169,7 +170,6 @@ class _BookRideScreenState extends State<BookRideScreen> {
       
       if (mounted) {
         final localizations = AppLocalizations.of(context)!;
-        print(e.toString());
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('${localizations.networkError}: ${e.toString()}'),
@@ -268,30 +268,6 @@ class _BookRideScreenState extends State<BookRideScreen> {
           );
         }
       }
-    }
-  }
-
-  String _formatDate(String dateString) {
-    final localizations = AppLocalizations.of(context)!;
-    if (dateString.isEmpty) return localizations.tbd;
-    
-    try {
-      final date = DateTime.parse(dateString);
-      return '${date.day}/${date.month}/${date.year}';
-    } catch (e) {
-      return dateString.isNotEmpty ? dateString : localizations.tbd;
-    }
-  }
-
-  String _formatTime(String timeString) {
-    final localizations = AppLocalizations.of(context)!;
-    if (timeString.isEmpty) return localizations.tbd;
-    
-    try {
-      final time = DateTime.parse(timeString);
-      return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
-    } catch (e) {
-      return timeString.isNotEmpty ? timeString : localizations.tbd;
     }
   }
   
@@ -531,18 +507,11 @@ class _BookRideScreenState extends State<BookRideScreen> {
                   ],
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: availableSeats > 5 ? colorScheme.primary.withOpacity(0.1) : colorScheme.error.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  localizations.seatsAvailable(availableSeats, maxCapacity),
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: availableSeats > 5 ? colorScheme.primary : colorScheme.error,
-                    fontWeight: FontWeight.w400,
-                  ),
+              Text(
+                localizations.seatsAvailable(availableSeats, maxCapacity),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: availableSeats > 5 ? colorScheme.primary : colorScheme.error,
+                  fontWeight: FontWeight.w400,
                 ),
               ),
             ],
@@ -560,7 +529,7 @@ class _BookRideScreenState extends State<BookRideScreen> {
                 ),
               ),
               Text(
-                ' - ${_formatTime(ride['startTime'] ?? '')}',
+                ' - ${FormattingUtils.formatTime(ride['startTime'] ?? '')}',
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
@@ -570,13 +539,14 @@ class _BookRideScreenState extends State<BookRideScreen> {
           
           const SizedBox(height: 4),
           
-          // Driver
-          Text(
-            '${driver['firstName']} ${driver['lastName']}',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            ),
-          ),
+          if (availableSeats == 0) ...[
+            Text(
+              'שימו לב: כל המקומות תפוסים, ההזמנה תתווסף לרשימת המתנה', // Note: All seats are booked, booking will be added to the waiting list
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.error,
+              ),
+            )
+          ],
         ],
         ),
       ),
@@ -925,6 +895,20 @@ class _RideBookingModalState extends State<_RideBookingModal> {
     final stops = ride['stops'] as List? ?? [];
     final availableSeats = ride['availableSeats'] ?? 0;
     
+    final availableDropoffStops = stops.where((stop) => stop['type'] == 'dropoff');
+    final onlyOneAvailableDroppffStop = availableDropoffStops.length == 1;
+    
+    final availablePickupStops = stops.where((stop) => stop['type'] == 'pickup');
+    final onlyOneAvailablePickupStop = availablePickupStops.length == 1;
+
+    if (onlyOneAvailableDroppffStop) {
+      _selectedDropoffStopId = availableDropoffStops.first['stopId'];
+    }
+
+    if (onlyOneAvailablePickupStop) {
+      _selectedPickupStopId = availablePickupStops.first['stopId'];
+    }
+
     // Find selected stop details
     Map<String, dynamic>? pickupStop;
     Map<String, dynamic>? dropoffStop;
@@ -1030,7 +1014,7 @@ class _RideBookingModalState extends State<_RideBookingModal> {
                                 ),
                               ),
                               Text(
-                                ' - ${_formatTime(ride['startTime'] ?? '')}',
+                                ' - ${FormattingUtils.formatTime(ride['startTime'] ?? '')}',
                                 style: theme.textTheme.bodyMedium?.copyWith(
                                   color: colorScheme.onSurfaceVariant,
                                 ),
@@ -1072,9 +1056,10 @@ class _RideBookingModalState extends State<_RideBookingModal> {
                     // Pickup stop
                     _buildStopSelector(
                       label: localizations.pickup,
+                      showOnMapLabel: localizations.openInMaps,
                       selectedStop: pickupStop,
                       hint: localizations.choosePickupStop,
-                      onTap: () => _showStopSelection('pickup'),
+                      onTap: onlyOneAvailablePickupStop ? () => null : () => _showStopSelection('pickup'),
                       theme: theme,
                       colorScheme: colorScheme,
                     ),
@@ -1084,9 +1069,10 @@ class _RideBookingModalState extends State<_RideBookingModal> {
                     // Dropoff stop
                     _buildStopSelector(
                       label: localizations.dropoff,
+                      showOnMapLabel: localizations.openInMaps,
                       selectedStop: dropoffStop,
                       hint: localizations.chooseDropoffStop,
-                      onTap: () => _showStopSelection('dropoff'),
+                      onTap: onlyOneAvailableDroppffStop ? () => null : () => _showStopSelection('dropoff'),
                       theme: theme,
                       colorScheme: colorScheme,
                     ),
@@ -1124,6 +1110,7 @@ class _RideBookingModalState extends State<_RideBookingModal> {
 
   Widget _buildStopSelector({
     required String label,
+    required String showOnMapLabel,
     required Map<String, dynamic>? selectedStop,
     required String hint,
     required VoidCallback onTap,
@@ -1169,11 +1156,25 @@ class _RideBookingModalState extends State<_RideBookingModal> {
                               ),
                             ),
                             if (selectedStop!['address']?.isNotEmpty == true) ...[
-                              const SizedBox(height: 2),
-                              Text(
-                                selectedStop!['address'],
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: colorScheme.onSurfaceVariant,
+                              const SizedBox(height: 4),
+                              GestureDetector(
+                                onTap: () => _openInMaps(selectedStop!['address']),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.location_on,
+                                      size: 17,
+                                      color: colorScheme.primary,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      showOnMapLabel,
+                                      style: theme.textTheme.bodyMedium?.copyWith(
+                                        color: colorScheme.primary,
+                                        decoration: TextDecoration.underline,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
@@ -1222,26 +1223,22 @@ class _RideBookingModalState extends State<_RideBookingModal> {
       setState(() {
         if (type == 'pickup') {
           _selectedPickupStopId = result;
-          print('Selected pickup stop: $result');
           // Reset dropoff if same as pickup
           if (_selectedDropoffStopId == result) {
             _selectedDropoffStopId = null;
           }
         } else {
           _selectedDropoffStopId = result;
-          print('Selected dropoff stop: $result');
         }
       });
     }
   }
-
-  String _formatTime(String timeString) {
-    try {
-      if (timeString.isEmpty) return '';
-      final timeDateTime = DateTime.parse(timeString);
-      return '${timeDateTime.hour.toString().padLeft(2, '0')}:${timeDateTime.minute.toString().padLeft(2, '0')}';
-    } catch (e) {
-      return timeString;
+  Future<void> _openInMaps(String address) async {
+    final encodedAddress = Uri.encodeComponent(address);
+    final url = Uri.parse('maps:?q=$encodedAddress');
+    
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
     }
   }
 }
@@ -1809,24 +1806,6 @@ class _BookingConfirmationModal extends StatelessWidget {
     required this.availablePassengers,
   });
 
-  String _formatDate(String dateString) {
-    try {
-      final date = DateTime.parse(dateString);
-      return '${date.day}/${date.month}/${date.year}';
-    } catch (e) {
-      return dateString;
-    }
-  }
-
-  String _formatTime(String timeString) {
-    try {
-      final time = DateTime.parse(timeString);
-      return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
-    } catch (e) {
-      return timeString;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
@@ -1944,7 +1923,7 @@ class _BookingConfirmationModal extends StatelessWidget {
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              _formatTime(ride['startTime'] ?? ''),
+                              FormattingUtils.formatTime(ride['startTime'] ?? ''),
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 color: colorScheme.onSurface,
                               ),

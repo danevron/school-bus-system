@@ -7,6 +7,7 @@ import '../l10n/app_localizations.dart';
 import '../services/auth_service.dart';
 import '../services/location_service.dart';
 import 'ride_tracking_screen.dart';
+import '../utils/formatting_utils.dart';
 
 class RideDetailScreen extends StatefulWidget {
   final Map<String, dynamic> ride;
@@ -520,7 +521,7 @@ class _RideDetailScreenState extends State<RideDetailScreen>
     final startTime = _currentRide['startTime'] ?? '';
     final date = _currentRide['date'] ?? '';
 
-    final formattedStartTime = _formatTime(startTime);
+    final formattedStartTime = FormattingUtils.formatTime(startTime);
 
     return Container(
       margin: EdgeInsets.zero,
@@ -1117,15 +1118,6 @@ class _RideDetailScreenState extends State<RideDetailScreen>
 
     if (confirmed == true) {
       await _updateBookingStatus(bookingId, 'cancel');
-    }
-  }
-
-  String _formatTime(String timeString) {
-    try {
-      final timeDateTime = DateTime.parse(timeString);
-      return '${timeDateTime.hour.toString().padLeft(2, '0')}:${timeDateTime.minute.toString().padLeft(2, '0')}';
-    } catch (e) {
-      return timeString; // Return original if parsing fails
     }
   }
 }

@@ -19,8 +19,9 @@ export const generateRidesForLine = async (line: ILine, limitDate?: Date): Promi
   }
 
   const today = new Date();
-  today.setHours(0, 0, 0, 0); // Start of today
+  today.setUTCHours(0, 0, 0, 0);
   
+  console.log({today});
   const schedule = line.schedule;
   
   // Determine the end date: use the earliest of limitDate, line's end date, or 1 year from now
@@ -43,10 +44,10 @@ export const generateRidesForLine = async (line: ILine, limitDate?: Date): Promi
   for (const rideDate of rideDates) {
     try {
       // Check if a ride already exists for this line and date
-      const startOfDay = new Date(rideDate);
-      startOfDay.setHours(0, 0, 0, 0);
-      const endOfDay = new Date(rideDate);
-      endOfDay.setHours(23, 59, 59, 999);
+
+      const dateString = rideDate.toISOString().split('T')[0];
+      const startOfDay = new Date(dateString + 'T00:00:00.000Z');
+      const endOfDay = new Date(dateString + 'T23:59:59.999Z');
       
       const existingRide = await Ride.findOne({
         lineId: line._id,
@@ -56,6 +57,7 @@ export const generateRidesForLine = async (line: ILine, limitDate?: Date): Promi
         }
       });
 
+      console.log({existingRide, startOfDay, endOfDay})
       if (existingRide) {
         continue; // Skip if ride already exists
       }
