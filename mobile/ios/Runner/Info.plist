@@ -35,6 +35,13 @@
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>This app needs continuous location access to track school bus rides even when the app is in the background for safety purposes.</string>
 	
+	<!-- Temporary usage description for iOS 14+ -->
+	<key>NSLocationTemporaryUsageDescriptionDictionary</key>
+	<dict>
+		<key>RideTracking</key>
+		<string>Track your location during school bus rides for safety and real-time tracking</string>
+	</dict>
+	
 	<!-- Background modes for location sharing -->
 	<key>UIBackgroundModes</key>
 	<array>

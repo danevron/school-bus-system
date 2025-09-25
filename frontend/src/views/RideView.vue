@@ -292,6 +292,10 @@
                   <div class="passenger-name">
                     <i class="pi pi-user"></i>
                     {{ getPassengerName(booking.passenger) }}
+                    <Tag v-if="booking.passenger.isGuest" 
+                         :value="$t('common.guest')" 
+                         severity="warn" 
+                         class="guest-tag" />
                   </div>
                   <div class="booking-status-container">
                     <span class="booking-status-badge" :class="getBookingStatusClass(booking.status)">
@@ -312,6 +316,17 @@
                       <span class="stop-label">{{ $t('rideView.dropoff') }}:</span>
                       <span v-if="booking.dropoffStop" class="stop-name">{{ booking.dropoffStop.name }}</span>
                       <span v-else class="not-assigned">{{ $t('rideView.notSpecified') }}</span>
+                    </div>
+                    <!-- Parent Information -->
+                    <div v-if="booking.passenger.parents && booking.passenger.parents.length > 0" class="parents-info">
+                      <i class="pi pi-users parent-icon"></i>
+                      <span class="parent-label">{{ $t('rideView.parents') }}:</span>
+                      <div class="parents-list">
+                        <div v-for="parent in booking.passenger.parents" :key="parent._id" class="parent-contact">
+                          <span class="parent-name">{{ parent.firstName }} {{ parent.lastName }}</span>
+                          <span v-if="parent.phone" class="parent-phone">{{ parent.phone }}</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1319,6 +1334,12 @@ export default {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.passenger-name .guest-tag {
+  font-size: 0.7rem;
+  margin-left: 0.25rem;
 }
 
 .passenger-name i {
@@ -1439,6 +1460,64 @@ export default {
   font-size: 0.8rem;
   flex: 1;
   min-width: 0;
+}
+
+/* Parent Information Styles */
+.parents-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.375rem;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--p-surface-border);
+}
+
+.parent-icon {
+  font-size: 0.875rem;
+  padding: 0.25rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--p-purple-600);
+  background-color: var(--p-purple-50);
+}
+
+.parent-label {
+  font-weight: 500;
+  color: var(--p-text-color);
+  font-size: 0.8rem;
+  min-width: 4rem;
+  flex-shrink: 0;
+}
+
+.parents-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.parent-contact {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.parent-name {
+  font-weight: 500;
+  color: var(--p-text-color);
+  font-size: 0.8rem;
+}
+
+.parent-phone {
+  font-size: 0.75rem;
+  color: var(--p-text-muted-color);
+  font-family: monospace;
 }
 
 

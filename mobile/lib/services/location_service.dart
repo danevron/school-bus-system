@@ -67,6 +67,22 @@ class LocationService extends ChangeNotifier {
         return false;
       }
 
+      // For iOS background location, check if we have always permission
+      if (Platform.isIOS) {
+        if (permission == LocationPermission.whileInUse) {
+          if (kDebugMode) {
+            print('LocationService: iOS - Only have whileInUse permission');
+            print('LocationService: Background location will be limited. For full functionality:');
+            print('LocationService: Go to Settings > Privacy & Security > Location Services > School Bus App > Select "Always"');
+          }
+          // Continue with limited functionality - location will work in foreground
+        } else if (permission == LocationPermission.always) {
+          if (kDebugMode) {
+            print('LocationService: iOS - Have always permission. Background location enabled.');
+          }
+        }
+      }
+
       // Check if location services are enabled
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
@@ -233,8 +249,35 @@ class LocationService extends ChangeNotifier {
   Future<bool> requestLocationPermission() async {
     LocationPermission permission = await Geolocator.checkPermission();
     
+    if (kDebugMode) {
+      print('LocationService: Current permission: $permission');
+    }
+    
     if (permission == LocationPermission.denied) {
+      if (kDebugMode) {
+        print('LocationService: Requesting initial location permission');
+      }
       permission = await Geolocator.requestPermission();
+      if (kDebugMode) {
+        print('LocationService: Permission after request: $permission');
+      }
+    }
+    
+    // For iOS background location, we need to explicitly request always permission
+    if (Platform.isIOS && permission == LocationPermission.whileInUse) {
+      if (kDebugMode) {
+        print('LocationService: iOS - Have whileInUse, need to request always permission');
+        print('LocationService: Please go to Settings > Privacy & Security > Location Services > School Bus App > and select "Always"');
+      }
+      
+      // On iOS, we can't programmatically upgrade from whileInUse to always
+      // The user must manually change this in Settings
+      // But we can inform them about this requirement
+      return false; // Return false to indicate always permission is needed
+    }
+    
+    if (kDebugMode) {
+      print('LocationService: Final permission status: $permission');
     }
     
     return permission == LocationPermission.always || 
@@ -253,37 +296,77 @@ class LocationService extends ChangeNotifier {
         print('LocationService: Starting iOS location sharing');
       }
 
-      // Configure location settings for iOS background location
-      const LocationSettings locationSettings = LocationSettings(
-        accuracy: LocationAccuracy.high,
-        distanceFilter: 10, // Update when moved 10 meters
-      );
+      // Check if we have always permission for background location
+      LocationPermission permission = await Geolocator.checkPermission();
+      bool hasAlwaysPermission = permission == LocationPermission.always;
+      
+      if (kDebugMode) {
+        print('LocationService iOS: Permission status: $permission');
+        print('LocationService iOS: Background capability: ${hasAlwaysPermission ? "Enabled" : "Limited"}');
+      }
 
-      // Use position stream for better iOS background compatibility
-      _locationStreamSubscription = Geolocator.getPositionStream(
-        locationSettings: locationSettings,
-      ).listen(
-        (Position position) {
-          _lastKnownPosition = position;
-          _sendLocationUpdate(position);
-          notifyListeners();
-        },
-        onError: (error) {
-          if (kDebugMode) {
-            print('LocationService iOS: Error in position stream: $error');
-          }
-          
-          // Fall back to timer-based updates if stream fails
-          if (_locationTimer == null) {
-            _locationTimer = Timer.periodic(const Duration(seconds: 30), (_) async {
-              await _sendCurrentLocation();
-            });
-          }
-        },
-      );
+      // Configure location settings based on permission level
+      LocationSettings locationSettings;
+      
+      if (hasAlwaysPermission) {
+        // Full background capability
+        locationSettings = const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          distanceFilter: 5, // Update when moved 5 meters
+          timeLimit: Duration(seconds: 20),
+        );
+      } else {
+        // Limited to foreground - be more aggressive about getting updates
+        locationSettings = const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          distanceFilter: 0, // Get all updates when foreground
+          timeLimit: Duration(seconds: 10),
+        );
+      }
 
-      // Also get initial location
+      // Start timer-based updates (more reliable for iOS background)
+      int timerInterval = hasAlwaysPermission ? 20 : 10; // More frequent if limited
+      _locationTimer = Timer.periodic(Duration(seconds: timerInterval), (_) async {
+        if (_isSharingLocation) {
+          await _sendCurrentLocation();
+        }
+      });
+
+      // Also try position stream as backup
+      try {
+        _locationStreamSubscription = Geolocator.getPositionStream(
+          locationSettings: locationSettings,
+        ).listen(
+          (Position position) {
+            _lastKnownPosition = position;
+            _sendLocationUpdate(position);
+            notifyListeners();
+            
+            if (kDebugMode) {
+              print('LocationService iOS: Stream update - Lat: ${position.latitude}, Lng: ${position.longitude}');
+            }
+          },
+          onError: (error) {
+            if (kDebugMode) {
+              print('LocationService iOS: Position stream error: $error');
+              print('LocationService iOS: Continuing with timer-based updates only');
+            }
+            // Don't restart timer here - it's already running
+          },
+        );
+      } catch (e) {
+        if (kDebugMode) {
+          print('LocationService iOS: Could not start position stream: $e');
+          print('LocationService iOS: Using timer-based updates only');
+        }
+      }
+
+      // Get initial location immediately
       await _sendCurrentLocation();
+
+      if (kDebugMode) {
+        print('LocationService iOS: Started with ${hasAlwaysPermission ? "full background" : "foreground-only"} capability');
+      }
 
     } catch (e) {
       if (kDebugMode) {

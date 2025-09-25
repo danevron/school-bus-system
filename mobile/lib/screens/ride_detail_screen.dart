@@ -120,6 +120,7 @@ class _RideDetailScreenState extends State<RideDetailScreen>
             return {
               '_id': booking['_id'],
               'passenger': booking['passenger'],
+              'parents': booking['passenger']?['parents'] ?? [],
               'status': booking['status'],
               'pickupStop': booking['pickupStop']?['name'] ?? '',
               'dropoffStop': booking['dropoffStop']?['name'] ?? '',
@@ -788,6 +789,7 @@ class _RideDetailScreenState extends State<RideDetailScreen>
     final status = booking['status'] ?? 'unknown';
     final pickupStop = booking['pickupStop'] ?? '';
     final dropoffStop = booking['dropoffStop'] ?? '';
+    final parents = booking['parents'] as List? ?? [];
 
     // Status color and translated text
     Color statusColor = colorScheme.onSurfaceVariant;
@@ -929,6 +931,77 @@ class _RideDetailScreenState extends State<RideDetailScreen>
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: const Color(0xFF6B7280),
                 ),
+              ),
+            ],
+            
+            // Parent Information
+            if (parents.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.family_restroom,
+                        size: 16,
+                        color: colorScheme.primary,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        localizations.parents,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.primary,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  ...parents.map((parent) {
+                    final parentName = '${parent['firstName'] ?? ''} ${parent['lastName'] ?? ''}'.trim();
+                    final parentPhone = parent['phone'] ?? '';
+                    
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 2),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              parentName,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: const Color(0xFF6B7280),
+                              ),
+                            ),
+                          ),
+                          if (parentPhone.isNotEmpty) ...[
+                            GestureDetector(
+                              onTap: () => _makePhoneCall(parentPhone),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.phone,
+                                    size: 14,
+                                    color: colorScheme.primary,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    parentPhone,
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: colorScheme.primary,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ],
               ),
             ],
           ],

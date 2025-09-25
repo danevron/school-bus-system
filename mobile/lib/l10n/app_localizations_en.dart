@@ -176,6 +176,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dropoff => 'Dropoff';
 
   @override
+  String get parents => 'Parents';
+
+  @override
   String get checkIn => 'Check In';
 
   @override
@@ -489,4 +492,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get openInMaps => 'Open in Maps';
+
+  @override
+  String get waitingListNotice =>
+      'Note: All seats are booked, booking will be added to the waiting list';
 }

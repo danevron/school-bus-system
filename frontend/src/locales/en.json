@@ -49,6 +49,7 @@
     "km": "km",
     "m": "m",
     "created": "Created",
+    "guest": "Guest",
     "days": {
       "sunday": "Sunday",
       "monday": "Monday",
@@ -399,6 +400,7 @@
     "dropOff": "Drop Off",
     "pickup": "Pickup",
     "dropoff": "Dropoff",
+    "parents": "Parents",
     "notSpecified": "Not specified",
     "interactiveRouteMap": "Interactive Route Map",
     "rideNotFound": "Ride Not Found",

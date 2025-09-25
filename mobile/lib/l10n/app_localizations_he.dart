@@ -175,6 +175,9 @@ class AppLocalizationsHe extends AppLocalizations {
   String get dropoff => 'ירידה';
 
   @override
+  String get parents => 'הורים';
+
+  @override
   String get checkIn => 'עליה לאוטובוס';
 
   @override
@@ -483,4 +486,8 @@ class AppLocalizationsHe extends AppLocalizations {
 
   @override
   String get openInMaps => 'פתח במפות';
+
+  @override
+  String get waitingListNotice =>
+      'שימו לב: כל המקומות תפוסים, ההזמנה תתווסף לרשימת המתנה';
 }

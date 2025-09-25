@@ -59,7 +59,7 @@ jobs:
           echo "API Response: $response"
 
           # Check if the response indicates success
-          if echo "$response" | grep -q "Ride confirmation messages sent successfully"; then
+          if echo "$response" | grep -q -e "Ride confirmation messages job completed" -e "No rides scheduled in the next 2 hours"; then
             echo "✅ Ride confirmation messages job completed successfully!"
           else
             echo "❌ Ride confirmation messages job failed!"

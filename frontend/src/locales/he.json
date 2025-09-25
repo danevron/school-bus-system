@@ -48,6 +48,7 @@
     "min": "דק'",
     "km": "ק\"מ",
     "m": "מ'",
+    "guest": "אורח",
     "days": {
       "sunday": "ראשון",
       "monday": "שני",
@@ -411,6 +412,7 @@
     "dropOff": "הורדה",
     "pickup": "איסוף",
     "dropoff": "הורדה",
+    "parents": "הורים",
     "notSpecified": "לא מצוין",
     "interactiveRouteMap": "מפת מסלול אינטראקטיבית",
     "rideNotFound": "נסיעה לא נמצאה",

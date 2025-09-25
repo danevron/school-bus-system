@@ -541,7 +541,7 @@ class _BookRideScreenState extends State<BookRideScreen> {
           
           if (availableSeats == 0) ...[
             Text(
-              'שימו לב: כל המקומות תפוסים, ההזמנה תתווסף לרשימת המתנה', // Note: All seats are booked, booking will be added to the waiting list
+              localizations.waitingListNotice,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: colorScheme.error,
               ),

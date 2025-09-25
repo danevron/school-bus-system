@@ -222,6 +222,10 @@
   "@dropoff": {
     "description": "Dropoff location label"
   },
+  "parents": "הורים",
+  "@parents": {
+    "description": "Parents label for passenger parent information"
+  },
   "checkIn": "עליה לאוטובוס",
   "@checkIn": {
     "description": "Check in button text"
@@ -692,5 +696,9 @@
   "openInMaps": "פתח במפות",
   "@openInMaps": {
     "description": "Text for opening location in maps app"
+  },
+  "waitingListNotice": "שימו לב: כל המקומות תפוסים, ההזמנה תתווסף לרשימת המתנה",
+  "@waitingListNotice": {
+    "description": "Notice shown when all seats are booked and user will join waiting list"
   }
 }

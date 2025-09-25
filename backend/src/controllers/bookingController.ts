@@ -484,8 +484,15 @@ export const bookingController = {
         }
       }
 
-      const bookings = await Booking.find({ ride: rideId })
-        .sort({ 'pickupStop.estimatedTime': 1 });
+      const bookings = await Booking.find({ ride: rideId }).populate({
+        path: 'passenger',
+        select: 'firstName lastName phone email role isGuest invitedBy parents',
+        populate: {
+          path: 'parents',
+          select: 'firstName lastName phone email'
+        }
+      }) as any[];
+
 
       // Get current user details to check parent-child relationships
       const currentUser = await User.findById(currentUserId);
@@ -496,7 +503,6 @@ export const bookingController = {
       // Manually fetch passenger details from Users collection and add action permissions
       const bookingsWithPassengers = await Promise.all(
         bookings.map(async (booking) => {
-          const passenger = await User.findById(booking.passenger, 'firstName lastName phone email role isGuest invitedBy');
           
           // Calculate action permissions for this booking
           const actions = {
@@ -522,7 +528,7 @@ export const bookingController = {
             actions.canDropOff = ride?.status === RideStatus.IN_PROGRESS && booking.status === BookingStatus.CHECKED_IN;
           }
           // Guest's creator can cancel and confirm the guest's bookings
-          else if (passenger?.isGuest && passenger?.invitedBy?.toString() === currentUserId)  {
+          else if (booking.passenger?.isGuest && booking.passenger?.invitedBy?.toString() === currentUserId)  {
             actions.canCancel = booking.canBeCancelled().canCancel;
             actions.canConfirm = booking.status === BookingStatus.UNCONFIRMED;
           }
@@ -546,7 +552,6 @@ export const bookingController = {
 
           return {
             ...booking.toObject(),
-            passenger,
             actions
           };
         })

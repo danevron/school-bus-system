@@ -21,7 +21,6 @@ export const generateRidesForLine = async (line: ILine, limitDate?: Date): Promi
   const today = new Date();
   today.setUTCHours(0, 0, 0, 0);
   
-  console.log({today});
   const schedule = line.schedule;
   
   // Determine the end date: use the earliest of limitDate, line's end date, or 1 year from now

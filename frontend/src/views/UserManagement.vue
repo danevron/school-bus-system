@@ -304,7 +304,13 @@
                       shape="circle"
                     />
                     <div class="user-details">
-                      <div class="user-name">{{ slotProps.data.firstName }} {{ slotProps.data.lastName }}</div>
+                      <div class="user-name-row">
+                        <span class="user-name">{{ slotProps.data.firstName }} {{ slotProps.data.lastName }}</span>
+                        <Tag v-if="slotProps.data.isGuest" 
+                             :value="$t('common.guest')" 
+                             severity="warn" 
+                             class="guest-tag" />
+                      </div>
                       <div class="user-contact">
                         <i class="pi pi-envelope"></i>
                         {{ slotProps.data.email }}
@@ -945,10 +951,21 @@ export default {
   gap: 4px;
 }
 
+.user-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .user-name {
   font-weight: bold;
   color: var(--p-text-color);
   font-size: 0.95rem;
+}
+
+.guest-tag {
+  font-size: 0.7rem;
 }
 
 .user-contact {

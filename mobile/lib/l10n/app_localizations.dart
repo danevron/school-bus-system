@@ -422,6 +422,12 @@ abstract class AppLocalizations {
   /// **'Dropoff'**
   String get dropoff;
 
+  /// Parents label for passenger parent information
+  ///
+  /// In en, this message translates to:
+  /// **'Parents'**
+  String get parents;
+
   /// Check in button text
   ///
   /// In en, this message translates to:
@@ -991,6 +997,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open in Maps'**
   String get openInMaps;
+
+  /// Notice shown when all seats are booked and user will join waiting list
+  ///
+  /// In en, this message translates to:
+  /// **'Note: All seats are booked, booking will be added to the waiting list'**
+  String get waitingListNotice;
 }
 
 class _AppLocalizationsDelegate

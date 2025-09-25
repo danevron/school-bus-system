@@ -258,9 +258,6 @@ class _LoginScreenState extends State<LoginScreen> {
                               )
                             : Text(
                                 localizations.login,
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w500,
-                                ),
                               ),
                       ),
                     ),

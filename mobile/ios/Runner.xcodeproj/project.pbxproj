@@ -17,6 +17,7 @@
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
 		AD2AB3B52E7C2852004F7769 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = AD2AB3B42E7C2852004F7769 /* GoogleService-Info.plist */; };
+		AD7A9B4F2E7FDED000A51F9E /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = AD7A9B4D2E7FDED000A51F9E /* InfoPlist.strings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -66,6 +67,8 @@
 		97C147001CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AD2AB3B42E7C2852004F7769 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "Runner/GoogleService-Info.plist"; sourceTree = "<group>"; };
+		AD7A9B4E2E7FDED000A51F9E /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = Runner/en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		AD7A9B502E7FDEE200A51F9E /* he */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = he; path = Runner/he.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		F4CF16883E8D91FE54975037 /* Pods_RunnerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RunnerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -120,6 +123,7 @@
 		97C146E51CF9000F007C117D = {
 			isa = PBXGroup;
 			children = (
+				AD7A9B4D2E7FDED000A51F9E /* InfoPlist.strings */,
 				AD2AB3B42E7C2852004F7769 /* GoogleService-Info.plist */,
 				9740EEB11CF90186004384FC /* Flutter */,
 				97C146F01CF9000F007C117D /* Runner */,
@@ -238,6 +242,7 @@
 			knownRegions = (
 				en,
 				Base,
+				he,
 			);
 			mainGroup = 97C146E51CF9000F007C117D;
 			productRefGroup = 97C146EF1CF9000F007C117D /* Products */;
@@ -263,6 +268,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */,
+				AD7A9B4F2E7FDED000A51F9E /* InfoPlist.strings in Resources */,
 				3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */,
 				AD2AB3B52E7C2852004F7769 /* GoogleService-Info.plist in Resources */,
 				97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */,
@@ -410,6 +416,15 @@
 				97C147001CF9000F007C117D /* Base */,
 			);
 			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+		AD7A9B4D2E7FDED000A51F9E /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				AD7A9B4E2E7FDED000A51F9E /* en */,
+				AD7A9B502E7FDEE200A51F9E /* he */,
+			);
+			name = InfoPlist.strings;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
