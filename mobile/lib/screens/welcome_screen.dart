@@ -70,36 +70,68 @@ class WelcomeScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 120),
+              const SizedBox(height: 60),
+              
+              // Logo - without animation
+              Center(
+                child: Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 15,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: Image.asset(
+                      'assets/icon/app_icon.png',
+                      width: 100,
+                      height: 100,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              ),
+              
+              const SizedBox(height: 32),
               
               // App Title - minimalistic like login
-              Text(
-                localizations.appTitle,
-                style: theme.textTheme.displayMedium?.copyWith(
-                  color: const Color(0xFF111827),
-                  fontWeight: FontWeight.w300,
-                  letterSpacing: -0.5,
+              Center(
+                child: Text(
+                  localizations.appTitle,
+                  style: theme.textTheme.displayMedium?.copyWith(
+                    color: const Color(0xFF111827),
+                    fontWeight: FontWeight.w300,
+                    letterSpacing: -0.5,
+                  ),
                 ),
               ),
               
               const SizedBox(height: 8),
               
               // Subtitle - minimalistic
-              Text(
-                localizations.appSubtitle,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: const Color(0xFF6B7280),
-                  height: 1.4,
+              Center(
+                child: Text(
+                  localizations.appSubtitle,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: const Color(0xFF6B7280),
+                    height: 1.4,
+                  ),
                 ),
               ),
               
-              const SizedBox(height: 80),
+              const SizedBox(height: 60),
               
               // Welcome Message - clean and simple
               Text(
                 _getPersonalizedWelcomeMessage(localizations),
                 style: theme.textTheme.headlineLarge?.copyWith(
-                  color: const Color(0xFF111827),
                   fontWeight: FontWeight.w400,
                 ),
               ),
@@ -108,10 +140,6 @@ class WelcomeScreen extends StatelessWidget {
               
               Text(
                 _getPersonalizedWelcomeDescription(localizations),
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: const Color(0xFF6B7280),
-                  height: 1.5,
-                ),
               ),
               
               const SizedBox(height: 40),

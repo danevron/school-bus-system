@@ -424,8 +424,8 @@ class _RideDetailScreenState extends State<RideDetailScreen>
                 _buildLocationSharingButton(theme, colorScheme, localizations),
             ],
             
-            // Track Ride Button (for in-progress rides - all users)
-            if (_currentRide['status'] == 'in_progress')
+            // Track Ride Button (for in-progress rides - all users except drivers)
+            if (_currentRide['status'] == 'in_progress' && !_isDriver)
               _buildTrackRideButton(theme, colorScheme, localizations),
             
             // Bookings List
@@ -598,9 +598,6 @@ class _RideDetailScreenState extends State<RideDetailScreen>
                   SizedBox(width: 8),
                   Text(
                     localizations.startRide,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
                   ),
                 ],
               ),
@@ -637,9 +634,6 @@ class _RideDetailScreenState extends State<RideDetailScreen>
                   SizedBox(width: 8),
                   Text(
                     localizations.endRide,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
                   ),
                 ],
               ),
@@ -717,9 +711,6 @@ class _RideDetailScreenState extends State<RideDetailScreen>
             SizedBox(width: 8),
             Text(
               localizations.trackRide,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
             ),
           ],
         ),
@@ -1001,6 +992,72 @@ class _RideDetailScreenState extends State<RideDetailScreen>
                       ),
                     );
                   }).toList(),
+                ],
+              ),
+            ],
+            
+            // Inviter Information (for guest users)
+            if (passenger['isGuest'] == true && passenger['invitedBy'] != null) ...[
+              const SizedBox(height: 8),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.person_add,
+                        size: 16,
+                        color: colorScheme.secondary,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        localizations.invitedBy,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.secondary,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 2),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            '${passenger['invitedBy']['firstName'] ?? ''} ${passenger['invitedBy']['lastName'] ?? ''}'.trim(),
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: const Color(0xFF6B7280),
+                            ),
+                          ),
+                        ),
+                        if (passenger['invitedBy']['phone'] != null && passenger['invitedBy']['phone'].isNotEmpty) ...[
+                          GestureDetector(
+                            onTap: () => _makePhoneCall(passenger['invitedBy']['phone']),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.phone,
+                                  size: 14,
+                                  color: colorScheme.secondary,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  passenger['invitedBy']['phone'],
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: colorScheme.secondary,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ],

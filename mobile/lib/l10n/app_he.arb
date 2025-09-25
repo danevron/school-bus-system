@@ -226,6 +226,10 @@
   "@parents": {
     "description": "Parents label for passenger parent information"
   },
+  "invitedBy": "הוזמן על ידי",
+  "@invitedBy": {
+    "description": "Label for showing who invited a guest user"
+  },
   "checkIn": "עליה לאוטובוס",
   "@checkIn": {
     "description": "Check in button text"

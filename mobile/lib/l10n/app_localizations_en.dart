@@ -179,6 +179,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get parents => 'Parents';
 
   @override
+  String get invitedBy => 'Invited by';
+
+  @override
   String get checkIn => 'Check In';
 
   @override

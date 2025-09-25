@@ -178,6 +178,9 @@ class AppLocalizationsHe extends AppLocalizations {
   String get parents => 'הורים';
 
   @override
+  String get invitedBy => 'הוזמן על ידי';
+
+  @override
   String get checkIn => 'עליה לאוטובוס';
 
   @override

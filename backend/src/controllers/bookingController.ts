@@ -487,12 +487,17 @@ export const bookingController = {
       const bookings = await Booking.find({ ride: rideId }).populate({
         path: 'passenger',
         select: 'firstName lastName phone email role isGuest invitedBy parents',
-        populate: {
-          path: 'parents',
-          select: 'firstName lastName phone email'
-        }
+        populate: [
+          {
+            path: 'parents',
+            select: 'firstName lastName phone email'
+          },
+          {
+            path: 'invitedBy',
+            select: 'firstName lastName email phone'
+          }
+        ]
       }) as any[];
-
 
       // Get current user details to check parent-child relationships
       const currentUser = await User.findById(currentUserId);
@@ -528,7 +533,7 @@ export const bookingController = {
             actions.canDropOff = ride?.status === RideStatus.IN_PROGRESS && booking.status === BookingStatus.CHECKED_IN;
           }
           // Guest's creator can cancel and confirm the guest's bookings
-          else if (booking.passenger?.isGuest && booking.passenger?.invitedBy?.toString() === currentUserId)  {
+          else if (booking.passenger?.isGuest && booking.passenger?.invitedBy._id.toString() === currentUserId)  {
             actions.canCancel = booking.canBeCancelled().canCancel;
             actions.canConfirm = booking.status === BookingStatus.UNCONFIRMED;
           }
@@ -540,7 +545,7 @@ export const bookingController = {
             // Check if this is a parent's child's booking
             if (currentUserRole === UserRole.PARENT && currentUser.children) {
               isChildBooking = currentUser.children.some(childId => 
-                childId.toString() === booking.passenger.toString()
+                childId.toString() === booking.passenger._id.toString()
               );
             }
             

@@ -428,6 +428,12 @@ abstract class AppLocalizations {
   /// **'Parents'**
   String get parents;
 
+  /// Label for showing who invited a guest user
+  ///
+  /// In en, this message translates to:
+  /// **'Invited by'**
+  String get invitedBy;
+
   /// Check in button text
   ///
   /// In en, this message translates to:
