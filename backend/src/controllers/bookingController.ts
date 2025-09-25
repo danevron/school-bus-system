@@ -534,7 +534,7 @@ export const bookingController = {
           }
           // Guest's creator can cancel and confirm the guest's bookings
           else if (booking.passenger?.isGuest && booking.passenger?.invitedBy._id.toString() === currentUserId)  {
-            actions.canCancel = booking.canBeCancelled().canCancel;
+            actions.canCancel = booking.canBeCancelled().canCancel && ride?.status === RideStatus.SCHEDULED;
             actions.canConfirm = booking.status === BookingStatus.UNCONFIRMED;
           }
           // Student/Parent can cancel and confirm their own bookings or their children's bookings
@@ -550,7 +550,7 @@ export const bookingController = {
             }
             
             if (isOwnBooking || isChildBooking) {
-              actions.canCancel = booking.canBeCancelled().canCancel;
+              actions.canCancel = booking.canBeCancelled().canCancel && ride?.status === RideStatus.SCHEDULED;
               actions.canConfirm = booking.status === BookingStatus.UNCONFIRMED;
             }
           } 

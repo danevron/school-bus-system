@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:apple_maps_flutter/apple_maps_flutter.dart' as apple_maps;
 import '../l10n/app_localizations.dart';
 import '../services/auth_service.dart';
 import '../utils/map_config.dart';
@@ -23,6 +25,7 @@ class RideTrackingScreen extends StatefulWidget {
 
 class _RideTrackingScreenState extends State<RideTrackingScreen> {
   final MapController _mapController = MapController();
+  apple_maps.AppleMapController? _appleMapController;
   Timer? _locationTimer;
   LatLng? _currentLocation;
   bool _isLoading = true;
@@ -33,6 +36,9 @@ class _RideTrackingScreenState extends State<RideTrackingScreen> {
   // Default center (can be updated based on first location)
   LatLng _mapCenter = const LatLng(32.0853, 34.7818); // Tel Aviv as default
   double _mapZoom = 13.0;
+  
+  // Check if we should use Apple Maps (iOS only)
+  bool get _useAppleMaps => Platform.isIOS;
 
   @override
   void initState() {
@@ -137,10 +143,18 @@ class _RideTrackingScreenState extends State<RideTrackingScreen> {
                     // Only move the map if it's already been rendered
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       if (mounted) {
-                        try {
-                          _mapController.move(newLocation, _mapZoom);
-                        } catch (e) {
-                          // Map controller not ready yet, will be centered when map builds
+                        if (_useAppleMaps) {
+                          _appleMapController?.animateCamera(
+                            apple_maps.CameraUpdate.newLatLng(
+                              apple_maps.LatLng(newLocation.latitude, newLocation.longitude),
+                            ),
+                          );
+                        } else {
+                          try {
+                            _mapController.move(newLocation, _mapZoom);
+                          } catch (e) {
+                            // Map controller not ready yet, will be centered when map builds
+                          }
                         }
                       }
                     });
@@ -175,7 +189,17 @@ class _RideTrackingScreenState extends State<RideTrackingScreen> {
   }
 
   void _centerOnBus() {
-    if (_currentLocation != null) {
+    if (_currentLocation == null) return;
+    
+    if (_useAppleMaps) {
+      // Center Apple Maps
+      _appleMapController?.animateCamera(
+        apple_maps.CameraUpdate.newLatLng(
+          apple_maps.LatLng(_currentLocation!.latitude, _currentLocation!.longitude),
+        ),
+      );
+    } else {
+      // Center Flutter Map
       try {
         _mapController.move(_currentLocation!, _mapZoom);
       } catch (e) {
@@ -185,28 +209,40 @@ class _RideTrackingScreenState extends State<RideTrackingScreen> {
   }
 
   void _zoomIn() {
-    try {
-      final currentZoom = _mapController.camera.zoom;
-      final newZoom = (currentZoom + 1).clamp(8.0, 19.0);
-      _mapController.move(_mapController.camera.center, newZoom);
-      setState(() {
-        _mapZoom = newZoom;
-      });
-    } catch (e) {
-      // Map controller not ready yet, ignore
+    if (_useAppleMaps) {
+      _appleMapController?.animateCamera(
+        apple_maps.CameraUpdate.zoomIn(),
+      );
+    } else {
+      try {
+        final currentZoom = _mapController.camera.zoom;
+        final newZoom = (currentZoom + 1).clamp(8.0, 19.0);
+        _mapController.move(_mapController.camera.center, newZoom);
+        setState(() {
+          _mapZoom = newZoom;
+        });
+      } catch (e) {
+        // Map controller not ready yet, ignore
+      }
     }
   }
 
   void _zoomOut() {
-    try {
-      final currentZoom = _mapController.camera.zoom;
-      final newZoom = (currentZoom - 1).clamp(8.0, 19.0);
-      _mapController.move(_mapController.camera.center, newZoom);
-      setState(() {
-        _mapZoom = newZoom;
-      });
-    } catch (e) {
-      // Map controller not ready yet, ignore
+    if (_useAppleMaps) {
+      _appleMapController?.animateCamera(
+        apple_maps.CameraUpdate.zoomOut(),
+      );
+    } else {
+      try {
+        final currentZoom = _mapController.camera.zoom;
+        final newZoom = (currentZoom - 1).clamp(8.0, 19.0);
+        _mapController.move(_mapController.camera.center, newZoom);
+        setState(() {
+          _mapZoom = newZoom;
+        });
+      } catch (e) {
+        // Map controller not ready yet, ignore
+      }
     }
   }
 
@@ -326,30 +362,8 @@ class _RideTrackingScreenState extends State<RideTrackingScreen> {
         Expanded(
           child: Stack(
             children: [
-              // Map
-              FlutterMap(
-                mapController: _mapController,
-                options: MapOptions(
-                  initialCenter: _mapCenter,
-                  initialZoom: _mapZoom,
-                  minZoom: 8.0,
-                  maxZoom: 19.0,
-                ),
-                children: [
-                  // Tile layer (Platform-specific)
-                  TileLayer(
-                    urlTemplate: MapTileConfig.getTileUrlTemplate(),
-                    subdomains: MapTileConfig.getSubdomains(),
-                    userAgentPackageName: 'com.danevron.school_bus_app',
-                    additionalOptions: MapTileConfig.getAdditionalOptions(),
-                  ),
-                  
-                  // Markers layer (bus stops and bus)
-                  MarkerLayer(
-                    markers: _buildAllMarkers(colorScheme),
-                  ),
-                ],
-              ),
+              // Platform-specific map
+              _useAppleMaps ? _buildAppleMap() : _buildFlutterMap(),
               
               // Zoom controls
               Positioned(
@@ -359,6 +373,86 @@ class _RideTrackingScreenState extends State<RideTrackingScreen> {
               ),
             ],
           ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAppleMap() {
+    final Set<apple_maps.Annotation> annotations = {};
+    
+    // Add bus stop annotations
+    for (final stop in _busStops) {
+      final coords = stop['coordinates'] as Map<String, dynamic>;
+      final lat = coords['latitude'] as double;
+      final lng = coords['longitude'] as double;
+      
+      if (lat != 0.0 && lng != 0.0) {
+        annotations.add(
+          apple_maps.Annotation(
+            annotationId: apple_maps.AnnotationId(stop['_id']),
+            position: apple_maps.LatLng(lat, lng),
+            infoWindow: apple_maps.InfoWindow(
+              title: stop['name'],
+              snippet: stop['address'],
+            ),
+          ),
+        );
+      }
+    }
+    
+    // Add bus annotation (current location)
+    if (_currentLocation != null) {
+      annotations.add(
+        apple_maps.Annotation(
+          annotationId: apple_maps.AnnotationId('school_bus'),
+          position: apple_maps.LatLng(
+            _currentLocation!.latitude, 
+            _currentLocation!.longitude
+          ),
+          infoWindow: apple_maps.InfoWindow(
+            title: 'School Bus',
+            snippet: 'Current Location',
+          ),
+        ),
+      );
+    }
+    
+    return apple_maps.AppleMap(
+      onMapCreated: (apple_maps.AppleMapController controller) {
+        _appleMapController = controller;
+      },
+      initialCameraPosition: apple_maps.CameraPosition(
+        target: apple_maps.LatLng(_mapCenter.latitude, _mapCenter.longitude),
+        zoom: _mapZoom,
+      ),
+      annotations: annotations,
+      myLocationEnabled: true,
+      myLocationButtonEnabled: false, // We have our own center button
+    );
+  }
+  
+  Widget _buildFlutterMap() {
+    return FlutterMap(
+      mapController: _mapController,
+      options: MapOptions(
+        initialCenter: _mapCenter,
+        initialZoom: _mapZoom,
+        minZoom: 8.0,
+        maxZoom: 19.0,
+      ),
+      children: [
+        // Tile layer (Platform-specific)
+        TileLayer(
+          urlTemplate: MapTileConfig.getTileUrlTemplate(),
+          subdomains: MapTileConfig.getSubdomains(),
+          userAgentPackageName: 'com.danevron.school_bus_app',
+          additionalOptions: MapTileConfig.getAdditionalOptions(),
+        ),
+        
+        // Markers layer (bus stops and bus)
+        MarkerLayer(
+          markers: _buildAllMarkers(Theme.of(context).colorScheme),
         ),
       ],
     );

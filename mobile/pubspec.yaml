@@ -53,6 +53,9 @@ dependencies:
   flutter_map: ^7.0.2
   latlong2: ^0.9.1
   
+  # Apple Maps for iOS native integration
+  apple_maps_flutter: ^1.4.0
+  
   # Background services and notifications
   flutter_foreground_task: ^8.0.0
   
