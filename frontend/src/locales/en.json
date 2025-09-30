@@ -78,8 +78,8 @@
     }
   },
   "login": {
-    "title": "Welcome to School Bus System!",
-    "subtitle": "Sign in to continue",
+    "title": "School Bus System",
+    "subtitle": "Zomer school",
     "loginTab": "Login",
     "signupTab": "Sign Up",
     "loginButton": "Login",

@@ -128,9 +128,9 @@
             </div>
 
             <!-- Parent View -->
-            <div v-if="userRole === 'parent'">
+            <div v-if="userRole === 'parent'" class="parent-dashboard">
               <!-- My Children Section -->
-              <Card class="children-card mb-4">
+              <Card class="children-card">
                 <template #title>
                   <div class="card-title-header">
                     <h3>{{ $t('home.parent.myChildren.title') }}</h3>
@@ -641,6 +641,11 @@ export default {
 <style scoped>
 /* Dashboard specific styles */
 
+/* Role-specific content spacing */
+.role-specific-content {
+  margin-top: 1.5rem;
+}
+
 /* Admin Dashboard Styles */
 
 .admin-actions-grid {
@@ -657,6 +662,12 @@ export default {
 }
 
 /* Parent Dashboard Styles */
+.parent-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
 .parent-actions-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -732,7 +743,7 @@ export default {
 .children-list {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.5rem;
 }
 
 .child-item {
@@ -796,7 +807,7 @@ export default {
 .registrations-list {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.5rem;
 }
 
 .registration-item {
@@ -984,7 +995,7 @@ export default {
 .requests-list {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 1rem;
 }
 
 .request-item {
